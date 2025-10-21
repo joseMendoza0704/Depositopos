@@ -151,7 +151,7 @@ function Inventario() {
           <table className="productos-tabla">
             <thead>
               <tr>
-                <th>Nombre</th>
+                <th>Descripcion</th>
                 <th>Tamaño</th>
                 <th>Stock (Uds.)</th>
                 <th>Costo (U.)</th>
