@@ -170,3 +170,87 @@ body {
   background-color: #f4f6f9; /* Un fondo gris claro para el contenido */
   overflow-y: auto; /* Permite scroll si el contenido es muy largo */
 }
+
+/* --- Estilos para el Formulario de Inventario --- */
+.producto-form {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.producto-form h3 {
+  margin-top: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 columnas */
+  gap: 20px; /* Espacio entre campos */
+  margin-bottom: 20px;
+}
+
+.form-grid input {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box; /* Importante para que el padding no afecte el ancho */
+}
+
+.producto-form button {
+  background-color: #2ecc71; /* Un verde para "añadir" */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.producto-form button:hover {
+  background-color: #27ae60;
+}
+
+.producto-form button:disabled {
+  background-color: #95a5a6; /* Un gris si está deshabilitado */
+  cursor: not-allowed;
+}
+
+/* --- Estilos para la Tabla de Inventario --- */
+.lista-productos {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.productos-tabla {
+  width: 100%;
+  border-collapse: collapse; /* Une los bordes de las celdas */
+  margin-top: 20px;
+}
+
+.productos-tabla th,
+.productos-tabla td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.productos-tabla th {
+  background-color: #f4f6f9; /* Un fondo gris claro para el encabezado */
+  font-weight: bold;
+}
+
+.productos-tabla tr:nth-child(even) {
+  background-color: #f9f9f9; /* Colorea las filas pares */
+}
+
+.productos-tabla tr:hover {
+  background-color: #f1f1f1; /* Resalta la fila al pasar el mouse */
+}
