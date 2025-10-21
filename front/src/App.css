@@ -254,3 +254,648 @@ body {
 .productos-tabla tr:hover {
   background-color: #f1f1f1; /* Resalta la fila al pasar el mouse */
 }
+
+/* --- Estilos para los botones del formulario --- */
+.form-botones {
+  display: flex;
+  gap: 10px; /* Espacio entre botones */
+}
+
+/* Botón de eliminar */
+.boton-eliminar {
+  background-color: #e74c3c; /* Rojo */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+.boton-eliminar:hover {
+  background-color: #c0392b;
+}
+
+/* Botón de eliminar (CORREGIDO) */
+.producto-form .boton-eliminar {
+  background-color: #e74c3c; /* Rojo */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+.producto-form .boton-eliminar:hover {
+  background-color: #c0392b;
+}
+
+/* Botón de limpiar/cancelar (CORREGIDO) */
+.producto-form .boton-limpiar {
+  background-color: #7f8c8d; /* Gris */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+.producto-form .boton-limpiar:hover {
+  background-color: #95a5a6;
+}
+
+
+/* --- Estilos para la Pantalla POS --- */
+.pos-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ocupa todo el alto del 'main-content' */
+  gap: 20px;
+}
+
+/* --- Cabecera (Búsqueda y Total) --- */
+.pos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.pos-search-bar {
+  flex-grow: 1; /* Ocupa el espacio disponible */
+  padding: 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.pos-total {
+  background-color: white;
+  padding: 10px 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  text-align: right;
+  min-width: 200px;
+}
+.pos-total h2 {
+  margin: 0;
+  color: #333;
+}
+.pos-total span {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2ecc71; /* Verde */
+}
+
+/* --- Tabla del Carrito --- */
+.pos-cart-container {
+  flex-grow: 1; /* Esta es la tabla que ocupa el espacio principal */
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow-y: auto; /* Permite scroll si hay muchos productos */
+}
+
+.pos-cart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pos-cart-table th,
+.pos-cart-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.pos-cart-table th {
+  background-color: #f4f6f9;
+}
+
+.boton-quitar {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* --- Pie de Página (Botones de Acción) --- */
+.pos-footer {
+  display: flex;
+  flex-wrap: wrap; /* Se ajustan si la pantalla es pequeña */
+  gap: 15px;
+  justify-content: center; /* Centra los botones */
+}
+
+.pos-button {
+  flex-grow: 1; /* Los botones crecen para ocupar espacio */
+  background-color: #34495e; /* Azul oscuro */
+  color: white;
+  border: none;
+  padding: 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  min-width: 150px; /* Ancho mínimo */
+}
+
+.pos-button:hover {
+  background-color: #2c3e50;
+}
+
+/* Botón especial de Venta */
+.pos-button.venta {
+  background-color: #2ecc71; /* Verde */
+}
+.pos-button.venta:hover {
+  background-color: #27ae60;
+}
+
+
+/* --- Estilos para la Búsqueda de Productos --- */
+.pos-search-container {
+  position: relative; /* Clave para posicionar los resultados */
+  flex-grow: 1;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%; /* Justo debajo de la barra de búsqueda */
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 999; /* Por encima de la tabla */
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  padding: 15px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.search-result-item:hover {
+  background-color: #f4f6f9;
+}
+
+/* --- Estilos para el Modal de Añadir Producto --- */
+.modal-backdrop {
+  position: fixed; /* Se superpone a todo */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 450px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.form-group select,
+.modal-input-cantidad {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.modal-botones {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.boton-modal-agregar,
+.boton-modal-cancelar {
+  flex-grow: 1;
+  border: none;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.boton-modal-agregar {
+  background-color: #2ecc71; /* Verde */
+  color: white;
+}
+.boton-modal-agregar:hover {
+  background-color: #27ae60;
+}
+
+.boton-modal-cancelar {
+  background-color: #f1f1f1; /* Gris claro */
+  color: #333;
+}
+.boton-modal-cancelar:hover {
+  background-color: #ddd;
+}
+
+
+/* --- Estilos para el Modal de Factura --- */
+.factura-modal {
+  max-width: 500px;
+}
+
+.factura-header {
+  text-align: center;
+  border-bottom: 2px dashed #ccc;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+.factura-header h3 {
+  margin: 0;
+  font-size: 24px;
+}
+.factura-header p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.factura-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+.factura-tabla th,
+.factura-tabla td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+.factura-tabla th {
+  background-color: #f9f9f9;
+}
+
+.factura-total {
+  text-align: right;
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 20px;
+  border-top: 2px solid #333;
+  padding-top: 10px;
+}
+
+.factura-botones {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+/* --- ESTILOS DE IMPRESIÓN --- */
+/* Esto se aplica SOLO al imprimir (Ctrl+P) */
+@media print {
+  /* Oculta todo menos la factura */
+  body * {
+    visibility: hidden;
+  }
+  #factura-imprimible, #factura-imprimible * {
+    visibility: visible;
+  }
+  
+  /* Posiciona la factura en la hoja */
+  #factura-imprimible {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  /* Oculta los botones en la impresión */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Quita sombras y fondos innecesarios */
+  .modal-backdrop {
+    position: relative;
+    background-color: white !important;
+  }
+  .modal-content {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+/* --- Estilos para el Input de Cliente --- */
+.pos-cliente-input {
+  padding: 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 300px; /* Ancho fijo */
+}
+/* Ajusta el header para el nuevo input */
+.pos-header {
+  flex-wrap: wrap; /* Permite que los items bajen si no caben */
+}
+
+
+/* --- Estilos para el Modal de Factura (Recibo Térmico) --- */
+.factura-modal {
+  max-width: 320px; /* Ancho de recibo térmico */
+  font-family: 'Courier New', Courier, monospace; /* Fuente de recibo */
+  font-size: 12px;
+  color: #000;
+  padding: 20px;
+}
+
+.factura-header {
+  text-align: center;
+  border-bottom: 1px dashed #000; /* Línea de guiones */
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.factura-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+.factura-header p {
+  margin: 2px 0;
+  font-size: 12px;
+}
+
+.factura-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+.factura-tabla th,
+.factura-tabla td {
+  padding: 4px 2px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+.factura-tabla th {
+  background-color: #f9f9f9;
+}
+
+.factura-total {
+  text-align: right;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 10px;
+  border-top: 1px solid #000;
+  padding-top: 5px;
+}
+
+.factura-botones {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* --- ESTILOS DE IMPRESIÓN (CORREGIDOS) --- */
+@media print {
+  /* 1. Oculta todo en la página por defecto */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* 2. MUESTRA el backdrop del modal y TODO su contenido */
+  .modal-backdrop, .modal-backdrop * {
+    visibility: visible;
+  }
+
+  /* 3. Oculta los botones de "Imprimir" y "Cerrar" */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* 4. Resetea el modal para que se ajuste a la página */
+  .modal-backdrop {
+    position: static !important;
+    background: none !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* 5. Posiciona la factura en la hoja */
+  #factura-imprimible {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* --- Estilos para el Modal de Historial de Ventas --- */
+.historial-modal {
+  max-width: 600px; /* Un poco más ancho que la factura */
+}
+
+.historial-lista-container {
+  max-height: 400px; /* Altura máxima para la lista */
+  overflow-y: auto; /* Scroll si hay muchas ventas */
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+
+.historial-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.historial-lista li {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.historial-lista li:last-child {
+  border-bottom: none;
+}
+
+.historial-lista li:hover {
+  background-color: #f9f9f9;
+}
+
+.historial-cliente {
+  font-weight: bold;
+}
+.historial-total {
+  color: #2ecc71; /* Verde */
+  font-weight: bold;
+}
+.historial-hora {
+  color: #7f8c8d;
+}
+
+/* --- Estilos para el Modal de Cobro --- */
+.cobro-modal {
+  max-width: 400px;
+}
+
+.cobro-display {
+  background-color: #f4f6f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.cobro-display div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+}
+
+.cobro-display div span {
+  color: #555;
+}
+
+.cobro-total {
+  font-size: 24px !important; /* !important para forzarlo */
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.cobro-total strong {
+  color: #e74c3c; /* Rojo para el total */
+}
+
+.cobro-vuelto strong {
+  color: #2ecc71; /* Verde para el vuelto */
+  font-size: 26px;
+}
+
+.cobro-input {
+  width: 100%;
+  padding: 15px;
+  font-size: 24px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* --- Estilos para la Factura (Ajuste de Totales) --- */
+.factura-total {
+  text-align: right;
+  font-size: 14px;
+  border-top: 1px solid #000;
+  padding-top: 5px;
+}
+.factura-total p {
+  margin: 5px 0;
+  display: flex;
+  justify-content: space-between;
+}
+.factura-total p strong {
+  font-size: 16px;
+}
+
+/* --- Estilos para POS Deshabilitado --- */
+.pos-overlay-disabled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 998; /* Debajo de los modales */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 8px; /* Para que coincida con .pos-container si tiene padding */
+}
+.pos-overlay-disabled h2 {
+  font-size: 32px;
+  color: #34495e;
+}
+.pos-overlay-disabled p {
+  font-size: 18px;
+  color: #7f8c8d;
+}
+
+/* --- Estilo para el botón de Apertura cuando está abierto --- */
+.pos-button:disabled {
+  background-color: #7f8c8d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* --- Estilo para el Dashboard Cargando --- */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 24px;
+}
+
+/* --- Estilo para el Contenedor Principal del POS --- */
+/* (Este es el nuevo contenedor que creamos) */
+.pos-main-content {
+  position: relative; /* Clave para que el overlay se posicione dentro de él */
+  flex-grow: 1; /* Ocupa el espacio vertical disponible */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
