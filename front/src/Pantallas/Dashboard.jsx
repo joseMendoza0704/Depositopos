@@ -132,7 +132,7 @@ function Dashboard({ alCerrarSesion }) {
         </div>
         <ul className="sidebar-menu">
           <li><button onClick={() => setVistaActual('pos')}>🛒 POS</button></li>
-          <li><button onClick={() => setVistaActual('inventario')}>📦 Inventario</button></li>
+          <li><button onClick={() => setVistaActual('inventario')}>📦 Inventario Total</button></li>
           <li><button onClick={() => setVistaActual('reportes')}>📊 Reportes</button></li>
         </ul>
         <div className="sidebar-footer">
