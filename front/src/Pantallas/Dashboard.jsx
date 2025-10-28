@@ -1,154 +1,195 @@
 // En: src/pantallas/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../firebaseConfig'; // Importa 'db'
+import { auth, db } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
-// Añade 'orderBy' a la lista (correcto):
-import { 
-  collection, 
-  addDoc, 
-  query, 
-  where, 
-  onSnapshot, 
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  onSnapshot,
   serverTimestamp,
-  orderBy // <-- ¡Añade esta línea!
+  orderBy,
+  doc,
+  updateDoc
 } from 'firebase/firestore';
 
-// Importa todas tus pantallas y modales
 import Inventario from './Inventario';
 import PuntoDeVenta from './PuntoDeVenta';
-import ModalApertura from '../components/ModalApertura'; // 1. Importa el nuevo modal
+import ModalApertura from '../components/ModalApertura';
+import ModalCierreZ from '../components/ModalCierreZ';
+import ModalMensaje from '../components/ModalMensaje';
 
 function VistaPrincipal() {
   return (
     <div>
       <h1>Bienvenido</h1>
-      <p>Selecciona una opción del menú para comenzar.</p>
+      <p>Selecciona una opci贸n del men煤 para comenzar.</p>
     </div>
   );
 }
 
 function Dashboard({ alCerrarSesion }) {
   const [vistaActual, setVistaActual] = useState('principal');
-  
-  // --- 2. NUEVOS ESTADOS PARA MANEJAR LA CAJA ---
-  const [cajaActual, setCajaActual] = useState(null); // Guarda los datos de la caja abierta
-  const [cargandoCaja, setCargandoCaja] = useState(true); // Para saber si ya revisamos Firebase
+  const [cajaActual, setCajaActual] = useState(null);
+  const [cargandoCaja, setCargandoCaja] = useState(true);
   const [mostrandoModalApertura, setMostrandoModalApertura] = useState(false);
+  const [mostrandoModalCierreZ, setMostrandoModalCierreZ] = useState(false);
 
-  
-// --- 3. Revisa en Firebase si ya hay una caja abierta HOY ---
+  // Estado para el mensaje modal
+  const [mensajeModal, setMensajeModal] = useState(null); // { texto: '', tipo: '' }
+
+  // --- useEffect para chequear caja abierta ---
   useEffect(() => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // 00:00:00 de hoy
-
+    today.setHours(0, 0, 0, 0);
     const cajasRef = collection(db, 'cajas');
-    
-    // 👇 ¡CÓDIGO ACTUALIZADO!
-    // Añadimos 'orderBy' para que coincida con el índice de Firebase
-    const q = query(cajasRef, 
+    const q = query(cajasRef,
                     where('estado', '==', 'abierta'),
                     where('fechaApertura', '>=', today),
-                    orderBy('fechaApertura', 'desc')); // Ordena por fecha descendente
+                    orderBy('fechaApertura', 'desc'));
 
+    // console.log("Iniciando listener de caja..."); // Logs eliminados
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      // console.log("Listener de caja recibi贸 datos. Vac铆o:", snapshot.empty);
       if (!snapshot.empty) {
-        // Si se encuentra una caja abierta
         const cajaDoc = snapshot.docs[0];
+        // console.log("隆Caja abierta encontrada!", cajaDoc.id, cajaDoc.data());
         setCajaActual({ id: cajaDoc.id, ...cajaDoc.data() });
       } else {
-        // No hay caja abierta
+        // console.log("No se encontr贸 ninguna caja abierta para hoy.");
         setCajaActual(null);
       }
       setCargandoCaja(false);
     }, (error) => {
-        // Manejo de errores (importante para depuración)
-        console.error("Error al escuchar estado de la caja: ", error);
-        // Si hay un error (ej. permisos), dejamos de cargar
-        setCargandoCaja(false); 
+        console.error("Error en listener de caja: ", error);
+        setCargandoCaja(false);
     });
-
-    // Se ejecuta cuando el componente se desmonta para limpiar
-    return () => unsubscribe();
-  }, []); // El array vacío asegura que solo se ejecute una vez
- 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      alCerrarSesion();
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+    return () => {
+        // console.log("Deteniendo listener de caja.");
+        unsubscribe();
     }
+  }, []);
+
+  // --- handleLogout ---
+  const handleLogout = async () => {
+      try {
+        await signOut(auth);
+        alCerrarSesion();
+      } catch (error) {
+        console.error("Error al cerrar sesi贸n:", error);
+      }
   };
 
-  // --- 4. NUEVA FUNCIÓN: Guarda la apertura en Firebase ---
+  // --- handleConfirmarApertura ---
   const handleConfirmarApertura = async (montoInicial) => {
     try {
       await addDoc(collection(db, 'cajas'), {
         fechaApertura: serverTimestamp(),
         montoInicial: montoInicial,
         estado: "abierta",
-        usuarioId: auth.currentUser.uid // Guarda quién la abrió
+        usuarioId: auth.currentUser.uid
       });
       setMostrandoModalApertura(false);
-      // El 'useEffect' de arriba detectará este cambio y actualizará 'cajaActual'
     } catch (error) {
       console.error("Error al abrir la caja: ", error);
-      alert("Error al abrir la caja.");
+      setMensajeModal({ texto: "Error al abrir la caja.", tipo: 'error' }); // Usar modal para error
     }
   };
 
-  // --- 5. Pasa el estado de la caja a las vistas ---
+  // --- handleCierreZ ---
+  const handleCierreZ = () => {
+      if (!cajaActual) return;
+      setMostrandoModalCierreZ(true);
+  };
+
+  // --- handleConfirmarCierreZ (MODIFICADO para usar ModalMensaje) ---
+  const handleConfirmarCierreZ = async (datosCierre) => {
+      if (!cajaActual?.id) return;
+
+      try {
+          const cajaRef = doc(db, 'cajas', cajaActual.id);
+          await updateDoc(cajaRef, {
+              ...datosCierre,
+              fechaCierre: serverTimestamp(),
+              estado: "cerrada"
+          });
+          setMostrandoModalCierreZ(false); // Cierra el modal de Cierre Z
+          // *** CAMBIO AQU脥: Usa ModalMensaje en lugar de alert ***
+          setMensajeModal({ texto: "隆Caja cerrada exitosamente!", tipo: 'exito' });
+
+      } catch (error) {
+          console.error("Error al cerrar la caja: ", error);
+          // *** CAMBIO AQU脥: Usa ModalMensaje en lugar de alert ***
+          setMensajeModal({ texto: "Error al cerrar la caja.", tipo: 'error' });
+      }
+  };
+
+  // --- renderizarVista ---
   const renderizarVista = () => {
     switch (vistaActual) {
       case 'pos':
-        return <PuntoDeVenta 
-                  cajaActual={cajaActual} 
-                  onAbrirCaja={() => setMostrandoModalApertura(true)} 
+        return <PuntoDeVenta
+                  cajaActual={cajaActual}
+                  onAbrirCaja={() => setMostrandoModalApertura(true)}
+                  onCierreZ={handleCierreZ}
                 />;
       case 'inventario':
         return <Inventario />;
-      // case 'reportes':
-      //   return <Reportes />;
       default:
         return <VistaPrincipal />;
     }
   };
 
-  // --- 6. Muestra un "Cargando..." mientras revisa la caja ---
+  // --- Estado de Carga ---
   if (cargandoCaja) {
-    return (
-      <div className="loading-container">
-        <h2>Cargando estado de la caja...</h2>
-      </div>
-    );
+      return (
+          <div className="loading-container">
+              <h2>Cargando estado de la caja...</h2>
+          </div>
+      );
   }
 
+  // --- JSX ---
   return (
     <div className="dashboard-container">
+      {/* Sidebar */}
       <div className="sidebar">
-        {/* ... (tu sidebar-header y sidebar-menu no cambian) ... */}
-        <div className="sidebar-header">
-          <h3>Depósito Mendoza</h3>
-        </div>
+        <div className="sidebar-header"><h3>Dep贸sito Mendoza</h3></div>
         <ul className="sidebar-menu">
-          <li><button onClick={() => setVistaActual('pos')}>🛒 POS</button></li>
-          <li><button onClick={() => setVistaActual('inventario')}>📦 Inventario Total</button></li>
-          <li><button onClick={() => setVistaActual('reportes')}>📊 Reportes</button></li>
+          <li><button onClick={() => setVistaActual('pos')}>馃洅 POS</button></li>
+          <li><button onClick={() => setVistaActual('inventario')}>馃摝 Inventario</button></li>
+          <li><button onClick={() => setVistaActual('reportes')}>馃搳 Reportes</button></li>
         </ul>
-        <div className="sidebar-footer">
-          <button onClick={handleLogout} className="logout-button">🚪 Cerrar Sesión</button>
-        </div>
+        <div className="sidebar-footer"><button onClick={handleLogout} className="logout-button">馃毆 Cerrar Sesi贸n</button></div>
       </div>
 
+      {/* Contenido Principal */}
       <div className="main-content">
         {renderizarVista()}
       </div>
 
-      {/* --- 7. Renderiza el nuevo Modal de Apertura --- */}
+      {/* --- Modales --- */}
       {mostrandoModalApertura && (
-        <ModalApertura 
+        <ModalApertura
           onClose={() => setMostrandoModalApertura(false)}
           onConfirmarApertura={handleConfirmarApertura}
+        />
+      )}
+      {mostrandoModalCierreZ && cajaActual && (
+        <ModalCierreZ
+            cajaActual={cajaActual}
+            onClose={() => setMostrandoModalCierreZ(false)}
+            onConfirmarCierreZ={handleConfirmarCierreZ}
+        />
+      )}
+
+      {/* Renderiza el ModalMensaje */}
+      {mensajeModal && (
+        <ModalMensaje
+          mensaje={mensajeModal.texto}
+          tipo={mensajeModal.tipo}
+          onClose={() => setMensajeModal(null)} // Funci贸n para cerrar
         />
       )}
     </div>

@@ -13,22 +13,32 @@ import ModalAgregarProducto from '../components/ModalAgregarProducto';
 import Factura from '../components/Factura';
 import HistorialVentas from '../components/HistorialVentas';
 import ModalCobro from '../components/ModalCobro';
+import ModalCierreX from '../components/ModalCierreX';
+// No necesitamos importar Cierre Z aquí, se maneja en Dashboard
 
-function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
-  // ... (Todos tus estados (useState) no cambian)
+// Recibe cajaActual, onAbrirCaja y onCierreZ del Dashboard
+function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) { 
+  // --- Estados Principales ---
   const [productosDB, setProductosDB] = useState([]);
   const [carrito, setCarrito] = useState([]);
   const [total, setTotal] = useState(0);
+
+  // --- Estados de Búsqueda y Modal ---
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [resultadosBusqueda, setResultadosBusqueda] = useState([]);
   const [productoModal, setProductoModal] = useState(null);
+
+  // --- Estados de Venta ---
   const [cargandoVenta, setCargandoVenta] = useState(false);
   const [ventaCompleta, setVentaCompleta] = useState(null);
   const [nombreCliente, setNombreCliente] = useState('');
+
+  // --- Estados de Modales ---
   const [mostrandoHistorial, setMostrandoHistorial] = useState(false);
   const [mostrandoModalCobro, setMostrandoModalCobro] = useState(false);
+  const [mostrandoCierreX, setMostrandoCierreX] = useState(false);
 
-  // ... (Todas tus funciones (useEffect, handle...) no cambian)
+  // --- Carga todos los productos de Firebase ---
   useEffect(() => {
     const productosCollection = collection(db, 'productos');
     const unsubscribe = onSnapshot(productosCollection, (snapshot) => {
@@ -38,11 +48,13 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
     return () => unsubscribe();
   }, []);
 
+  // --- Calcula el total ---
   useEffect(() => {
     const nuevoTotal = carrito.reduce((acc, item) => acc + item.subtotal, 0);
     setTotal(nuevoTotal);
   }, [carrito]);
 
+  // --- Lógica de Búsqueda ---
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setTerminoBusqueda(query);
@@ -60,12 +72,14 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
     setTerminoBusqueda('');
     setResultadosBusqueda([]);
   };
+
+  // --- Lógica del Carrito ---
   const handleAgregarAlCarrito = (producto, formato, cantidad) => {
     const nuevoItem = {
       id: producto.id,
       nombre: producto.nombre,
       tamaño: producto.tamaño,
-      formato: formato,
+      formato: formato, // Guarda el objeto formato completo
       cantidad: cantidad,
       precio: formato.precio,
       subtotal: formato.precio * cantidad
@@ -78,15 +92,23 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
     setCarrito(nuevoCarrito);
   };
   
+  // --- Lógica de Venta ---
   const handleRealizarVenta = () => {
     if (carrito.length === 0) {
       alert("El carrito está vacío.");
       return;
     }
-    setMostrandoModalCobro(true);
+    setMostrandoModalCobro(true); // Abre el modal de cobro
   };
 
   const handleConfirmarVenta = async (dineroRecibido, vuelto) => {
+    // Verifica si cajaActual existe antes de intentar acceder a cajaActual.id
+    if (!cajaActual?.id) {
+        alert("Error: No se pudo identificar la caja actual. Por favor, intente recargar.");
+        setCargandoVenta(false);
+        return;
+    }
+      
     setCargandoVenta(true);
     setMostrandoModalCobro(false); 
     try {
@@ -103,21 +125,35 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
           transaction.update(productoRef, { stockUnidades: nuevoStock });
         }
       });
-      // 2. Guardar Venta
+      
+      // 2. Preparar datos de la Venta (con costo)
+      const itemsConCosto = carrito.map(item => {
+        const productoData = productosDB.find(p => p.id === item.id);
+        const costoUnidad = productoData ? productoData.precioCostoUnidad : 0;
+        return { 
+          ...item, 
+          formato: item.formato.nombre,
+          costoTotalItem: costoUnidad * item.formato.unidades * item.cantidad 
+        };
+      });
+
       const ventaData = {
         fecha: serverTimestamp(),
-        items: carrito.map(item => ({ ...item, formato: item.formato.nombre })),
+        items: itemsConCosto,
         totalVenta: total,
         tipoPago: "efectivo",
         cliente: nombreCliente.trim() === '' ? "Consumidor Final" : nombreCliente,
         dineroRecibido: Number(dineroRecibido),
         vuelto: Number(vuelto),
-        cajaId: cajaActual.id
+        cajaId: cajaActual.id // Asocia la venta a la caja abierta
       };
+      
+      // 3. Guardar la Venta
       const ventasCollection = collection(db, 'ventas');
       const docRef = await addDoc(ventasCollection, ventaData);
-      // 3. Mostrar Factura y Limpiar
-      setVentaCompleta({ id: docRef.id, ...ventaData, fecha: new Date() });
+
+      // 4. Mostrar Factura y Limpiar
+      setVentaCompleta({ id: docRef.id, ...ventaData, fecha: new Date() }); 
       setCarrito([]);
       setNombreCliente('');
     } catch (error) {
@@ -135,12 +171,9 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
   return (
     <div className="pos-container">
       
-      {/* --- 1. NUEVO CONTENEDOR PRINCIPAL --- */}
-      {/* Este div envuelve el header y la tabla */}
+      {/* --- Contenedor Principal (Header y Carrito) --- */}
       <div className="pos-main-content">
-      
-        {/* --- 2. EL OVERLAY AHORA VIVE AQUÍ DENTRO --- */}
-        {/* Al estar aquí, solo bloqueará esta sección, no los botones de abajo */}
+        {/* Overlay si la caja está cerrada */}
         {!cajaActual && (
           <div className="pos-overlay-disabled">
             <h2>Caja Cerrada</h2>
@@ -148,7 +181,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
           </div>
         )}
 
-        {/* El header y la tabla van dentro del nuevo contenedor */}
+        {/* Header (Búsqueda, Cliente, Total) */}
         <div className="pos-header">
           <div className="pos-search-container">
             <input
@@ -157,6 +190,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
               className="pos-search-bar"
               value={terminoBusqueda}
               onChange={handleSearchChange}
+              disabled={!cajaActual} // Deshabilita si la caja está cerrada
             />
             {resultadosBusqueda.length > 0 && (
               <div className="search-results">
@@ -178,6 +212,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
             className="pos-cliente-input"
             value={nombreCliente}
             onChange={(e) => setNombreCliente(e.target.value)}
+            disabled={!cajaActual} // Deshabilita si la caja está cerrada
           />
           <div className="pos-total">
             <h2>TOTAL</h2>
@@ -185,6 +220,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
           </div>
         </div>
         
+        {/* Carrito de Compras */}
         <div className="pos-cart-container">
           <table className="pos-cart-table">
             <thead>
@@ -207,7 +243,11 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
                   <td>L. {item.precio.toFixed(2)}</td>
                   <td>L. {item.subtotal.toFixed(2)}</td>
                   <td>
-                    <button onClick={() => handleQuitarDelCarrito(index)} className="boton-quitar">
+                    <button 
+                      onClick={() => handleQuitarDelCarrito(index)} 
+                      className="boton-quitar"
+                      disabled={!cajaActual} // Deshabilita si la caja está cerrada
+                    >
                       X
                     </button>
                   </td>
@@ -218,9 +258,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
         </div>
       </div> {/* --- Fin del .pos-main-content --- */}
 
-
-      {/* --- 3. EL FOOTER AHORA ESTÁ FUERA --- */}
-      {/* Al estar fuera, el overlay ya no lo bloquea */}
+      {/* --- Botones de Acción --- */}
       <div className="pos-footer">
         <button 
           className="pos-button" 
@@ -229,8 +267,21 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
         >
           {cajaActual ? `Caja Abierta (L. ${cajaActual.montoInicial.toFixed(2)})` : 'Apertura'}
         </button>
-        <button className="pos-button" disabled={!cajaActual}>Cierre X</button>
-        <button className="pos-button" disabled={!cajaActual}>Cierre Z</button>
+        <button 
+          className="pos-button" 
+          disabled={!cajaActual} 
+          onClick={() => setMostrandoCierreX(true)} 
+        >
+          Cierre X
+        </button>
+        {/* 👇 AQUÍ ESTÁ EL CAMBIO: onClick ahora usa onCierreZ 👇 */}
+        <button 
+          className="pos-button" 
+          disabled={!cajaActual} 
+          onClick={onCierreZ} // Llama a la función recibida del Dashboard
+        >
+          Cierre Z
+        </button>
         <button 
           className="pos-button" 
           onClick={() => setMostrandoHistorial(true)}
@@ -247,7 +298,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
         </button>
       </div>
 
-      {/* --- Modales (sin cambios) --- */}
+      {/* --- Modales --- */}
       {productoModal && (
         <ModalAgregarProducto
           producto={productoModal}
@@ -273,6 +324,14 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja }) {
           onConfirmarVenta={handleConfirmarVenta}
         />
       )}
+      {mostrandoCierreX && cajaActual && (
+        <ModalCierreX 
+          cajaActualId={cajaActual.id} 
+          montoInicial={cajaActual.montoInicial}
+          onClose={() => setMostrandoCierreX(false)}
+        />
+      )}
+      {/* El ModalCierreZ se renderiza en Dashboard.jsx */}
     </div>
   );
 }
