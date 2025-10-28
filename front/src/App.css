@@ -899,3 +899,86 @@ body {
   flex-direction: column;
   gap: 20px;
 }
+
+/* --- Estilos Adicionales para Cierre X/Z --- */
+.cierre-diferencia {
+  margin-top: 15px !important; /* Forzar margen */
+  padding-top: 15px;
+  border-top: 1px dashed #ccc;
+}
+.cierre-diferencia strong {
+  font-size: 20px;
+}
+.cierre-diferencia.faltante strong {
+  color: #e74c3c; /* Rojo para faltante */
+}
+.cierre-diferencia.sobrante strong {
+  color: #27ae60; /* Verde oscuro para sobrante */
+}
+/* Estilo para botón imprimir (opcional, puedes usar uno existente) */
+.boton-modal-imprimir {
+  flex-grow: 1;
+  background-color: #3498db; /* Azul */
+  color: white;
+  border: none;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+.boton-modal-imprimir:hover {
+  background-color: #2980b9;
+}
+
+/* --- ESTILOS DE IMPRESIÓN PARA CIERRE X/Z --- */
+@media print {
+  /* Oculta todo por defecto */
+  body * {
+    visibility: hidden;
+  }
+  /* Muestra solo el reporte y su contenido */
+  #reporte-imprimible, #reporte-imprimible * {
+    visibility: visible;
+  }
+  
+  /* Posiciona el reporte en la hoja */
+  #reporte-imprimible {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%; /* O ajusta a un ancho específico si prefieres */
+    margin: 0;
+    padding: 0;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Oculta elementos no deseados en la impresión */
+  .no-print, .no-print * { /* Usa !important si es necesario */
+    display: none !important; 
+    visibility: hidden !important;
+  }
+  
+  /* Quita el fondo oscuro del modal */
+  .modal-backdrop {
+    position: static !important;
+    background: none !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  
+  /* Ajusta el modal para impresión */
+  .cierre-modal {
+     max-width: 100%;
+     font-size: 10pt;
+     color: #000;
+  }
+  
+  
+
+}
+
