@@ -157,11 +157,11 @@ function Dashboard({ alCerrarSesion }) {
       <div className="sidebar">
         <div className="sidebar-header"><h3>Dep贸sito Mendoza</h3></div>
         <ul className="sidebar-menu">
-          <li><button onClick={() => setVistaActual('pos')}>馃洅 POS</button></li>
-          <li><button onClick={() => setVistaActual('inventario')}>馃摝 Inventario</button></li>
-          <li><button onClick={() => setVistaActual('reportes')}>馃搳 Reportes</button></li>
+          <li><button onClick={() => setVistaActual('pos')}>POS</button></li>
+          <li><button onClick={() => setVistaActual('inventario')}> Inventario</button></li>
+          <li><button onClick={() => setVistaActual('reportes')}>Reportes</button></li>
         </ul>
-        <div className="sidebar-footer"><button onClick={handleLogout} className="logout-button">馃毆 Cerrar Sesi贸n</button></div>
+        <div className="sidebar-footer"><button onClick={handleLogout} className="logout-button"> Cerrar Sesión</button></div>
       </div>
 
       {/* Contenido Principal */}
