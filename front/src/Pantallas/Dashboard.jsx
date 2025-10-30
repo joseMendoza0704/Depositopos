@@ -16,6 +16,10 @@ import {
 
 import Inventario from './Inventario';
 import PuntoDeVenta from './PuntoDeVenta';
+// Iconos del sidebar
+import iconPos from '../assets/poslogo.png';
+import iconInventario from '../assets/inventario.png';
+import iconReportes from '../assets/reportes.png';
 import ModalApertura from '../components/ModalApertura';
 import ModalCierreZ from '../components/ModalCierreZ';
 import ModalMensaje from '../components/ModalMensaje';
@@ -24,7 +28,8 @@ function VistaPrincipal() {
   return (
     <div>
       <h1>Bienvenido</h1>
-      <p>Sal sistema de Deposito Mendoza.</p>
+      <p>Al sistema de Deposito Mendoza.</p>
+      <p>Selecciona una opción del menú para comenzar.</p>
     </div>
   );
 }
@@ -155,13 +160,28 @@ function Dashboard({ alCerrarSesion }) {
     <div className="dashboard-container">
       {/* Sidebar */}
       <div className="sidebar">
-        <div className="sidebar-header"><h3>Dep贸sito Mendoza</h3></div>
+        <div className="sidebar-header"><h3>Depósito Mendoza</h3></div>
         <ul className="sidebar-menu">
-          <li><button onClick={() => setVistaActual('pos')}>馃洅 POS</button></li>
-          <li><button onClick={() => setVistaActual('inventario')}>馃摝 Inventario</button></li>
-          <li><button onClick={() => setVistaActual('reportes')}>馃搳 Reportes</button></li>
+          <li>
+            <button onClick={() => setVistaActual('pos')}>
+              <img src={iconPos} className="menu-icon" alt="POS" />
+              POS
+            </button>
+          </li>
+          <li>
+            <button onClick={() => setVistaActual('inventario')}>
+              <img src={iconInventario} className="menu-icon" alt="Inventario" />
+              Inventario
+            </button>
+          </li>
+          <li>
+            <button onClick={() => setVistaActual('reportes')}>
+              <img src={iconReportes} className="menu-icon" alt="Reportes" />
+              Reportes
+            </button>
+          </li>
         </ul>
-        <div className="sidebar-footer"><button onClick={handleLogout} className="logout-button">馃毆 Cerrar Sesi贸n</button></div>
+        <div className="sidebar-footer"><button onClick={handleLogout} className="logout-button"> Cerrar Sesión</button></div>
       </div>
 
       {/* Contenido Principal */}
