@@ -28,6 +28,7 @@ function VistaPrincipal() {
   return (
     <div>
       <h1>Bienvenido</h1>
+      <p>Al sistema de Deposito Mendoza.</p>
       <p>Selecciona una opción del menú para comenzar.</p>
     </div>
   );
