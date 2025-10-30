@@ -1,6 +1,6 @@
 // En: src/pantallas/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig'; // Asegúrate de que la ruta sea correcta (ej. ../firebaseConfig.js)
 import { signOut } from 'firebase/auth';
 import {
   collection,
@@ -14,12 +14,18 @@ import {
   updateDoc
 } from 'firebase/firestore';
 
+// Asumiendo que estas pantallas están en la misma carpeta 'pantallas'
 import Inventario from './Inventario';
 import PuntoDeVenta from './PuntoDeVenta';
-// Iconos del sidebar
+import GestionClientes from './GestionClientes'; // Importa la pantalla de Clientes
+
+// Iconos del sidebar (desde la nueva carpeta src/assets/)
 import iconPos from '../assets/poslogo.png';
 import iconInventario from '../assets/inventario.png';
 import iconReportes from '../assets/reportes.png';
+import iconClientes from '../assets/clientes.png'; // Asegúrate que este archivo exista en src/assets/
+
+// Componentes
 import ModalApertura from '../components/ModalApertura';
 import ModalCierreZ from '../components/ModalCierreZ';
 import ModalMensaje from '../components/ModalMensaje';
@@ -28,7 +34,6 @@ function VistaPrincipal() {
   return (
     <div>
       <h1>Bienvenido</h1>
-      <p>Al sistema de Deposito Mendoza.</p>
       <p>Selecciona una opción del menú para comenzar.</p>
     </div>
   );
@@ -40,9 +45,7 @@ function Dashboard({ alCerrarSesion }) {
   const [cargandoCaja, setCargandoCaja] = useState(true);
   const [mostrandoModalApertura, setMostrandoModalApertura] = useState(false);
   const [mostrandoModalCierreZ, setMostrandoModalCierreZ] = useState(false);
-
-  // Estado para el mensaje modal
-  const [mensajeModal, setMensajeModal] = useState(null); // { texto: '', tipo: '' }
+  const [mensajeModal, setMensajeModal] = useState(null);
 
   // --- useEffect para chequear caja abierta ---
   useEffect(() => {
@@ -54,15 +57,11 @@ function Dashboard({ alCerrarSesion }) {
                     where('fechaApertura', '>=', today),
                     orderBy('fechaApertura', 'desc'));
 
-    // console.log("Iniciando listener de caja..."); // Logs eliminados
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      // console.log("Listener de caja recibi贸 datos. Vac铆o:", snapshot.empty);
       if (!snapshot.empty) {
         const cajaDoc = snapshot.docs[0];
-        // console.log("隆Caja abierta encontrada!", cajaDoc.id, cajaDoc.data());
         setCajaActual({ id: cajaDoc.id, ...cajaDoc.data() });
       } else {
-        // console.log("No se encontr贸 ninguna caja abierta para hoy.");
         setCajaActual(null);
       }
       setCargandoCaja(false);
@@ -71,7 +70,6 @@ function Dashboard({ alCerrarSesion }) {
         setCargandoCaja(false);
     });
     return () => {
-        // console.log("Deteniendo listener de caja.");
         unsubscribe();
     }
   }, []);
@@ -82,7 +80,8 @@ function Dashboard({ alCerrarSesion }) {
         await signOut(auth);
         alCerrarSesion();
       } catch (error) {
-        console.error("Error al cerrar sesi贸n:", error);
+        console.error("Error al cerrar sesión:", error);
+        setMensajeModal({ texto: "Error al cerrar sesión.", tipo: 'error' });
       }
   };
 
@@ -91,14 +90,14 @@ function Dashboard({ alCerrarSesion }) {
     try {
       await addDoc(collection(db, 'cajas'), {
         fechaApertura: serverTimestamp(),
-        montoInicial: montoInicial,
+        montoInicial: Number(montoInicial),
         estado: "abierta",
         usuarioId: auth.currentUser.uid
       });
       setMostrandoModalApertura(false);
     } catch (error) {
       console.error("Error al abrir la caja: ", error);
-      setMensajeModal({ texto: "Error al abrir la caja.", tipo: 'error' }); // Usar modal para error
+      setMensajeModal({ texto: "Error al abrir la caja. Revise la consola.", tipo: 'error' });
     }
   };
 
@@ -108,29 +107,29 @@ function Dashboard({ alCerrarSesion }) {
       setMostrandoModalCierreZ(true);
   };
 
-  // --- handleConfirmarCierreZ (MODIFICADO para usar ModalMensaje) ---
+  // --- handleConfirmarCierreZ ---
   const handleConfirmarCierreZ = async (datosCierre) => {
-      if (!cajaActual?.id) return;
-
+      if (!cajaActual?.id) {
+          setMensajeModal({ texto: "Error: No se pudo identificar la caja actual.", tipo: 'error' });
+          return;
+      }
       try {
           const cajaRef = doc(db, 'cajas', cajaActual.id);
           await updateDoc(cajaRef, {
               ...datosCierre,
               fechaCierre: serverTimestamp(),
-              estado: "cerrada"
+              estado: "cerrada",
+              usuarioCierreId: auth.currentUser ? auth.currentUser.uid : 'desconocido'
           });
-          setMostrandoModalCierreZ(false); // Cierra el modal de Cierre Z
-          // *** CAMBIO AQU脥: Usa ModalMensaje en lugar de alert ***
-          setMensajeModal({ texto: "隆Caja cerrada exitosamente!", tipo: 'exito' });
-
+          setMostrandoModalCierreZ(false);
+          setMensajeModal({ texto: "¡Caja cerrada exitosamente!", tipo: 'exito' });
       } catch (error) {
           console.error("Error al cerrar la caja: ", error);
-          // *** CAMBIO AQU脥: Usa ModalMensaje en lugar de alert ***
-          setMensajeModal({ texto: "Error al cerrar la caja.", tipo: 'error' });
+          setMensajeModal({ texto: "Error al cerrar la caja. Revise la consola.", tipo: 'error' });
       }
   };
 
-  // --- renderizarVista ---
+  // --- renderizarVista (MODIFICADO) ---
   const renderizarVista = () => {
     switch (vistaActual) {
       case 'pos':
@@ -141,6 +140,14 @@ function Dashboard({ alCerrarSesion }) {
                 />;
       case 'inventario':
         return <Inventario />;
+      
+      // AÑADE EL CASE PARA CLIENTES
+      case 'clientes':
+        return <GestionClientes />;
+      
+      // case 'reportes':
+      //   return <VistaPrincipal />; // Temporal
+        
       default:
         return <VistaPrincipal />;
     }
@@ -155,12 +162,13 @@ function Dashboard({ alCerrarSesion }) {
       );
   }
 
-  // --- JSX ---
+  // --- JSX (MODIFICADO) ---
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
       <div className="sidebar">
         <div className="sidebar-header"><h3>Depósito Mendoza</h3></div>
+        
         <ul className="sidebar-menu">
           <li>
             <button onClick={() => setVistaActual('pos')}>
@@ -172,6 +180,13 @@ function Dashboard({ alCerrarSesion }) {
             <button onClick={() => setVistaActual('inventario')}>
               <img src={iconInventario} className="menu-icon" alt="Inventario" />
               Inventario
+            </button>
+          </li>
+          {/* --- Botón de Clientes Añadido --- */}
+          <li>
+            <button onClick={() => setVistaActual('clientes')}>
+              <img src={iconClientes} className="menu-icon" alt="Clientes" />
+              Clientes
             </button>
           </li>
           <li>
@@ -203,13 +218,11 @@ function Dashboard({ alCerrarSesion }) {
             onConfirmarCierreZ={handleConfirmarCierreZ}
         />
       )}
-
-      {/* Renderiza el ModalMensaje */}
       {mensajeModal && (
         <ModalMensaje
           mensaje={mensajeModal.texto}
           tipo={mensajeModal.tipo}
-          onClose={() => setMensajeModal(null)} // Funci贸n para cerrar
+          onClose={() => setMensajeModal(null)}
         />
       )}
     </div>
