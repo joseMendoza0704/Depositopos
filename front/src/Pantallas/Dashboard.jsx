@@ -24,7 +24,7 @@ function VistaPrincipal() {
   return (
     <div>
       <h1>Bienvenido</h1>
-      <p>Selecciona una opci贸n del men煤 para comenzar.</p>
+      <p>Sal sistema de Deposito Mendoza.</p>
     </div>
   );
 }
