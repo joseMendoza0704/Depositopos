@@ -1,0 +1,190 @@
+/* Estilos para modales */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Estilos para la búsqueda */
+.search-container {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Lista de clientes y productos */
+.clientes-list,
+.productos-list {
+  max-height: calc(70vh - 200px);
+  overflow-y: auto;
+  margin: 0 -20px;
+  padding: 0 20px;
+}
+
+.cliente-item,
+.producto-item {
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #fff;
+}
+
+.cliente-item:hover,
+.producto-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-color: #007bff;
+}
+
+.loading-message,
+.empty-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Información de cliente y producto */
+.cliente-info-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cliente-nombre {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.cliente-telefono {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.cliente-direccion {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 4px;
+}
+
+.producto-info {
+  margin-bottom: 8px;
+}
+
+.producto-nombre {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.producto-precios {
+  margin-top: 4px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+/* Estilos para la lista de items en el pedido */
+.items-list {
+  margin: 16px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.total-row {
+  margin-top: 16px;
+  text-align: right;
+  font-size: 1.2em;
+}
+
+/* Botones */
+.modal-botones {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.boton-modal-agregar,
+.boton-modal-cancelar {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.boton-modal-agregar {
+  background-color: #28a745;
+  color: white;
+}
+
+.boton-modal-agregar:hover {
+  background-color: #218838;
+}
+
+.boton-modal-cancelar {
+  background-color: #6c757d;
+  color: white;
+}
+
+.boton-modal-cancelar:hover {
+  background-color: #5a6268;
+}
+
+.boton-modal-agregar:disabled {
+  background-color: #87c997;
+  cursor: not-allowed;
+}
+
+/* Estilos para la información del cliente seleccionado */
+.cliente-seleccionado {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}

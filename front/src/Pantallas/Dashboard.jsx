@@ -1,6 +1,6 @@
 // En: src/pantallas/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../firebaseConfig'; // Asegúrate de que la ruta sea correcta (ej. ../firebaseConfig.js)
+import { auth, db } from '../firebaseConfig.js'; // Añadido .js
 import { signOut } from 'firebase/auth';
 import {
   collection,
@@ -14,21 +14,23 @@ import {
   updateDoc
 } from 'firebase/firestore';
 
-// Asumiendo que estas pantallas están en la misma carpeta 'pantallas'
-import Inventario from './Inventario';
-import PuntoDeVenta from './PuntoDeVenta';
-import GestionClientes from './GestionClientes'; // Importa la pantalla de Clientes
+// Importa todas tus pantallas (añadiendo .jsx)
+import Inventario from './Inventario.jsx';
+import PuntoDeVenta from './PuntoDeVenta.jsx';
+import GestionClientes from './GestionClientes.jsx';
+import GestionPedidos from './GestionPedidos.jsx'; // 1. IMPORTA LA NUEVA PANTALLA
 
-// Iconos del sidebar (desde la nueva carpeta src/assets/)
+// Iconos del sidebar (¡Asegúrate de tenerlos en src/assets/!)
 import iconPos from '../assets/poslogo.png';
 import iconInventario from '../assets/inventario.png';
 import iconReportes from '../assets/reportes.png';
-import iconClientes from '../assets/clientes.png'; // Asegúrate que este archivo exista en src/assets/
+import iconClientes from '../assets/clientes.png';
+import iconPedidos from '../assets/pedidos.png'; // 2. AÑADE ICONO DE PEDIDOS
 
-// Componentes
-import ModalApertura from '../components/ModalApertura';
-import ModalCierreZ from '../components/ModalCierreZ';
-import ModalMensaje from '../components/ModalMensaje';
+// Importa todos los modales (añadiendo .jsx)
+import ModalApertura from '../components/ModalApertura.jsx';
+import ModalCierreZ from '../components/ModalCierreZ.jsx';
+import ModalMensaje from '../components/ModalMensaje.jsx';
 
 function VistaPrincipal() {
   return (
@@ -66,27 +68,29 @@ function Dashboard({ alCerrarSesion }) {
       }
       setCargandoCaja(false);
     }, (error) => {
-        console.error("Error en listener de caja: ", error);
+        console.error("Error en listener de caja (¿Falta índice?): ", error);
         setCargandoCaja(false);
     });
-    return () => {
-        unsubscribe();
-    }
+    return () => unsubscribe();
   }, []);
 
   // --- handleLogout ---
   const handleLogout = async () => {
-      try {
-        await signOut(auth);
-        alCerrarSesion();
-      } catch (error) {
-        console.error("Error al cerrar sesión:", error);
-        setMensajeModal({ texto: "Error al cerrar sesión.", tipo: 'error' });
-      }
+    try {
+      await signOut(auth);
+      alCerrarSesion();
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      setMensajeModal({ texto: "Error al cerrar sesión.", tipo: 'error' });
+    }
   };
 
   // --- handleConfirmarApertura ---
   const handleConfirmarApertura = async (montoInicial) => {
+    if (!auth.currentUser) {
+      setMensajeModal({ texto: "Error: Usuario no autenticado.", tipo: 'error' });
+      return;
+    }
     try {
       await addDoc(collection(db, 'cajas'), {
         fechaApertura: serverTimestamp(),
@@ -103,30 +107,30 @@ function Dashboard({ alCerrarSesion }) {
 
   // --- handleCierreZ ---
   const handleCierreZ = () => {
-      if (!cajaActual) return;
-      setMostrandoModalCierreZ(true);
+    if (!cajaActual) return;
+    setMostrandoModalCierreZ(true);
   };
 
   // --- handleConfirmarCierreZ ---
   const handleConfirmarCierreZ = async (datosCierre) => {
-      if (!cajaActual?.id) {
-          setMensajeModal({ texto: "Error: No se pudo identificar la caja actual.", tipo: 'error' });
-          return;
-      }
-      try {
-          const cajaRef = doc(db, 'cajas', cajaActual.id);
-          await updateDoc(cajaRef, {
-              ...datosCierre,
-              fechaCierre: serverTimestamp(),
-              estado: "cerrada",
-              usuarioCierreId: auth.currentUser ? auth.currentUser.uid : 'desconocido'
-          });
-          setMostrandoModalCierreZ(false);
-          setMensajeModal({ texto: "¡Caja cerrada exitosamente!", tipo: 'exito' });
-      } catch (error) {
-          console.error("Error al cerrar la caja: ", error);
-          setMensajeModal({ texto: "Error al cerrar la caja. Revise la consola.", tipo: 'error' });
-      }
+    if (!cajaActual?.id) {
+        setMensajeModal({ texto: "Error: No se pudo identificar la caja actual.", tipo: 'error' });
+        return;
+    }
+    try {
+      const cajaRef = doc(db, 'cajas', cajaActual.id);
+      await updateDoc(cajaRef, {
+          ...datosCierre,
+          fechaCierre: serverTimestamp(),
+          estado: "cerrada",
+          usuarioCierreId: auth.currentUser ? auth.currentUser.uid : 'desconocido'
+      });
+      setMostrandoModalCierreZ(false);
+      setMensajeModal({ texto: "¡Caja cerrada exitosamente!", tipo: 'exito' });
+    } catch (error) {
+      console.error("Error al cerrar la caja: ", error);
+      setMensajeModal({ texto: "Error al cerrar la caja. Revise la consola.", tipo: 'error' });
+    }
   };
 
   // --- renderizarVista (MODIFICADO) ---
@@ -140,13 +144,15 @@ function Dashboard({ alCerrarSesion }) {
                 />;
       case 'inventario':
         return <Inventario />;
-      
-      // AÑADE EL CASE PARA CLIENTES
       case 'clientes':
         return <GestionClientes />;
       
-      // case 'reportes':
-      //   return <VistaPrincipal />; // Temporal
+      // 3. AÑADE EL CASE PARA PEDIDOS
+      case 'pedidos':
+        return <GestionPedidos cajaActual={cajaActual} />; // Pasa la caja actual
+
+      case 'reportes':
+        return <VistaPrincipal />; // Temporal
         
       default:
         return <VistaPrincipal />;
@@ -162,13 +168,11 @@ function Dashboard({ alCerrarSesion }) {
       );
   }
 
-  // --- JSX (MODIFICADO) ---
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
+      {/* Sidebar (MODIFICADO) */}
       <div className="sidebar">
         <div className="sidebar-header"><h3>Depósito Mendoza</h3></div>
-        
         <ul className="sidebar-menu">
           <li>
             <button onClick={() => setVistaActual('pos')}>
@@ -182,11 +186,17 @@ function Dashboard({ alCerrarSesion }) {
               Inventario
             </button>
           </li>
-          {/* --- Botón de Clientes Añadido --- */}
           <li>
             <button onClick={() => setVistaActual('clientes')}>
               <img src={iconClientes} className="menu-icon" alt="Clientes" />
               Clientes
+            </button>
+          </li>
+          {/* 4. AÑADE EL BOTÓN DE PEDIDOS */}
+          <li>
+            <button onClick={() => setVistaActual('pedidos')}>
+              <img src={iconPedidos} className="menu-icon" alt="Pedidos" />
+              Pedidos
             </button>
           </li>
           <li>
