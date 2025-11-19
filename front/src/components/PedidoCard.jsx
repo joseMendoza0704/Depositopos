@@ -13,7 +13,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
   }
 
   const { id, cliente, items, total, estado } = pedido;
-  
+    
   // Validar que los campos requeridos existan
   if (!id || !cliente.nombre || !items || typeof total === 'undefined' || !estado) {
     console.error('Pedido con campos faltantes:', pedido);

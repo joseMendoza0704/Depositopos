@@ -78,7 +78,7 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
         fechaCreacion: pedidoParaEditar?.fechaCreacion || Timestamp.now(),
         total: Number(total)
       };
-
+  
       console.log('Guardando pedido:', pedidoData); // Para debug
 
       try {
