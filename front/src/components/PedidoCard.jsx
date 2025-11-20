@@ -20,20 +20,29 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
     return null;
   }
 
-  const actualizarInventario = async (items) => {
-    try {
-      // Actualizar el stock de cada producto
-      for (const item of items) {
-        const productoRef = doc(db, 'productos', item.id);
-        await updateDoc(productoRef, {
-          stock: item.stockActual - item.cantidad
-        });
+const actualizarInventario = async (items) => {
+  try {
+    for (const item of items) {
+      const productoRef = doc(db, 'productos', item.id);
+      const productoDoc = await getDoc(productoRef);
+      if (!productoDoc.exists()) throw new Error(`Producto no encontrado: ${item.nombre}`);
+      const stockActualUnidades = productoDoc.data().stockUnidades || 0;
+      // Si tu item tiene formato.unidades, úsalo; si no, asegúrate que item.formato es el nombre y busca el número de unidades en la base según formato.
+      const unidadesPorFormato = item.formato.unidades || 1;
+      const cantidadARestar = unidadesPorFormato * item.cantidad;
+      if (stockActualUnidades < cantidadARestar) {
+        throw new Error(`Stock insuficiente para ${item.nombre}`);
       }
-    } catch (error) {
-      console.error('Error al actualizar inventario:', error);
-      throw new Error('Error al actualizar el inventario');
+      await updateDoc(productoRef, {
+        stockUnidades: stockActualUnidades - cantidadARestar
+      });
     }
-  };
+  } catch (error) {
+    console.error('Error al actualizar inventario:', error);
+    throw new Error('Error al actualizar el inventario');
+  }
+};
+
 
   const registrarVentaEnCaja = async (pedido) => {
     try {

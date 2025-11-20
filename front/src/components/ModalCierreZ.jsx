@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
 
+
 function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
   // Estados de datos
   const [loading, setLoading] = useState(true);
@@ -16,15 +17,18 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
   const [dineroContado, setDineroContado] = useState('');
   const [diferencia, setDiferencia] = useState(0);
 
+
   // Estados "Congelados" (¡siguen siendo vitales!)
   const [cajaIdParaReporte] = useState(cajaActual?.id);
   const [montoInicialCongelado] = useState(cajaActual?.montoInicial || 0);
+
 
   // --- ¡NUEVO! ---
   // Estados para controlar el flujo de botones
   const [isConfirmando, setConfirmando] = useState(false); // Para deshabilitar botones
   const [isConfirmado, setConfirmado] = useState(false);   // Para mostrar los botones finales
   // --- FIN NUEVO ---
+
 
 
   // Lógica de carga de datos (sin cambios)
@@ -78,18 +82,21 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cajaIdParaReporte]); 
 
+
   // Cálculos derivados (sin cambios)
   const gananciaBruta = totalVentas - totalCostos;
   const donacion = Math.round(totalVentas * 0.01); 
   const totalEsperado = montoInicialCongelado + totalVentas; 
   const efectivoFinalEsperado = totalEsperado - donacion; 
 
+
   useEffect(() => {
     const contadoNum = Number(dineroContado) || 0;
     setDiferencia(contadoNum - efectivoFinalEsperado);
   }, [dineroContado, efectivoFinalEsperado]);
 
-  // Lógica de archivado (sin cambios)
+
+  // Lógica de archivado (modificada para reiniciar pedidos)
   const archivarVentasYPedidos = async () => {
     try {
       if (!cajaIdParaReporte) throw new Error("No hay ID de caja para archivar.");
@@ -97,7 +104,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
       const fechaArchivado = new Date();
       const cierreZId = fechaArchivado.toISOString().split('T')[0];
       
-      // 1. Archivar Pedidos
+      // 1. Archivar Pedidos y luego eliminarlos para reiniciar pedidos
       const pedidosRef = collection(db, 'pedidos');
       const pedidosQuery = query(pedidosRef);
       const pedidosSnapshot = await getDocs(pedidosQuery);
@@ -107,7 +114,8 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
         batch.delete(pedidoDoc.ref);
       });
 
-      // 2. Archivar Ventas
+
+      // 2. Archivar Ventas y eliminarlas
       const ventasRef = collection(db, 'ventas');
       const qVentas = query(ventasRef, where('cajaId', '==', cajaIdParaReporte));
       const ventasSnapshot = await getDocs(qVentas);
@@ -117,7 +125,8 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
         batch.delete(ventaDoc.ref);
       });
 
-      // 3. Archivar CajaTransacciones
+
+      // 3. Archivar CajaTransacciones de tipo 'pedido' del día y eliminarlas
       const transaccionesRef = collection(db, 'cajaTransacciones');
       const startOfDay = new Date(new Date().setHours(0,0,0,0));
       const qTransacciones = query( transaccionesRef, where('fecha', '>=', startOfDay), where('tipo', '==', 'pedido') );
@@ -135,17 +144,18 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
     }
   };
 
+
   // --- ¡MODIFICADO! ---
-  // 2. handleConfirmar AHORA SOLO CONFIRMA, NO IMPRIME NI CIERRA.
-    const handleConfirmar = async () => {
-      const contadoNum = Number(dineroContado) || 0;
-      if (contadoNum <= 0) {
-        alert("Por favor, ingrese el monto contado en caja.");
-        return;
-      }
-    
+  // 2. handleConfirmar AHORA SOLO CONFIRMA, ARCHIVA, IMPRIME y NOTIFICA al padre.
+  const handleConfirmar = async () => {
+    const contadoNum = Number(dineroContado) || 0;
+    if (contadoNum <= 0) {
+      alert("Por favor, ingrese el monto contado en caja.");
+      return;
+    }
+  
     setConfirmando(true); // Bloquea botones
-    
+  
     try {
       const datosCierre = {
           fecha: new Date(),
@@ -160,18 +170,21 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
           resumenPedidos: { totalPedidosRecibidos, totalPedidosPagados, ventasPedidos }
       };
 
-      // 1. Archiva todo
+
+      // 1. Archivar/Vaciar todos los pedidos, ventas y transacciones pendientes
       await archivarVentasYPedidos();
 
-      // 2. ¡ESTA ES LA CORRECCIÓN!
-      // Llamamos a la impresión ANTES de que la función padre cierre el modal.
+
+      // 2. Imprimir reporte antes de cerrar
       handlePrint();
       
-      // 3. Guarda el cierre (y esto probablemente cierra el modal)
+      // 3. Avisar al padre con datos del cierre (puede cerrar modal y refrescar UI)
       await onConfirmarCierreZ(datosCierre);
+
 
       // 4. Cambia al estado "Confirmado" (aunque el modal se cierre)
       setConfirmado(true);
+
 
     } catch (error) {
       console.error('Error al realizar el cierre Z:', error);
@@ -182,21 +195,21 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
     }
   };
 
+
   // --- ¡NUEVO! ---
-  // 3. handlePrint AHORA ES UNA FUNCIÓN SEPARADA Y SIMPLE.
+  // Función simple para imprimir el reporte
   const handlePrint = () => {
-    // Esta función no tiene lógica async, es segura.
     document.title = `Cierre_Z_${new Date().toLocaleDateString()}`;
     window.print();
   };
   // --- FIN NUEVO ---
 
 
-  // --- ¡MODIFICADO! ---
-  // 4. Añadimos la clase 'area-impresion-cierre' al div principal.
+
+  // --- Renderizado principal ---
   return (
-    <div className="modal-backdrop"> {/* <-- 1. QUITA 'area-impresion-cierre' de aquí */}
-     <div className="modal-content cierre-modal" id="reporte-imprimible"> {/* <-- 2. AÑADE el ID aquí */}
+    <div className="modal-backdrop">
+      <div className="modal-content cierre-modal" id="reporte-imprimible">
         
         <h3>Reporte Cierre Z (Final del Día)</h3>
         <p>Fecha/Hora: {new Date().toLocaleString()}</p>
@@ -214,12 +227,14 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
               <p><span>Total Ventas Directas:</span> <strong>L. {ventasNormales.toFixed(2)}</strong></p>
             </div>
 
+
             <div className="seccion-pedidos">
               <h4>Resumen de Pedidos</h4>
               <p><span>Pedidos Recibidos:</span> <strong>{totalPedidosRecibidos}</strong></p>
               <p><span>Pedidos Pagados:</span> <strong>{totalPedidosPagados}</strong></p>
               <p><span>Total Ventas Pedidos:</span> <strong>L. {ventasPedidos.toFixed(2)}</strong></p>
             </div>
+
 
             <hr />
             <p><span>(=) Total Ventas:</span> <strong>L. {totalVentas.toFixed(2)}</strong></p>
@@ -236,7 +251,6 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
               <input 
                 type="number" 
                 className="cobro-input"
-                // Deshabilitamos el input si ya se confirmó
                 value={dineroContado}
                 onChange={(e) => setDineroContado(e.target.value)}
                 placeholder="Ingrese el monto contado..."
@@ -250,16 +264,15 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
           </div>
         )}
 
-        {/* --- ¡MODIFICADO! --- */}
-        {/* 5. Lógica condicional para los botones. */}
+
+        {/* Botones */}
         <div className="modal-botones no-print ocultar-en-impresion">
           
           {isConfirmado ? (
-            // --- ESTADO 2: YA CONFIRMADO ---
             <>
               <button 
                 onClick={handlePrint}
-                className="boton-modal-imprimir" // (Usa la clase de Cierre X si la tienes)
+                className="boton-modal-imprimir"
               >
                 Imprimir Reporte
               </button>
@@ -271,7 +284,6 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
               </button>
             </>
           ) : (
-            // --- ESTADO 1: PENDIENTE DE CONFIRMAR ---
             <>
               <button 
                 onClick={handleConfirmar}
@@ -290,10 +302,12 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
             </>
           )}
 
+
         </div>
       </div>
     </div>
   );
 }
+
 
 export default ModalCierreZ;
