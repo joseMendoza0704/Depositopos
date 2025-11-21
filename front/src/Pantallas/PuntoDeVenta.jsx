@@ -14,7 +14,7 @@ import Factura from '../components/Factura';
 import HistorialVentas from '../components/HistorialVentas';
 import ModalCobro from '../components/ModalCobro';
 import ModalCierreX from '../components/ModalCierreX';
-// No necesitamos importar Cierre Z aquí, se maneja en Dashboard
+import '../styles/PuntoDeVenta.css';
 
 // Recibe cajaActual, onAbrirCaja y onCierreZ del Dashboard
 function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) { 
@@ -67,6 +67,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) {
       setResultadosBusqueda([]);
     }
   };
+
   const handleSelectProductoBusqueda = (producto) => {
     setProductoModal(producto);
     setTerminoBusqueda('');
@@ -86,6 +87,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) {
     };
     setCarrito([...carrito, nuevoItem]);
   };
+
   const handleQuitarDelCarrito = (index) => {
     const nuevoCarrito = [...carrito];
     nuevoCarrito.splice(index, 1);
@@ -104,25 +106,48 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) {
   const handleConfirmarVenta = async (dineroRecibido, vuelto) => {
     // Verifica si cajaActual existe antes de intentar acceder a cajaActual.id
     if (!cajaActual?.id) {
-        alert("Error: No se pudo identificar la caja actual. Por favor, intente recargar.");
-        setCargandoVenta(false);
-        return;
+      alert("Error: No se pudo identificar la caja actual. Por favor, intente recargar.");
+      setCargandoVenta(false);
+      return;
     }
       
     setCargandoVenta(true);
     setMostrandoModalCobro(false); 
+
     try {
-      // 1. Restar Stock
+      // 1. Restar Stock usando transacción CORRECTAMENTE
       await runTransaction(db, async (transaction) => {
+        // PASO 1: Primero hacemos TODAS las lecturas
+        const productosRefs = [];
+        const productosData = [];
+        
         for (const item of carrito) {
-          const cantidadARestar = item.formato.unidades * item.cantidad;
           const productoRef = doc(db, 'productos', item.id);
+          productosRefs.push(productoRef);
           const productoDoc = await transaction.get(productoRef);
-          if (!productoDoc.exists()) throw new Error(`Producto no encontrado: ${item.nombre}`);
-          const stockActual = productoDoc.data().stockUnidades;
-          if (stockActual < cantidadARestar) throw new Error(`Stock insuficiente para: ${item.nombre}`);
+          
+          if (!productoDoc.exists()) {
+            throw new Error(`Producto no encontrado: ${item.nombre}`);
+          }
+          
+          productosData.push({
+            ref: productoRef,
+            data: productoDoc.data(),
+            item: item
+          });
+        }
+        
+        // PASO 2: Ahora hacemos TODAS las escrituras
+        for (const producto of productosData) {
+          const cantidadARestar = producto.item.formato.unidades * producto.item.cantidad;
+          const stockActual = producto.data.stockUnidades;
+          
+          if (stockActual < cantidadARestar) {
+            throw new Error(`Stock insuficiente para: ${producto.item.nombre}`);
+          }
+          
           const nuevoStock = stockActual - cantidadARestar;
-          transaction.update(productoRef, { stockUnidades: nuevoStock });
+          transaction.update(producto.ref, { stockUnidades: nuevoStock });
         }
       });
       
@@ -274,11 +299,10 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) {
         >
           Cierre X
         </button>
-        {/* 👇 AQUÍ ESTÁ EL CAMBIO: onClick ahora usa onCierreZ 👇 */}
         <button 
           className="pos-button" 
           disabled={!cajaActual} 
-          onClick={onCierreZ} // Llama a la función recibida del Dashboard
+          onClick={onCierreZ}
         >
           Cierre Z
         </button>
@@ -331,7 +355,6 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) {
           onClose={() => setMostrandoCierreX(false)}
         />
       )}
-      {/* El ModalCierreZ se renderiza en Dashboard.jsx */}
     </div>
   );
 }

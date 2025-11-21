@@ -1,0 +1,179 @@
+/* En: src/pantallas/Dashboard.css o en tu archivo global de estilos */
+
+/* Animación de fade-in para el contenido cuando cambias de vista */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Sidebar con transición suave para colapsar */
+.sidebar {
+  width: 250px;
+  transition: width 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+/* Ocultar texto cuando está colapsada */
+.sidebar.collapsed .menu-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar .menu-text {
+  opacity: 1;
+  transition: opacity 0.3s ease 0.1s;
+}
+
+/* Ocultar título cuando está colapsada */
+.sidebar.collapsed .sidebar-header h3 {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+/* Botón de toggle sidebar */
+.toggle-sidebar-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.3s ease;
+}
+
+.toggle-sidebar-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Header de sidebar con flexbox para alinear título y botón */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+}
+
+/* Botones del menú con hover y active */
+.sidebar-menu li button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.sidebar-menu li button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.sidebar-menu li button.active {
+  background-color: rgba(74, 144, 226, 0.3);
+  border-left: 4px solid #4a90e2;
+}
+
+.sidebar-menu li button.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: #4a90e2;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    height: 0;
+  }
+  to {
+    height: 100%;
+  }
+}
+
+/* Iconos con tamaño fijo */
+.menu-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+/* Botón de logout con hover */
+.logout-button {
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #d43f3f;
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Loading container con animación de pulso */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loading-container h2 {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Vista principal con animación */
+.vista-principal {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive: Auto-colapsar en móviles */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 70px;
+  }
+  
+  .sidebar .menu-text {
+    opacity: 0;
+    width: 0;
+  }
+  
+  .sidebar-header h3 {
+    opacity: 0;
+    width: 0;
+  }
+}

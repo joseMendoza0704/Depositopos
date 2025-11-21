@@ -1,0 +1,398 @@
+/* En: src/styles/ModalCierreZ.css */
+
+/* ============================================
+   MODAL BACKDROP Y CONTENEDOR
+   ============================================ */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+  padding: 10px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal principal - CORREGIDO PARA FLEXBOX */
+.cierre-modal {
+  background: #fff;
+  border-radius: 10px;
+  width: 85%;
+  max-width: 550px;
+  max-height: 90vh; /* Aumentado ligeramente para aprovechar pantalla */
+  display: flex;
+  flex-direction: column; /* Vital para organizar cabecera-cuerpo-pie */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   ÁREA CON SCROLL - CORREGIDO
+   ============================================ */
+.cierre-modal-scroll {
+  flex: 1; /* Ocupa todo el espacio disponible automáticamente */
+  overflow-y: auto; /* Scroll solo si es necesario */
+  overflow-x: hidden;
+  padding: 18px 20px;
+  min-height: 0; /* Truco necesario para que el scroll funcione en flexbox */
+  /* Eliminado el max-height con calc() que causaba el error */
+}
+
+/* Scroll personalizado */
+.cierre-modal-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cierre-modal-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.cierre-modal-scroll::-webkit-scrollbar-thumb {
+  background: #4a90e2;
+  border-radius: 10px;
+}
+
+.cierre-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #357abd;
+}
+
+/* ============================================
+   ENCABEZADO
+   ============================================ */
+.cierre-modal h3 {
+  color: #2e3b4e;
+  font-size: 19px;
+  font-weight: 700;
+  margin: 15px 0 8px 0; /* Ajustado margen superior */
+  text-align: center;
+  border-bottom: 2px solid #4a90e2;
+  padding-bottom: 8px;
+  flex-shrink: 0; /* Evita que el título se aplaste */
+}
+
+.cierre-modal-scroll > p:first-of-type {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+  margin: 0 0 15px 0;
+}
+
+/* ============================================
+   DETALLES
+   ============================================ */
+.cierre-details {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.cierre-details p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.cierre-details p span:first-child {
+  color: #555;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.cierre-details p strong {
+  color: #2e3b4e;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Secciones especiales */
+.seccion-ventas,
+.seccion-pedidos {
+  background: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 12px 0;
+  border-left: 3px solid #4a90e2;
+}
+
+.seccion-ventas h4,
+.seccion-pedidos h4 {
+  color: #4a90e2;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+/* Separadores */
+.cierre-details hr {
+  border: none;
+  border-top: 1px solid #dee2e6;
+  margin: 10px 0;
+}
+
+/* Total destacado */
+.cierre-total {
+  background: #e3f2fd;
+  padding: 10px 12px !important;
+  border-radius: 6px;
+  border-left: 3px solid #4a90e2;
+  margin: 12px 0 !important;
+}
+
+.cierre-total strong {
+  color: #1565c0 !important;
+  font-size: 16px !important;
+}
+
+/* Diferencia */
+.cierre-diferencia {
+  background: #fff;
+  padding: 10px 12px !important;
+  border-radius: 6px;
+  margin: 12px 0 !important;
+  font-weight: 700;
+}
+
+.cierre-diferencia.faltante {
+  border-left: 3px solid #e85353;
+  background: #ffebee;
+}
+
+.cierre-diferencia.faltante strong {
+  color: #c62828 !important;
+  font-size: 15px !important;
+}
+
+.cierre-diferencia.sobrante {
+  border-left: 3px solid #28a745;
+  background: #e8f5e9;
+}
+
+.cierre-diferencia.sobrante strong {
+  color: #2e7d32 !important;
+  font-size: 15px !important;
+}
+
+/* ============================================
+   FORMULARIO
+   ============================================ */
+.form-group {
+  margin: 15px 0;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #2e3b4e;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.cobro-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.cobro-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.cobro-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ============================================
+   BOTONES FIJOS - CORREGIDO
+   ============================================ */
+.modal-botones-fijos {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 14px 20px;
+  border-top: 2px solid #e0e0e0;
+  background: #fff;
+  flex-shrink: 0; /* ASEGURA QUE ESTO NO SE ENCOJA NI SE OCULTE */
+  min-height: auto;
+  z-index: 10;
+}
+
+/* Botones más pequeños */
+.boton-modal-confirmar-cierre,
+.boton-modal-imprimir,
+.boton-modal-cancelar {
+  flex: 1;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 110px;
+}
+
+.boton-modal-confirmar-cierre {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+}
+
+.boton-modal-confirmar-cierre:hover:not(:disabled) {
+  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+  box-shadow: 0 4px 10px rgba(32, 201, 151, 0.4);
+  transform: translateY(-2px);
+}
+
+.boton-modal-confirmar-cierre:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.boton-modal-imprimir {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3);
+}
+
+.boton-modal-imprimir:hover {
+  background: linear-gradient(135deg, #357abd 0%, #2868a8 100%);
+  box-shadow: 0 4px 10px rgba(74, 144, 226, 0.4);
+  transform: translateY(-2px);
+}
+
+.boton-modal-cancelar {
+  background: #6c757d;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(108, 117, 125, 0.3);
+}
+
+.boton-modal-cancelar:hover:not(:disabled) {
+  background: #5a6268;
+  box-shadow: 0 4px 10px rgba(108, 117, 125, 0.4);
+  transform: translateY(-2px);
+}
+
+.boton-modal-cancelar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================
+   ESTADOS DE CARGA Y ERROR
+   ============================================ */
+.cierre-modal-scroll > p {
+  text-align: center;
+  padding: 15px;
+  font-size: 15px;
+  color: #666;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .cierre-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .cierre-modal-scroll {
+    padding: 15px 12px;
+  }
+
+  .cierre-modal h3 {
+    font-size: 17px;
+  }
+
+  .cierre-details p {
+    font-size: 13px;
+  }
+
+  .modal-botones-fijos {
+    flex-direction: column;
+    padding: 12px 15px;
+  }
+
+  .boton-modal-confirmar-cierre,
+  .boton-modal-imprimir,
+  .boton-modal-cancelar {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   IMPRESIÓN
+   ============================================ */
+@media print {
+  .modal-backdrop {
+    background: none;
+    position: static;
+  }
+
+  .cierre-modal {
+    max-height: none;
+    overflow: visible;
+    box-shadow: none;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .cierre-modal-scroll {
+    overflow: visible;
+    padding: 20px;
+    max-height: none;
+    flex: none; /* Reseteo para impresión */
+  }
+
+  .modal-botones-fijos,
+  .no-print,
+  .ocultar-en-impresion {
+    display: none !important;
+  }
+
+  .cierre-diferencia.faltante,
+  .cierre-diferencia.sobrante,
+  .cierre-total {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
