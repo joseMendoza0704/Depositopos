@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
 
-
 function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
   // Estados de datos
   const [loading, setLoading] = useState(true);
@@ -17,21 +16,15 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
   const [dineroContado, setDineroContado] = useState('');
   const [diferencia, setDiferencia] = useState(0);
 
-
-  // Estados "Congelados" (¡siguen siendo vitales!)
+  // Estados "Congelados"
   const [cajaIdParaReporte] = useState(cajaActual?.id);
   const [montoInicialCongelado] = useState(cajaActual?.montoInicial || 0);
 
-
-  // --- ¡NUEVO! ---
   // Estados para controlar el flujo de botones
-  const [isConfirmando, setConfirmando] = useState(false); // Para deshabilitar botones
-  const [isConfirmado, setConfirmado] = useState(false);   // Para mostrar los botones finales
-  // --- FIN NUEVO ---
+  const [isConfirmando, setConfirmando] = useState(false);
+  const [isConfirmado, setConfirmado] = useState(false);
 
-
-
-  // Lógica de carga de datos (sin cambios)
+  // Lógica de carga de datos
   useEffect(() => {
     if (!cajaIdParaReporte) {
       setLoading(false); 
@@ -82,21 +75,18 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cajaIdParaReporte]); 
 
-
-  // Cálculos derivados (sin cambios)
+  // Cálculos derivados
   const gananciaBruta = totalVentas - totalCostos;
   const donacion = Math.round(totalVentas * 0.01); 
   const totalEsperado = montoInicialCongelado + totalVentas; 
   const efectivoFinalEsperado = totalEsperado - donacion; 
-
 
   useEffect(() => {
     const contadoNum = Number(dineroContado) || 0;
     setDiferencia(contadoNum - efectivoFinalEsperado);
   }, [dineroContado, efectivoFinalEsperado]);
 
-
-  // Lógica de archivado (modificada para reiniciar pedidos)
+  // Lógica de archivado
   const archivarVentasYPedidos = async () => {
     try {
       if (!cajaIdParaReporte) throw new Error("No hay ID de caja para archivar.");
@@ -104,7 +94,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
       const fechaArchivado = new Date();
       const cierreZId = fechaArchivado.toISOString().split('T')[0];
       
-      // 1. Archivar Pedidos y luego eliminarlos para reiniciar pedidos
+      // 1. Archivar Pedidos
       const pedidosRef = collection(db, 'pedidos');
       const pedidosQuery = query(pedidosRef);
       const pedidosSnapshot = await getDocs(pedidosQuery);
@@ -114,8 +104,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
         batch.delete(pedidoDoc.ref);
       });
 
-
-      // 2. Archivar Ventas y eliminarlas
+      // 2. Archivar Ventas
       const ventasRef = collection(db, 'ventas');
       const qVentas = query(ventasRef, where('cajaId', '==', cajaIdParaReporte));
       const ventasSnapshot = await getDocs(qVentas);
@@ -125,8 +114,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
         batch.delete(ventaDoc.ref);
       });
 
-
-      // 3. Archivar CajaTransacciones de tipo 'pedido' del día y eliminarlas
+      // 3. Archivar CajaTransacciones
       const transaccionesRef = collection(db, 'cajaTransacciones');
       const startOfDay = new Date(new Date().setHours(0,0,0,0));
       const qTransacciones = query( transaccionesRef, where('fecha', '>=', startOfDay), where('tipo', '==', 'pedido') );
@@ -144,9 +132,6 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
     }
   };
 
-
-  // --- ¡MODIFICADO! ---
-  // 2. handleConfirmar AHORA SOLO CONFIRMA, ARCHIVA, IMPRIME y NOTIFICA al padre.
   const handleConfirmar = async () => {
     const contadoNum = Number(dineroContado) || 0;
     if (contadoNum <= 0) {
@@ -154,7 +139,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
       return;
     }
   
-    setConfirmando(true); // Bloquea botones
+    setConfirmando(true);
   
     try {
       const datosCierre = {
@@ -170,104 +155,108 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
           resumenPedidos: { totalPedidosRecibidos, totalPedidosPagados, ventasPedidos }
       };
 
-
-      // 1. Archivar/Vaciar todos los pedidos, ventas y transacciones pendientes
       await archivarVentasYPedidos();
-
-
-      // 2. Imprimir reporte antes de cerrar
       handlePrint();
-      
-      // 3. Avisar al padre con datos del cierre (puede cerrar modal y refrescar UI)
       await onConfirmarCierreZ(datosCierre);
-
-
-      // 4. Cambia al estado "Confirmado" (aunque el modal se cierre)
       setConfirmado(true);
-
 
     } catch (error) {
       console.error('Error al realizar el cierre Z:', error);
       alert('Error al realizar el cierre Z. Por favor, intente nuevamente.');
   
     } finally {
-      setConfirmando(false); // Libera botones
+      setConfirmando(false);
     }
   };
 
-
-  // --- ¡NUEVO! ---
-  // Función simple para imprimir el reporte
   const handlePrint = () => {
     document.title = `Cierre_Z_${new Date().toLocaleDateString()}`;
     window.print();
   };
-  // --- FIN NUEVO ---
 
-
-
-  // --- Renderizado principal ---
   return (
     <div className="modal-backdrop">
-      <div className="modal-content cierre-modal" id="reporte-imprimible">
+      {/* AQUI ESTA EL CAMBIO PRINCIPAL: 
+         Se agregan estilos inline (style={{...}}) para FORZAR el comportamiento 
+         flexbox y el límite de altura, ignorando conflictos externos.
+      */}
+      <div 
+        className="modal-content cierre-modal"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '90vh',
+          overflow: 'hidden'
+        }}
+      >
         
-        <h3>Reporte Cierre Z (Final del Día)</h3>
-        <p>Fecha/Hora: {new Date().toLocaleString()}</p>
-        
-        {loading ? (
-          <p>Calculando...</p>
-        ) : error ? (
-          <p style={{ color: 'red' }}>{error}</p>
-        ) : (
-          <div className="cierre-details">
-            <p><span>Monto Inicial:</span> <strong>L. {montoInicialCongelado.toFixed(2)}</strong></p>
-            
-            <div className="seccion-ventas">
-              <h4>Ventas Directas</h4>
-              <p><span>Total Ventas Directas:</span> <strong>L. {ventasNormales.toFixed(2)}</strong></p>
-            </div>
-
-
-            <div className="seccion-pedidos">
-              <h4>Resumen de Pedidos</h4>
-              <p><span>Pedidos Recibidos:</span> <strong>{totalPedidosRecibidos}</strong></p>
-              <p><span>Pedidos Pagados:</span> <strong>{totalPedidosPagados}</strong></p>
-              <p><span>Total Ventas Pedidos:</span> <strong>L. {ventasPedidos.toFixed(2)}</strong></p>
-            </div>
-
-
-            <hr />
-            <p><span>(=) Total Ventas:</span> <strong>L. {totalVentas.toFixed(2)}</strong></p>
-            <p><span>(-) Total Costos:</span> <strong>L. {totalCostos.toFixed(2)}</strong></p>
-            <hr />
-            <p><span>(=) Ganancia Bruta:</span> <strong>L. {gananciaBruta.toFixed(2)}</strong></p>
-            <hr />
-            <p><span>Total Esperado (Inicial + Ventas):</span> <strong>L. {totalEsperado.toFixed(2)}</strong></p>
-            <p><span>(-) Donación (1% Ventas Redondeado):</span> <strong>L. {donacion.toFixed(0)}</strong></p> 
-             <p className="cierre-total"><span>(=) Efectivo Final Esperado:</span> <strong>L. {efectivoFinalEsperado.toFixed(2)}</strong></p>
-            
-            <div className="form-group no-print ocultar-en-impresion">
-              <label>Dinero Contado Físicamente:</label>
-              <input 
-                type="number" 
-                className="cobro-input"
-                value={dineroContado}
-                onChange={(e) => setDineroContado(e.target.value)}
-                placeholder="Ingrese el monto contado..."
-                disabled={isConfirmado || isConfirmando}
-              />
-            </div>
-            <p className={`cierre-diferencia ${diferencia < 0 ? 'faltante' : 'sobrante'}`}>
-              <span>Diferencia:</span> 
-              <strong>L. {diferencia.toFixed(2)} {diferencia < 0 ? '(Faltante)' : diferencia > 0 ? '(Sobrante)' : ''}</strong>
-            </p>
-          </div>
-        )}
-
-
-        {/* Botones */}
-        <div className="modal-botones no-print ocultar-en-impresion">
+        {/* Contenedor con scroll - FORZAMOS EL SCROLL AQUÍ */}
+        <div 
+          className="cierre-modal-scroll" 
+          id="reporte-imprimible"
+          style={{
+            flex: 1,             /* Ocupa todo el espacio disponible */
+            overflowY: 'auto',   /* Habilita el scroll vertical */
+            minHeight: 0         /* Vital para que flexbox no expanda el contenedor */
+          }}
+        >
+          <h3>Reporte Cierre Z (Final del Día)</h3>
+          <p>Fecha/Hora: {new Date().toLocaleString()}</p>
           
+          {loading ? (
+            <p>Calculando...</p>
+          ) : error ? (
+            <p style={{ color: 'red' }}>{error}</p>
+          ) : (
+            <div className="cierre-details">
+              <p><span>Monto Inicial:</span> <strong>L. {montoInicialCongelado.toFixed(2)}</strong></p>
+              
+              <div className="seccion-ventas">
+                <h4>Ventas Directas</h4>
+                <p><span>Total Ventas Directas:</span> <strong>L. {ventasNormales.toFixed(2)}</strong></p>
+              </div>
+
+              <div className="seccion-pedidos">
+                <h4>Resumen de Pedidos</h4>
+                <p><span>Pedidos Recibidos:</span> <strong>{totalPedidosRecibidos}</strong></p>
+                <p><span>Pedidos Pagados:</span> <strong>{totalPedidosPagados}</strong></p>
+                <p><span>Total Ventas Pedidos:</span> <strong>L. {ventasPedidos.toFixed(2)}</strong></p>
+              </div>
+
+              <hr />
+              <p><span>(=) Total Ventas:</span> <strong>L. {totalVentas.toFixed(2)}</strong></p>
+              <p><span>(-) Total Costos:</span> <strong>L. {totalCostos.toFixed(2)}</strong></p>
+              <hr />
+              <p><span>(=) Ganancia Bruta:</span> <strong>L. {gananciaBruta.toFixed(2)}</strong></p>
+              <hr />
+              <p><span>Total Esperado (Inicial + Ventas):</span> <strong>L. {totalEsperado.toFixed(2)}</strong></p>
+              <p><span>(-) Donación (1% Ventas Redondeado):</span> <strong>L. {donacion.toFixed(0)}</strong></p> 
+              <p className="cierre-total"><span>(=) Efectivo Final Esperado:</span> <strong>L. {efectivoFinalEsperado.toFixed(2)}</strong></p>
+              
+              <div className="form-group no-print ocultar-en-impresion">
+                <label>Dinero Contado Físicamente:</label>
+                <input 
+                  type="number" 
+                  className="cobro-input"
+                  value={dineroContado}
+                  onChange={(e) => setDineroContado(e.target.value)}
+                  placeholder="Ingrese el monto contado..."
+                  disabled={isConfirmado || isConfirmando}
+                />
+              </div>
+              <p className={`cierre-diferencia ${diferencia < 0 ? 'faltante' : 'sobrante'}`}>
+                <span>Diferencia:</span> 
+                <strong>L. {diferencia.toFixed(2)} {diferencia < 0 ? '(Faltante)' : diferencia > 0 ? '(Sobrante)' : ''}</strong>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Botones fijos en la parte inferior - FORZAMOS QUE NO SE ENCOJAN */}
+        <div 
+          className="modal-botones-fijos no-print ocultar-en-impresion"
+          style={{ flexShrink: 0 }}
+        >
           {isConfirmado ? (
             <>
               <button 
@@ -301,13 +290,11 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
               </button>
             </>
           )}
-
-
         </div>
+
       </div>
     </div>
   );
 }
-
 
 export default ModalCierreZ;

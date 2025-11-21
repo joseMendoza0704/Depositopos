@@ -1,6 +1,7 @@
-// En: src/pantallas/Dashboard.jsx
+// En: src/pantallas/Dashboard.j
+import '../styles/Dashboard.css';
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../firebaseConfig.js'; // Añadido .js
+import { auth, db } from '../firebaseConfig.js';
 import { signOut } from 'firebase/auth';
 import {
   collection,
@@ -14,27 +15,24 @@ import {
   updateDoc
 } from 'firebase/firestore';
 
-// Importa todas tus pantallas (añadiendo .jsx)
 import Inventario from './Inventario.jsx';
 import PuntoDeVenta from './PuntoDeVenta.jsx';
 import GestionClientes from './GestionClientes.jsx';
-import GestionPedidos from './GestionPedidos.jsx'; // 1. IMPORTA LA NUEVA PANTALLA
+import GestionPedidos from './GestionPedidos.jsx';
 
-// Iconos del sidebar (¡Asegúrate de tenerlos en src/assets/!)
-import iconPos from '../assets/poslogo.png';
-import iconInventario from '../assets/inventario.png';
-import iconReportes from '../assets/reportes.png';
-import iconClientes from '../assets/clientes.png';
-import iconPedidos from '../assets/pedidos.png'; // 2. AÑADE ICONO DE PEDIDOS
-
-// Importa todos los modales (añadiendo .jsx)
 import ModalApertura from '../components/ModalApertura.jsx';
 import ModalCierreZ from '../components/ModalCierreZ.jsx';
 import ModalMensaje from '../components/ModalMensaje.jsx';
 
+import iconPos from '../assets/poslogo.png';
+import iconInventario from '../assets/inventario.png';
+import iconReportes from '../assets/reportes.png';
+import iconClientes from '../assets/clientes.png';
+import iconPedidos from '../assets/pedidos.png';
+
 function VistaPrincipal() {
   return (
-    <div>
+    <div className="vista-principal">
       <h1>Bienvenido</h1>
       <p>Selecciona una opción del menú para comenzar.</p>
     </div>
@@ -48,6 +46,7 @@ function Dashboard({ alCerrarSesion }) {
   const [mostrandoModalApertura, setMostrandoModalApertura] = useState(false);
   const [mostrandoModalCierreZ, setMostrandoModalCierreZ] = useState(false);
   const [mensajeModal, setMensajeModal] = useState(null);
+  const [sidebarColapsada, setSidebarColapsada] = useState(false); // Estado para colapsar sidebar
 
   // --- useEffect para chequear caja abierta ---
   useEffect(() => {
@@ -133,7 +132,7 @@ function Dashboard({ alCerrarSesion }) {
     }
   };
 
-  // --- renderizarVista (MODIFICADO) ---
+  // --- renderizarVista ---
   const renderizarVista = () => {
     switch (vistaActual) {
       case 'pos':
@@ -146,14 +145,10 @@ function Dashboard({ alCerrarSesion }) {
         return <Inventario />;
       case 'clientes':
         return <GestionClientes />;
-      
-      // 3. AÑADE EL CASE PARA PEDIDOS
       case 'pedidos':
-        return <GestionPedidos cajaActual={cajaActual} />; // Pasa la caja actual
-
+        return <GestionPedidos cajaActual={cajaActual} />;
       case 'reportes':
-        return <VistaPrincipal />; // Temporal
-        
+        return <VistaPrincipal />;
       default:
         return <VistaPrincipal />;
     }
@@ -170,51 +165,80 @@ function Dashboard({ alCerrarSesion }) {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar (MODIFICADO) */}
-      <div className="sidebar">
-        <div className="sidebar-header"><h3>Depósito Mendoza</h3></div>
+      {/* Sidebar con clase condicional para colapsar */}
+      <div className={`sidebar ${sidebarColapsada ? 'collapsed' : ''}`}>
+        <div className="sidebar-header">
+          <h3>Depósito Mendoza</h3>
+          <button 
+            className="toggle-sidebar-btn" 
+            onClick={() => setSidebarColapsada(!sidebarColapsada)}
+            aria-label={sidebarColapsada ? "Expandir menú" : "Colapsar menú"}
+          >
+            {sidebarColapsada ? '☰' : '✕'}
+          </button>
+        </div>
         <ul className="sidebar-menu">
           <li>
-            <button onClick={() => setVistaActual('pos')}>
+            <button 
+              onClick={() => setVistaActual('pos')}
+              className={vistaActual === 'pos' ? 'active' : ''}
+            >
               <img src={iconPos} className="menu-icon" alt="POS" />
-              POS
+              <span className="menu-text">POS</span>
             </button>
           </li>
           <li>
-            <button onClick={() => setVistaActual('inventario')}>
+            <button 
+              onClick={() => setVistaActual('inventario')}
+              className={vistaActual === 'inventario' ? 'active' : ''}
+            >
               <img src={iconInventario} className="menu-icon" alt="Inventario" />
-              Inventario
+              <span className="menu-text">Inventario</span>
             </button>
           </li>
           <li>
-            <button onClick={() => setVistaActual('clientes')}>
+            <button 
+              onClick={() => setVistaActual('clientes')}
+              className={vistaActual === 'clientes' ? 'active' : ''}
+            >
               <img src={iconClientes} className="menu-icon" alt="Clientes" />
-              Clientes
+              <span className="menu-text">Clientes</span>
             </button>
           </li>
-          {/* 4. AÑADE EL BOTÓN DE PEDIDOS */}
           <li>
-            <button onClick={() => setVistaActual('pedidos')}>
+            <button 
+              onClick={() => setVistaActual('pedidos')}
+              className={vistaActual === 'pedidos' ? 'active' : ''}
+            >
               <img src={iconPedidos} className="menu-icon" alt="Pedidos" />
-              Pedidos
+              <span className="menu-text">Pedidos</span>
             </button>
           </li>
           <li>
-            <button onClick={() => setVistaActual('reportes')}>
+            <button 
+              onClick={() => setVistaActual('reportes')}
+              className={vistaActual === 'reportes' ? 'active' : ''}
+            >
               <img src={iconReportes} className="menu-icon" alt="Reportes" />
-              Reportes
+              <span className="menu-text">Reportes</span>
             </button>
           </li>
         </ul>
-        <div className="sidebar-footer"><button onClick={handleLogout} className="logout-button"> Cerrar Sesión</button></div>
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="logout-button">
+            <span className="menu-text">Cerrar Sesión</span>
+          </button>
+        </div>
       </div>
 
-      {/* Contenido Principal */}
+      {/* Contenido Principal con animación de entrada */}
       <div className="main-content">
-        {renderizarVista()}
+        <div className="content-fade-in" key={vistaActual}>
+          {renderizarVista()}
+        </div>
       </div>
 
-      {/* --- Modales --- */}
+      {/* Modales */}
       {mostrandoModalApertura && (
         <ModalApertura
           onClose={() => setMostrandoModalApertura(false)}
