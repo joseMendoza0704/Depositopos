@@ -19,10 +19,12 @@ import Inventario from './Inventario.jsx';
 import PuntoDeVenta from './PuntoDeVenta.jsx';
 import GestionClientes from './GestionClientes.jsx';
 import GestionPedidos from './GestionPedidos.jsx';
+import Reportes from './Reportes.jsx';
 
 import ModalApertura from '../components/ModalApertura.jsx';
 import ModalCierreZ from '../components/ModalCierreZ.jsx';
 import ModalMensaje from '../components/ModalMensaje.jsx';
+import Loading from '../components/Loading.jsx';
 
 import iconPos from '../assets/poslogo.png';
 import iconInventario from '../assets/inventario.png';
@@ -148,7 +150,7 @@ function Dashboard({ alCerrarSesion }) {
       case 'pedidos':
         return <GestionPedidos cajaActual={cajaActual} />;
       case 'reportes':
-        return <VistaPrincipal />;
+        return <Reportes />;
       default:
         return <VistaPrincipal />;
     }
@@ -156,11 +158,7 @@ function Dashboard({ alCerrarSesion }) {
 
   // --- Estado de Carga ---
   if (cargandoCaja) {
-    return (
-      <div className="loading-container">
-        <h2>Cargando estado de la caja...</h2>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (

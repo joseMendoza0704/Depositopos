@@ -27,7 +27,6 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
         const productoDoc = await getDoc(productoRef);
         if (!productoDoc.exists()) throw new Error(`Producto no encontrado: ${item.nombre}`);
         const stockActualUnidades = productoDoc.data().stockUnidades || 0;
-        // Si tu item tiene formato.unidades, úsalo; si no, asegúrate que item.formato es el nombre y busca el número de unidades en la base según formato.
         const unidadesPorFormato = item.formato.unidades || 1;
         const cantidadARestar = unidadesPorFormato * item.cantidad;
         if (stockActualUnidades < cantidadARestar) {
@@ -43,7 +42,6 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
     }
   };
 
-
   const registrarVentaEnCaja = async (pedido) => {
     try {
       const cajaDiariaRef = collection(db, 'cajaTransacciones');
@@ -54,7 +52,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
         items: pedido.items,
         total: pedido.total,
         pedidoId: pedido.id,
-        metodoPago: 'efectivo', // o podrías tener esto como parte del pedido
+        metodoPago: 'efectivo',
       };
 
       await addDoc(cajaDiariaRef, ventaData);
@@ -68,9 +66,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
     try {
       const pedidoRef = doc(db, 'pedidos', id);
 
-      // Si el nuevo estado es 'pagado', actualizar inventario y registrar venta
       if (nuevoEstado === 'pagado') {
-        // Primero verificar stock actual
         const productosPromises = items.map(async (item) => {
           const productoDoc = await getDoc(doc(db, 'productos', item.id));
           const stockActual = productoDoc.data().stock;
@@ -83,21 +79,16 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
         });
 
         const itemsConStock = await Promise.all(productosPromises);
-
-        // Actualizar inventario
         await actualizarInventario(itemsConStock);
-
-        // Registrar venta en caja
         await registrarVentaEnCaja(pedido);
       }
 
-      // Actualizar estado del pedido
       await updateDoc(pedidoRef, {
         estado: nuevoEstado,
         fechaPago: nuevoEstado === 'pagado' ? new Date() : null
       });
 
-      onRecargarPedidos(); // Recargar lista de pedidos
+      onRecargarPedidos();
     } catch (error) {
       console.error('Error al mover pedido:', error);
       alert(error.message || 'Error al mover el pedido. Intente nuevamente.');
@@ -109,7 +100,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
 
     try {
       await deleteDoc(doc(db, 'pedidos', id));
-      onRecargarPedidos(); // Recargar lista de pedidos
+      onRecargarPedidos();
     } catch (error) {
       console.error('Error al eliminar pedido:', error);
       alert('Error al eliminar el pedido. Intente nuevamente.');
@@ -117,56 +108,92 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
   };
 
   return (
-    <div className="pedido-card">
-      <div className="pedido-header">
-        <h4>{cliente.nombre}</h4>
-        <span>{cliente.telefono}</span>
-      </div>
-
-      <div className="pedido-items">
-        {items.map((item, index) => (
-          <div key={index} className="pedido-item">
-            <span className="item-cantidad">{item.cantidad}x</span>
-            <span className="item-nombre">{item.nombre}</span>
-            <span className="item-formato">({item.formato})</span>
-            <span className="item-subtotal">L. {item.subtotal.toFixed(2)}</span>
+    <div className="pedido-card-modern">
+      {/* Header con gradiente */}
+      <div className="pedido-card-header">
+        <div className="cliente-info">
+          <div className="cliente-nombre">
+            <span className="icon-cliente">👤</span>
+            <h4>{cliente.nombre}</h4>
           </div>
-        ))}
+          <div className="cliente-contacto">
+            <span className="icon-telefono">📱</span>
+            <span>{cliente.telefono}</span>
+          </div>
+          {cliente.direccion && (
+            <div className="cliente-direccion">
+              <span className="icon-direccion">📍</span>
+              <span>{cliente.direccion}</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="pedido-footer">
-        <div className="pedido-total">
-          <strong>Total: L. {total.toFixed(2)}</strong>
+      {/* Items del pedido */}
+      <div className="pedido-card-body">
+        <div className="items-header">
+          <span className="icon-lista">📦</span>
+          <span className="items-title">Productos</span>
+        </div>
+        <div className="pedido-items-list">
+          {items.map((item, index) => (
+            <div key={index} className="pedido-item-modern">
+              <div className="item-info">
+                <span className="item-cantidad-badge">{item.cantidad}x</span>
+                <div className="item-detalles">
+                  <span className="item-nombre-modern">{item.nombre}</span>
+                  <span className="item-formato-modern">{item.formato}</span>
+                </div>
+              </div>
+              <span className="item-subtotal-modern">L. {item.subtotal.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer con total y acciones */}
+      <div className="pedido-card-footer">
+        <div className="pedido-total-modern">
+          <span className="total-label">Total</span>
+          <span className="total-monto">L. {total.toFixed(2)}</span>
         </div>
 
-        <div className={estado === 'recibido' ? 'pedido-acciones-grid' : 'pedido-acciones'}>
+        <div className={estado === 'recibido' ? 'pedido-acciones-modern-grid' : 'pedido-acciones-modern'}>
           <button
             onClick={() => onEdit(pedido)}
-            className="btn-editar"
+            className="btn-modern btn-editar-modern"
+            title="Editar pedido"
           >
-            Editar
+            <span className="btn-icon">✏️</span>
+            <span className="btn-text">Editar</span>
           </button>
 
           <button
             onClick={handleEliminar}
-            className="btn-eliminar"
+            className="btn-modern btn-eliminar-modern"
+            title="Eliminar pedido"
           >
-            Eliminar
+            <span className="btn-icon">🗑️</span>
+            <span className="btn-text">Eliminar</span>
           </button>
 
           {estado === 'recibido' && (
             <>
               <button
                 onClick={() => handleMoverPedido('enviado')}
-                className="btn-mover"
+                className="btn-modern btn-mover-modern"
+                title="Marcar como enviado"
               >
-                → Enviado
+                <span className="btn-icon">🚚</span>
+                <span className="btn-text">Enviar</span>
               </button>
               <button
                 onClick={() => setMostrarFactura(true)}
-                className="btn-imprimir"
+                className="btn-modern btn-imprimir-modern"
+                title="Imprimir factura"
               >
-                Imprimir
+                <span className="btn-icon">🖨️</span>
+                <span className="btn-text">Imprimir</span>
               </button>
             </>
           )}
@@ -174,13 +201,16 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
           {estado === 'enviado' && (
             <button
               onClick={() => handleMoverPedido('pagado')}
-              className="btn-mover"
+              className="btn-modern btn-pagar-modern"
+              title="Marcar como pagado"
             >
-              → Pagado
+              <span className="btn-icon">✅</span>
+              <span className="btn-text">Marcar Pagado</span>
             </button>
           )}
         </div>
       </div>
+
       {mostrarFactura && (
         <FacturaPedido
           pedido={pedido}

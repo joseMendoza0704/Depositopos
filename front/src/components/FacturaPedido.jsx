@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import '../styles/factura.css';
 
 function FacturaPedido({ pedido, onClose }) {
@@ -17,7 +18,7 @@ function FacturaPedido({ pedido, onClose }) {
     setTimeout(() => { document.title = 'Deposito POS'; }, 500);
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div className="modal-backdrop">
       <div className="factura-container" id="factura-imprimible">
 
@@ -102,7 +103,8 @@ function FacturaPedido({ pedido, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
