@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { collection, doc, updateDoc, deleteDoc, addDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import FacturaPedido from './FacturaPedido';
+import '../styles/PedidoCard.css';
 
 function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
   const [mostrarFactura, setMostrarFactura] = useState(false);

@@ -1,0 +1,267 @@
+/* Estilos modernos para PedidoCard */
+
+.pedido-card-modern {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.pedido-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+/* Header con gradiente pastel */
+.pedido-card-header {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+    padding: 16px 20px;
+    color: #1e3a5f;
+    /* Texto oscuro para contraste */
+    position: relative;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.cliente-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cliente-nombre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cliente-nombre h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #0f172a;
+}
+
+.icon-cliente {
+    font-size: 1.2rem;
+    opacity: 0.8;
+    color: #3b82f6;
+}
+
+.cliente-contacto,
+.cliente-direccion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    color: #334155;
+}
+
+.icon-telefono,
+.icon-direccion {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* Cuerpo de la tarjeta */
+.pedido-card-body {
+    padding: 20px;
+    flex: 1;
+}
+
+.items-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pedido-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pedido-item-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pedido-item-modern:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.item-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.item-cantidad-badge {
+    background-color: #e2e8f0;
+    color: #1e293b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.item-detalles {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-nombre-modern {
+    font-weight: 500;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.item-formato-modern {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.item-subtotal-modern {
+    font-weight: 600;
+    color: #2c5282;
+    font-size: 0.95rem;
+}
+
+/* Footer */
+.pedido-card-footer {
+    padding: 20px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.pedido-total-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.total-label {
+    font-size: 1rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.total-monto {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e3a5f;
+}
+
+/* Botones de acción */
+.pedido-acciones-modern,
+.pedido-acciones-modern-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.btn-modern {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-modern:active {
+    transform: translateY(0);
+}
+
+.btn-editar-modern {
+    background-color: white;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+}
+
+.btn-editar-modern:hover {
+    background-color: #eff6ff;
+}
+
+.btn-eliminar-modern {
+    background-color: white;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.btn-eliminar-modern:hover {
+    background-color: #fef2f2;
+}
+
+.btn-mover-modern {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.btn-mover-modern:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.btn-imprimir-modern {
+    background-color: #8b5cf6;
+    color: white;
+}
+
+.btn-imprimir-modern:hover {
+    background-color: #7c3aed;
+}
+
+.btn-pagar-modern {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    grid-column: span 2;
+}
+
+.btn-pagar-modern:hover {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+}
+
+/* Ajustes responsive */
+@media (max-width: 480px) {
+
+    .pedido-acciones-modern,
+    .pedido-acciones-modern-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-mover-modern,
+    .btn-pagar-modern {
+        grid-column: span 1;
+    }
+}
