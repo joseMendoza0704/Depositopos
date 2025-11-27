@@ -5,7 +5,7 @@ import FacturaPedido from './FacturaPedido';
 
 function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
   const [mostrarFactura, setMostrarFactura] = useState(false);
-  
+
   // Validar que el pedido tenga todas las propiedades necesarias
   if (!pedido || !pedido.cliente || !pedido.items || !Array.isArray(pedido.items)) {
     console.error('Pedido inválido:', pedido);
@@ -13,35 +13,35 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
   }
 
   const { id, cliente, items, total, estado } = pedido;
-    
+
   // Validar que los campos requeridos existan
   if (!id || !cliente.nombre || !items || typeof total === 'undefined' || !estado) {
     console.error('Pedido con campos faltantes:', pedido);
     return null;
   }
 
-const actualizarInventario = async (items) => {
-  try {
-    for (const item of items) {
-      const productoRef = doc(db, 'productos', item.id);
-      const productoDoc = await getDoc(productoRef);
-      if (!productoDoc.exists()) throw new Error(`Producto no encontrado: ${item.nombre}`);
-      const stockActualUnidades = productoDoc.data().stockUnidades || 0;
-      // Si tu item tiene formato.unidades, úsalo; si no, asegúrate que item.formato es el nombre y busca el número de unidades en la base según formato.
-      const unidadesPorFormato = item.formato.unidades || 1;
-      const cantidadARestar = unidadesPorFormato * item.cantidad;
-      if (stockActualUnidades < cantidadARestar) {
-        throw new Error(`Stock insuficiente para ${item.nombre}`);
+  const actualizarInventario = async (items) => {
+    try {
+      for (const item of items) {
+        const productoRef = doc(db, 'productos', item.id);
+        const productoDoc = await getDoc(productoRef);
+        if (!productoDoc.exists()) throw new Error(`Producto no encontrado: ${item.nombre}`);
+        const stockActualUnidades = productoDoc.data().stockUnidades || 0;
+        // Si tu item tiene formato.unidades, úsalo; si no, asegúrate que item.formato es el nombre y busca el número de unidades en la base según formato.
+        const unidadesPorFormato = item.formato.unidades || 1;
+        const cantidadARestar = unidadesPorFormato * item.cantidad;
+        if (stockActualUnidades < cantidadARestar) {
+          throw new Error(`Stock insuficiente para ${item.nombre}`);
+        }
+        await updateDoc(productoRef, {
+          stockUnidades: stockActualUnidades - cantidadARestar
+        });
       }
-      await updateDoc(productoRef, {
-        stockUnidades: stockActualUnidades - cantidadARestar
-      });
+    } catch (error) {
+      console.error('Error al actualizar inventario:', error);
+      throw new Error('Error al actualizar el inventario');
     }
-  } catch (error) {
-    console.error('Error al actualizar inventario:', error);
-    throw new Error('Error al actualizar el inventario');
-  }
-};
+  };
 
 
   const registrarVentaEnCaja = async (pedido) => {
@@ -56,7 +56,7 @@ const actualizarInventario = async (items) => {
         pedidoId: pedido.id,
         metodoPago: 'efectivo', // o podrías tener esto como parte del pedido
       };
-      
+
       await addDoc(cajaDiariaRef, ventaData);
     } catch (error) {
       console.error('Error al registrar venta en caja:', error);
@@ -67,26 +67,26 @@ const actualizarInventario = async (items) => {
   const handleMoverPedido = async (nuevoEstado) => {
     try {
       const pedidoRef = doc(db, 'pedidos', id);
-      
+
       // Si el nuevo estado es 'pagado', actualizar inventario y registrar venta
       if (nuevoEstado === 'pagado') {
         // Primero verificar stock actual
         const productosPromises = items.map(async (item) => {
           const productoDoc = await getDoc(doc(db, 'productos', item.id));
           const stockActual = productoDoc.data().stock;
-          
+
           if (stockActual < item.cantidad) {
             throw new Error(`Stock insuficiente para ${item.nombre}`);
           }
-          
+
           return { ...item, stockActual };
         });
 
         const itemsConStock = await Promise.all(productosPromises);
-        
+
         // Actualizar inventario
         await actualizarInventario(itemsConStock);
-        
+
         // Registrar venta en caja
         await registrarVentaEnCaja(pedido);
       }
@@ -106,7 +106,7 @@ const actualizarInventario = async (items) => {
 
   const handleEliminar = async () => {
     if (!window.confirm('¿Está seguro de eliminar este pedido?')) return;
-    
+
     try {
       await deleteDoc(doc(db, 'pedidos', id));
       onRecargarPedidos(); // Recargar lista de pedidos
@@ -122,7 +122,7 @@ const actualizarInventario = async (items) => {
         <h4>{cliente.nombre}</h4>
         <span>{cliente.telefono}</span>
       </div>
-      
+
       <div className="pedido-items">
         {items.map((item, index) => (
           <div key={index} className="pedido-item">
@@ -138,16 +138,16 @@ const actualizarInventario = async (items) => {
         <div className="pedido-total">
           <strong>Total: L. {total.toFixed(2)}</strong>
         </div>
-        
-        <div className="pedido-acciones">
-          <button 
+
+        <div className={estado === 'recibido' ? 'pedido-acciones-grid' : 'pedido-acciones'}>
+          <button
             onClick={() => onEdit(pedido)}
             className="btn-editar"
           >
             Editar
           </button>
-          
-          <button 
+
+          <button
             onClick={handleEliminar}
             className="btn-eliminar"
           >
@@ -156,13 +156,13 @@ const actualizarInventario = async (items) => {
 
           {estado === 'recibido' && (
             <>
-              <button 
+              <button
                 onClick={() => handleMoverPedido('enviado')}
                 className="btn-mover"
               >
                 → Enviado
               </button>
-              <button 
+              <button
                 onClick={() => setMostrarFactura(true)}
                 className="btn-imprimir"
               >
@@ -172,7 +172,7 @@ const actualizarInventario = async (items) => {
           )}
 
           {estado === 'enviado' && (
-            <button 
+            <button
               onClick={() => handleMoverPedido('pagado')}
               className="btn-mover"
             >
@@ -182,9 +182,9 @@ const actualizarInventario = async (items) => {
         </div>
       </div>
       {mostrarFactura && (
-        <FacturaPedido 
-          pedido={pedido} 
-          onClose={() => setMostrarFactura(false)} 
+        <FacturaPedido
+          pedido={pedido}
+          onClose={() => setMostrarFactura(false)}
         />
       )}
     </div>

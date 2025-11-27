@@ -6,6 +6,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -16,15 +17,22 @@
   animation: fadeIn 0.4s ease-out;
 }
 
-/* Sidebar con transición suave para colapsar */
+/* ===== SIDEBAR CON DISEÑO MODERNO ===== */
 .sidebar {
-  width: 250px;
+  width: 255px !important;
+  min-width: 255px;
+  max-width: 255px;
+  background: linear-gradient(180deg, #1e3a5f 0%, #2c5282 100%);
   transition: width 0.3s ease, transform 0.3s ease;
   overflow: hidden;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .sidebar.collapsed {
-  width: 70px;
+  width: 70px !important;
+  min-width: 70px;
+  max-width: 70px;
 }
 
 /* Ocultar texto cuando está colapsada */
@@ -49,16 +57,18 @@
 
 /* Botón de toggle sidebar */
 .toggle-sidebar-btn {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
-  padding: 5px;
-  transition: transform 0.3s ease;
+  padding: 6px 10px;
+  transition: all 0.3s ease;
 }
 
 .toggle-sidebar-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
   transform: scale(1.1);
 }
 
@@ -68,42 +78,88 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px;
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-header h3 {
   margin: 0;
   white-space: nowrap;
   transition: opacity 0.3s ease;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Botones del menú con hover y active */
+/* Icono del header (tienda) */
+.header-icon {
+  font-size: 24px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header:hover .header-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.sidebar.collapsed .header-icon {
+  display: none;
+}
+
+/* Menú del sidebar */
+.sidebar-menu {
+  list-style: none;
+  padding: 15px 10px;
+  margin: 0;
+}
+
+.sidebar-menu li {
+  margin-bottom: 5px;
+}
+
+/* Botones del menú con hover y active - DISEÑO MODERNO */
 .sidebar-menu li button {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 12px 20px;
-  transition: all 0.3s ease;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
 .sidebar-menu li button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   transform: translateX(5px);
+  color: white;
 }
 
 .sidebar-menu li button.active {
-  background-color: rgba(74, 144, 226, 0.3);
-  border-left: 4px solid #4a90e2;
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+  color: white;
 }
 
 .sidebar-menu li button.active::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 0;
-  height: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
   width: 4px;
-  background: #4a90e2;
+  background: white;
+  border-radius: 0 4px 4px 0;
   animation: slideIn 0.3s ease;
 }
 
@@ -111,28 +167,83 @@
   from {
     height: 0;
   }
+
   to {
-    height: 100%;
+    height: 60%;
   }
 }
 
-/* Iconos con tamaño fijo */
-.menu-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 15px;
+/* ===== ICONOS EMOJI CON BADGES ===== */
+.menu-icon-badge {
+  font-size: 22px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-}
-
-/* Botón de logout con hover */
-.logout-button {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  margin-right: 14px;
   transition: all 0.3s ease;
 }
 
+.sidebar-menu li button:hover .menu-icon-badge,
+.logout-button:hover .menu-icon-badge {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+.sidebar-menu li button.active .menu-icon-badge {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Cuando el sidebar está colapsado */
+.sidebar.collapsed .menu-icon-badge {
+  margin-right: 0;
+}
+
+/* Texto del menú */
+.menu-text {
+  flex: 1;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* Footer del sidebar */
+.sidebar-footer {
+  padding: 15px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Botón de logout con diseño moderno */
+.logout-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
 .logout-button:hover {
-  background-color: #d43f3f;
-  transform: scale(1.02);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);
+}
+
+.logout-button .logout-icon {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Loading container con animación de pulso */
@@ -141,18 +252,27 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .loading-container h2 {
+  color: white;
+  font-size: 24px;
   animation: pulse 1.5s ease-in-out infinite;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
+    transform: scale(1);
   }
+
   50% {
-    opacity: 0.5;
+    opacity: 0.8;
+    transform: scale(1.05);
   }
 }
 
@@ -161,17 +281,56 @@
   animation: fadeIn 0.5s ease-out;
 }
 
+/* Animación de entrada para los items del menú */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sidebar-menu li {
+  animation: slideInFromLeft 0.4s ease backwards;
+}
+
+.sidebar-menu li:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.sidebar-menu li:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.sidebar-menu li:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.sidebar-menu li:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.sidebar-menu li:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
 /* Responsive: Auto-colapsar en móviles */
 @media (max-width: 768px) {
   .sidebar {
-    width: 70px;
+    width: 70px !important;
+    min-width: 70px;
+    max-width: 70px;
   }
-  
+
   .sidebar .menu-text {
     opacity: 0;
     width: 0;
   }
-  
+
   .sidebar-header h3 {
     opacity: 0;
     width: 0;
