@@ -54,9 +54,9 @@ function Dashboard({ alCerrarSesion }) {
     today.setHours(0, 0, 0, 0);
     const cajasRef = collection(db, 'cajas');
     const q = query(cajasRef,
-                    where('estado', '==', 'abierta'),
-                    where('fechaApertura', '>=', today),
-                    orderBy('fechaApertura', 'desc'));
+      where('estado', '==', 'abierta'),
+      where('fechaApertura', '>=', today),
+      orderBy('fechaApertura', 'desc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
@@ -67,8 +67,8 @@ function Dashboard({ alCerrarSesion }) {
       }
       setCargandoCaja(false);
     }, (error) => {
-        console.error("Error en listener de caja (¿Falta índice?): ", error);
-        setCargandoCaja(false);
+      console.error("Error en listener de caja (¿Falta índice?): ", error);
+      setCargandoCaja(false);
     });
     return () => unsubscribe();
   }, []);
@@ -113,16 +113,16 @@ function Dashboard({ alCerrarSesion }) {
   // --- handleConfirmarCierreZ ---
   const handleConfirmarCierreZ = async (datosCierre) => {
     if (!cajaActual?.id) {
-        setMensajeModal({ texto: "Error: No se pudo identificar la caja actual.", tipo: 'error' });
-        return;
+      setMensajeModal({ texto: "Error: No se pudo identificar la caja actual.", tipo: 'error' });
+      return;
     }
     try {
       const cajaRef = doc(db, 'cajas', cajaActual.id);
       await updateDoc(cajaRef, {
-          ...datosCierre,
-          fechaCierre: serverTimestamp(),
-          estado: "cerrada",
-          usuarioCierreId: auth.currentUser ? auth.currentUser.uid : 'desconocido'
+        ...datosCierre,
+        fechaCierre: serverTimestamp(),
+        estado: "cerrada",
+        usuarioCierreId: auth.currentUser ? auth.currentUser.uid : 'desconocido'
       });
       setMostrandoModalCierreZ(false);
       setMensajeModal({ texto: "¡Caja cerrada exitosamente!", tipo: 'exito' });
@@ -137,10 +137,10 @@ function Dashboard({ alCerrarSesion }) {
     switch (vistaActual) {
       case 'pos':
         return <PuntoDeVenta
-                  cajaActual={cajaActual}
-                  onAbrirCaja={() => setMostrandoModalApertura(true)}
-                  onCierreZ={handleCierreZ}
-                />;
+          cajaActual={cajaActual}
+          onAbrirCaja={() => setMostrandoModalApertura(true)}
+          onCierreZ={handleCierreZ}
+        />;
       case 'inventario':
         return <Inventario />;
       case 'clientes':
@@ -156,11 +156,11 @@ function Dashboard({ alCerrarSesion }) {
 
   // --- Estado de Carga ---
   if (cargandoCaja) {
-      return (
-          <div className="loading-container">
-              <h2>Cargando estado de la caja...</h2>
-          </div>
-      );
+    return (
+      <div className="loading-container">
+        <h2>Cargando estado de la caja...</h2>
+      </div>
+    );
   }
 
   return (
@@ -168,58 +168,51 @@ function Dashboard({ alCerrarSesion }) {
       {/* Sidebar con clase condicional para colapsar */}
       <div className={`sidebar ${sidebarColapsada ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
-          <h3>Depósito Mendoza</h3>
-          <button 
-            className="toggle-sidebar-btn" 
-            onClick={() => setSidebarColapsada(!sidebarColapsada)}
-            aria-label={sidebarColapsada ? "Expandir menú" : "Colapsar menú"}
-          >
-            {sidebarColapsada ? '☰' : '✕'}
-          </button>
+          <h3><span className="header-icon">🛒</span> Depósito Mendoza</h3>
         </div>
         <ul className="sidebar-menu">
           <li>
-            <button 
+            <button
               onClick={() => setVistaActual('pos')}
               className={vistaActual === 'pos' ? 'active' : ''}
             >
-              <img src={iconPos} className="menu-icon" alt="POS" />
+              <span className="menu-icon-badge">💰</span>
               <span className="menu-text">POS</span>
             </button>
           </li>
           <li>
-            <button 
+            <button
               onClick={() => setVistaActual('inventario')}
               className={vistaActual === 'inventario' ? 'active' : ''}
             >
-              <img src={iconInventario} className="menu-icon" alt="Inventario" />
+              <span className="menu-icon-badge">📦</span>
               <span className="menu-text">Inventario</span>
             </button>
           </li>
           <li>
-            <button 
+            <button
               onClick={() => setVistaActual('clientes')}
               className={vistaActual === 'clientes' ? 'active' : ''}
             >
-              <img src={iconClientes} className="menu-icon" alt="Clientes" />
+              <span className="menu-icon-badge">👥</span>
               <span className="menu-text">Clientes</span>
             </button>
           </li>
           <li>
-            <button 
+            <button
               onClick={() => setVistaActual('pedidos')}
               className={vistaActual === 'pedidos' ? 'active' : ''}
             >
-              <img src={iconPedidos} className="menu-icon" alt="Pedidos" />
+              <span className="menu-icon-badge">📋</span>
               <span className="menu-text">Pedidos</span>
             </button>
           </li>
           <li>
-            <button 
+            <button
               onClick={() => setVistaActual('reportes')}
               className={vistaActual === 'reportes' ? 'active' : ''}
             >
-              <img src={iconReportes} className="menu-icon" alt="Reportes" />
+              <span className="menu-icon-badge">📊</span>
               <span className="menu-text">Reportes</span>
             </button>
           </li>
@@ -247,9 +240,9 @@ function Dashboard({ alCerrarSesion }) {
       )}
       {mostrandoModalCierreZ && cajaActual && (
         <ModalCierreZ
-            cajaActual={cajaActual}
-            onClose={() => setMostrandoModalCierreZ(false)}
-            onConfirmarCierreZ={handleConfirmarCierreZ}
+          cajaActual={cajaActual}
+          onClose={() => setMostrandoModalCierreZ(false)}
+          onConfirmarCierreZ={handleConfirmarCierreZ}
         />
       )}
       {mensajeModal && (

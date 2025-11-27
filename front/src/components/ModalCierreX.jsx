@@ -2,28 +2,24 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import '../styles/factura.css';
 
 function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
   const [totalVentas, setTotalVentas] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // --- NUEVO: Estados para conteo físico ---
   const [dineroContado, setDineroContado] = useState('');
   const [diferencia, setDiferencia] = useState(0);
-
-  // Calcula ventas
   const [ventasNormales, setVentasNormales] = useState(0);
   const [ventasPedidos, setVentasPedidos] = useState(0);
 
   useEffect(() => {
     if (!cajaActualId) return;
-    
+
     const fetchVentas = async () => {
       try {
         setLoading(true);
-        
-        // Obtener ventas normales
+
         const ventasRef = collection(db, 'ventas');
         const qVentas = query(ventasRef, where('cajaId', '==', cajaActualId));
         const ventasSnapshot = await getDocs(qVentas);
@@ -33,11 +29,10 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
         });
         setVentasNormales(sumaVentasNormales);
 
-        // Obtener ventas de pedidos
         const cajaTransaccionesRef = collection(db, 'cajaTransacciones');
-        const startOfDay = new Date(new Date().setHours(0,0,0,0));
+        const startOfDay = new Date(new Date().setHours(0, 0, 0, 0));
         const qPedidos = query(
-          cajaTransaccionesRef, 
+          cajaTransaccionesRef,
           where('tipo', '==', 'pedido'),
           where('fecha', '>=', startOfDay)
         );
@@ -45,15 +40,13 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
         let sumaVentasPedidos = 0;
         pedidosSnapshot.forEach((doc) => {
           const pedido = doc.data();
-          // Verificar si la fecha está dentro del día actual
           const pedidoFecha = pedido.fecha.toDate();
-          if (pedidoFecha <= new Date(new Date().setHours(23,59,59,999))) {
+          if (pedidoFecha <= new Date(new Date().setHours(23, 59, 59, 999))) {
             sumaVentasPedidos += pedido.total || 0;
           }
         });
         setVentasPedidos(sumaVentasPedidos);
 
-        // Actualizar total general
         setTotalVentas(sumaVentasNormales + sumaVentasPedidos);
         setError(null);
       } catch (err) {
@@ -63,72 +56,137 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
         setLoading(false);
       }
     };
-    
+
     fetchVentas();
   }, [cajaActualId]);
 
   const totalEsperado = montoInicial + totalVentas;
 
-  // --- NUEVO: Calcula la diferencia cuando cambia el dinero contado ---
   useEffect(() => {
     const contadoNum = Number(dineroContado) || 0;
     setDiferencia(contadoNum - totalEsperado);
   }, [dineroContado, totalEsperado]);
 
-  // --- NUEVO: Función para imprimir ---
   const handlePrint = () => {
-    // Título temporal para la impresión
     document.title = `Cierre_X_${new Date().toLocaleDateString()}`;
     window.print();
-    // Restaura título (opcional)
     setTimeout(() => { document.title = 'Deposito POS'; }, 500);
   };
 
+  const fechaReporte = new Date().toLocaleDateString('es-HN');
+  const horaReporte = new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+
   return (
     <div className="modal-backdrop">
-      {/* Añadimos ID para los estilos de impresión */}
-      <div className="modal-content cierre-modal" id="reporte-imprimible">
-        <h3>Reporte Cierre X</h3>
-        <p>Fecha/Hora: {new Date().toLocaleString()}</p>
-        
+      <div className="factura-container" id="reporte-imprimible">
+
+        {/* Header */}
+        <div className="factura-empresa">
+          <div className="factura-logo">
+            <img src="/logo_fact.png" alt="Logo Depósito Mendoza" />
+          </div>
+
+          <p className="factura-empresa-info">Dirección: Barrio el centro 5ta calle en frente a pollolandia</p>
+          <p className="factura-empresa-info">Teléfono: +504 3390-6236</p>
+          <p className="factura-empresa-info">Email: mendozadeposito0704@gmail.com</p>
+        </div>
+
+        {/* Información del Reporte */}
+        <div className="factura-info-section">
+          <div className="factura-info-cliente">
+            <p><strong>Tipo de reporte:</strong> Cierre X (Parcial)</p>
+            <p><strong>Estado:</strong> Caja Abierta</p>
+          </div>
+          <div className="factura-info-datos">
+            <h3>REPORTE CIERRE X</h3>
+            <p><strong>Fecha:</strong> {fechaReporte}</p>
+            <p><strong>Hora:</strong> {horaReporte}</p>
+          </div>
+        </div>
+
+        <hr className="factura-separador" />
+
         {loading ? (
-          <p>Calculando...</p>
+          <p style={{ textAlign: 'center', padding: '20px' }}>Calculando...</p>
         ) : error ? (
-          <p style={{ color: 'red' }}>{error}</p>
+          <p style={{ color: 'red', textAlign: 'center', padding: '20px' }}>{error}</p>
         ) : (
-          <div className="cierre-details">
-            <p><span>Monto Inicial:</span> <strong>L. {montoInicial.toFixed(2)}</strong></p>
-            <p><span>Ventas Directas:</span> <strong>L. {ventasNormales.toFixed(2)}</strong></p>
-            <p><span>Ventas de Pedidos:</span> <strong>L. {ventasPedidos.toFixed(2)}</strong></p>
-            <p><span>Total Ventas:</span> <strong>L. {totalVentas.toFixed(2)}</strong></p>
-            <hr />
-            <p className="cierre-total"><span>Total Esperado en Caja:</span> <strong>L. {totalEsperado.toFixed(2)}</strong></p>
-            
-            {/* --- NUEVO: Input y Diferencia --- */}
-            <div className="form-group no-print"> {/* no-print para ocultar al imprimir */}
-              <label>Dinero En Caja:</label>
-              <input 
-                type="number" 
+          <>
+            {/* Tabla de Resumen */}
+            <table className="factura-productos-tabla">
+              <thead>
+                <tr>
+                  <th>Concepto</th>
+                  <th className="text-right">Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="producto-nombre">Monto Inicial</td>
+                  <td className="text-right">L. {montoInicial.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td className="producto-nombre">Ventas Directas</td>
+                  <td className="text-right">L. {ventasNormales.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td className="producto-nombre">Ventas de Pedidos</td>
+                  <td className="text-right">L. {ventasPedidos.toFixed(2)}</td>
+                </tr>
+                <tr style={{ borderTop: '2px solid #2c3e50' }}>
+                  <td className="producto-nombre"><strong>Total Ventas</strong></td>
+                  <td className="text-right"><strong>L. {totalVentas.toFixed(2)}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Totales */}
+            <div className="factura-totales">
+              <div className="factura-totales-row factura-total-final">
+                <span>TOTAL ESPERADO EN CAJA:</span>
+                <strong>L. {totalEsperado.toFixed(2)}</strong>
+              </div>
+            </div>
+
+            {/* Input de Dinero Contado */}
+            <div className="form-group no-print" style={{ marginTop: '20px' }}>
+              <label style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>
+                Dinero En Caja:
+              </label>
+              <input
+                type="number"
                 className="cobro-input"
                 value={dineroContado}
                 onChange={(e) => setDineroContado(e.target.value)}
                 placeholder="Ingrese el monto en caja..."
+                style={{ width: '100%', padding: '12px', fontSize: '16px' }}
               />
             </div>
-            <p className={`cierre-diferencia ${diferencia < 0 ? 'faltante' : 'sobrante'}`}>
-              <span>Diferencia:</span> 
-              <strong>L. {diferencia.toFixed(2)} {diferencia < 0 ? '(Faltante)' : '(Sobrante)'}</strong>
-            </p>
-            {/* --- Fin de lo nuevo --- */}
-            
-          </div>
+
+            {dineroContado && (
+              <div className="factura-totales" style={{ marginTop: '20px' }}>
+                <div className={`factura-totales-row ${diferencia < 0 ? 'faltante' : 'sobrante'}`}>
+                  <span>Diferencia:</span>
+                  <strong style={{ color: diferencia < 0 ? '#e74c3c' : '#27ae60' }}>
+                    L. {diferencia.toFixed(2)} {diferencia < 0 ? '(Faltante)' : '(Sobrante)'}
+                  </strong>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
-        {/* --- NUEVO: Botones con Imprimir --- */}
-        <div className="modal-botones no-print"> {/* no-print para ocultar al imprimir */}
-           <button onClick={handlePrint} className="boton-modal-imprimir">
-            Imprimir
-           </button>
+        {/* Pie */}
+        <div className="factura-footer">
+          <p className="factura-mensaje">Este es un reporte parcial de caja.</p>
+          <p className="factura-mensaje">La caja permanece abierta.</p>
+        </div>
+
+        {/* Botones */}
+        <div className="factura-botones no-print">
+          <button onClick={handlePrint} className="boton-modal-agregar">
+            🖨️ Imprimir
+          </button>
           <button onClick={onClose} className="boton-modal-cancelar">
             Cerrar
           </button>

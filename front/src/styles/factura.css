@@ -1,0 +1,422 @@
+/* ===================================
+   ESTILOS PARA FACTURA PROFESIONAL
+   =================================== */
+
+.factura-container {
+    background-color: white;
+    max-width: 800px;
+    max-height: 90vh;
+    margin: 0 auto;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    overflow-y: auto;
+}
+
+/* Versión más ancha para reportes de cierre */
+.factura-container-wide {
+    background-color: white;
+    max-width: 1000px;
+    max-height: 90vh;
+    margin: 0 auto;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    overflow-y: auto;
+}
+
+/* ===== HEADER - EMPRESA ===== */
+.factura-empresa {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #333;
+    margin-bottom: 25px;
+}
+
+.factura-logo {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.factura-logo img {
+    max-width: 250px;
+    height: auto;
+    display: block;
+}
+
+.factura-empresa-nombre {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: none;
+    /* Oculto porque el nombre está en el logo */
+}
+
+.factura-empresa-info {
+    margin: 6px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ===== SECCIÓN DE INFORMACIÓN ===== */
+.factura-info-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background-color: white;
+}
+
+.factura-info-cliente,
+.factura-info-datos {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    border-left: 3px solid #2c3e50;
+    padding-left: 15px;
+}
+
+.factura-info-cliente p,
+.factura-info-datos p {
+    margin: 8px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #444;
+}
+
+.factura-info-datos h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 15px 0;
+    text-align: left;
+    background-color: transparent;
+    color: #2c3e50;
+    padding: 0 0 10px 0;
+    border-bottom: 2px solid #2c3e50;
+    border-radius: 0;
+}
+
+.factura-info-cliente strong,
+.factura-info-datos strong {
+    color: #2c3e50;
+}
+
+/* ===== SEPARADOR ===== */
+.factura-separador {
+    border: none;
+    border-top: 2px dashed #ccc;
+    margin: 25px 0;
+}
+
+/* ===== TABLA DE PRODUCTOS ===== */
+.factura-productos-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+
+.factura-productos-tabla thead {
+    background-color: #2c3e50;
+    color: white;
+}
+
+.factura-productos-tabla th {
+    padding: 12px 10px;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: left;
+}
+
+.factura-productos-tabla th.col-cantidad,
+.factura-productos-tabla th.col-precio,
+.factura-productos-tabla th.col-subtotal {
+    text-align: right;
+}
+
+.factura-productos-tabla tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.factura-productos-tabla tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.factura-productos-tabla td {
+    padding: 12px 10px;
+    font-weight: 600;
+    color: #333;
+}
+
+.producto-nombre {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.producto-formato {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 13px;
+    color: #7f8c8d;
+    font-weight: normal;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* ===== TOTALES ===== */
+.factura-totales {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #2c3e50;
+}
+
+.factura-totales-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.factura-totales-row span {
+    color: #555;
+}
+
+.factura-totales-row strong {
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.factura-total-final {
+    border-top: 2px solid #2c3e50;
+    margin-top: 10px;
+    padding-top: 15px;
+}
+
+.factura-total-final span {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.factura-total-final strong {
+    font-size: 24px;
+    color: #27ae60;
+}
+
+/* ===== PIE DE FACTURA ===== */
+.factura-footer {
+    text-align: center;
+    padding: 20px 0;
+    border-top: 2px solid #e0e0e0;
+    margin-top: 30px;
+}
+
+.factura-agradecimiento {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.factura-mensaje {
+    font-size: 14px;
+    font-weight: 600;
+    color: #7f8c8d;
+    margin: 5px 0;
+}
+
+/* ===== GENERACIÓN ===== */
+.factura-generacion {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #ccc;
+}
+
+.factura-generacion p {
+    font-size: 12px;
+    color: #999;
+    font-weight: 600;
+}
+
+/* ===== BOTONES ===== */
+.factura-botones {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.factura-botones button {
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* ===================================
+   ESTILOS DE IMPRESIÓN
+   =================================== */
+
+@media print {
+
+    /* Ocultar todo excepto la factura */
+    body * {
+        visibility: hidden;
+    }
+
+    .modal-backdrop,
+    .modal-backdrop * {
+        visibility: visible;
+    }
+
+    #factura-imprimible,
+    #factura-imprimible * {
+        visibility: visible;
+    }
+
+    #reporte-imprimible,
+    #reporte-imprimible * {
+        visibility: visible;
+    }
+
+    /* Ocultar los botones en la impresión */
+    .no-print {
+        display: none !important;
+    }
+
+    /* Resetear el modal para impresión */
+    .modal-backdrop {
+        position: static !important;
+        background: none !important;
+        width: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        display: block !important;
+    }
+
+    /* Ajustar la factura para impresión */
+    .factura-container,
+    .factura-container-wide {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 100%;
+        max-height: none;
+        overflow: visible;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 20px !important;
+        margin: 0 !important;
+    }
+
+    /* Ajustar tamaños de fuente para impresión */
+    .factura-logo img {
+        max-width: 220px;
+    }
+
+    .factura-empresa-info {
+        font-size: 12px;
+    }
+
+    .factura-productos-tabla {
+        font-size: 12px;
+    }
+
+    .factura-productos-tabla th {
+        font-size: 13px;
+    }
+
+    .factura-totales-row {
+        font-size: 14px;
+    }
+
+    .factura-total-final strong {
+        font-size: 20px;
+    }
+
+    /* Evitar saltos de página innecesarios */
+    .factura-container,
+    .factura-container-wide {
+        page-break-inside: avoid;
+    }
+
+    .factura-productos-tabla {
+        page-break-inside: auto;
+    }
+
+    .factura-productos-tabla tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+}
+
+/* ===================================
+   RESPONSIVE - MÓVILES
+   =================================== */
+
+@media screen and (max-width: 768px) {
+
+    .factura-container,
+    .factura-container-wide {
+        padding: 20px;
+        max-width: 100%;
+    }
+
+    .factura-logo img {
+        max-width: 200px;
+    }
+
+    .factura-empresa-info {
+        font-size: 12px;
+    }
+
+    .factura-info-section {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .factura-productos-tabla {
+        font-size: 13px;
+    }
+
+    .factura-productos-tabla th,
+    .factura-productos-tabla td {
+        padding: 8px 5px;
+    }
+
+    .factura-totales-row {
+        font-size: 14px;
+    }
+
+    .factura-total-final strong {
+        font-size: 20px;
+    }
+}

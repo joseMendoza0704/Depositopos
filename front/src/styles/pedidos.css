@@ -2,7 +2,7 @@
 .pedido-card {
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 15px;
   margin-bottom: 10px;
 }
@@ -71,9 +71,16 @@
   gap: 8px;
 }
 
+.pedido-acciones-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .btn-editar,
 .btn-eliminar,
-.btn-mover {
+.btn-mover,
+.btn-imprimir {
   padding: 6px 12px;
   border: none;
   border-radius: 4px;
@@ -87,6 +94,7 @@
   background-color: #3498db;
   color: white;
 }
+
 .btn-editar:hover {
   background-color: #2980b9;
 }
@@ -95,6 +103,7 @@
   background-color: #e74c3c;
   color: white;
 }
+
 .btn-eliminar:hover {
   background-color: #c0392b;
 }
@@ -103,8 +112,18 @@
   background-color: #2ecc71;
   color: white;
 }
+
 .btn-mover:hover {
   background-color: #27ae60;
+}
+
+.btn-imprimir {
+  background-color: #9b59b6;
+  color: white;
+}
+
+.btn-imprimir:hover {
+  background-color: #8e44ad;
 }
 
 /* Estilos para las columnas */
