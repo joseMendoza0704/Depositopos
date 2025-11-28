@@ -271,18 +271,10 @@
     margin-top: 30px;
 }
 
-.factura-botones button {
-    padding: 12px 30px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+@page {
+    size: auto;
+    margin: 0mm;
 }
-
-/* ===================================
-   ESTILOS DE IMPRESIÓN
-   =================================== */
 
 @media print {
 
@@ -333,33 +325,149 @@
         overflow: visible;
         box-shadow: none !important;
         border: none !important;
-        padding: 20px !important;
+        filter: grayscale(100%) contrast(200%);
+        /* Logo en blanco y negro y alto contraste */
+        padding: 0 !important;
         margin: 0 !important;
     }
 
-    /* Ajustar tamaños de fuente para impresión */
+    /* ESTILOS ESPECÍFICOS PARA IMPRESORA TÉRMICA */
+    #factura-imprimible,
+    #factura-imprimible * {
+        font-family: 'Arial', sans-serif !important;
+        /* Restaurar fuente original */
+        font-weight: 900 !important;
+        /* Extra bold */
+        color: #000000 !important;
+        text-shadow: none !important;
+    }
+
+    /* Forzar negrita en elementos específicos */
+    #factura-imprimible p,
+    #factura-imprimible span,
+    #factura-imprimible div,
+    #factura-imprimible td,
+    #factura-imprimible th,
+    #factura-imprimible h3,
+    #factura-imprimible strong,
+    #factura-imprimible b {
+        font-weight: bold !important;
+        color: #000000 !important;
+    }
+
+    /* Ajustar tamaños de fuente para impresión térmica */
     .factura-logo img {
-        max-width: 220px;
+        max-width: 180px;
+        /* Logo un poco más pequeño */
+        filter: grayscale(100%) contrast(200%);
+        /* Logo en blanco y negro y alto contraste */
     }
 
     .factura-empresa-info {
         font-size: 12px;
     }
 
+    .factura-empresa-nombre {
+        display: block;
+        /* Mostrar nombre si el logo no se ve bien */
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .factura-info-section {
+        display: grid !important;
+        /* Restaurar Grid */
+        grid-template-columns: 1fr 1fr !important;
+        /* Dos columnas */
+        gap: 10px !important;
+        border: 2px solid #000 !important;
+        /* Borde sólido negro */
+        padding: 10px !important;
+        margin-bottom: 15px;
+        border-radius: 8px !important;
+    }
+
+    .factura-info-cliente,
+    .factura-info-datos {
+        border: none;
+        padding: 0;
+        margin-bottom: 0;
+        border-left: 2px solid #000 !important;
+        /* Borde izquierdo sólido */
+        padding-left: 10px !important;
+    }
+
+    .factura-info-datos h3 {
+        border-bottom: 2px solid #000 !important;
+        /* Borde inferior sólido */
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .factura-separador {
+        border-top: 2px solid #000 !important;
+        /* Borde sólido */
+        margin: 10px 0;
+    }
+
     .factura-productos-tabla {
         font-size: 12px;
+        width: 100%;
     }
 
     .factura-productos-tabla th {
-        font-size: 13px;
+        font-size: 12px;
+        border-bottom: 2px solid #000 !important;
+        /* Borde sólido */
+        padding: 5px 2px;
+    }
+
+    .factura-productos-tabla td {
+        padding: 5px 2px;
+    }
+
+    .factura-totales {
+        border: none;
+        background: none;
+        padding: 10px 0;
+        margin: 10px 0;
+        border-top: 2px solid #000 !important;
+        /* Borde sólido */
+        border-left: 4px solid #000 !important;
+        /* Borde izquierdo más grueso */
+        padding-left: 10px !important;
     }
 
     .factura-totales-row {
         font-size: 14px;
+        padding: 2px 0;
+    }
+
+    .factura-total-final {
+        border-top: 2px solid #000 !important;
+        /* Borde sólido */
+        margin-top: 5px;
+        padding-top: 5px;
     }
 
     .factura-total-final strong {
-        font-size: 20px;
+        font-size: 18px;
+    }
+
+    .factura-footer {
+        border-top: 2px solid #000 !important;
+        /* Borde sólido */
+        margin-top: 15px;
+        padding-top: 10px;
+    }
+
+    .factura-agradecimiento {
+        font-size: 14px;
+    }
+
+    .factura-mensaje {
+        font-size: 10px;
     }
 
     /* Evitar saltos de página innecesarios */

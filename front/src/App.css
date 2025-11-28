@@ -7,33 +7,41 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
   /* Configuración del fondo */
-  background-image: url('/public/fondo.jpg'); /* Llama a la imagen desde la carpeta 'public' */
-  background-size: cover; /* Cubre toda la pantalla */
-  background-position: center; /* Centra la imagen */
-  background-attachment: fixed; /* Evita que el fondo se mueva al hacer scroll */
-  
+  background-image: url('/public/fondo.jpg');
+  /* Llama a la imagen desde la carpeta 'public' */
+  background-size: cover;
+  /* Cubre toda la pantalla */
+  background-position: center;
+  /* Centra la imagen */
+  background-attachment: fixed;
+  /* Evita que el fondo se mueva al hacer scroll */
+
   /* Centrar el contenido */
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Ocupa el 100% de la altura de la pantalla */
+  height: 100vh;
+  /* Ocupa el 100% de la altura de la pantalla */
 }
 
 /* --- Contenedor del Login --- */
 .login-container {
   background-color: white;
-  padding: 50px; /* Aumentamos el espacio interior */
+  padding: 50px;
+  /* Aumentamos el espacio interior */
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 450px; /* Hacemos el contenedor más ancho */
+  max-width: 450px;
+  /* Hacemos el contenedor más ancho */
   text-align: center;
   box-sizing: border-box;
 }
 
 /* --- Logo --- */
 .login-logo {
-  width: 150px; /* Ajusta el tamaño de tu logo */
+  width: 150px;
+  /* Ajusta el tamaño de tu logo */
   margin-bottom: 25px;
 }
 
@@ -52,10 +60,13 @@ body {
 /* --- Estilos para el ícono de ver/ocultar contraseña --- */
 .password-toggle-icon {
   position: absolute;
-  top: 15px; /* Ajusta la posición vertical del ícono */
-  right: 10px; /* Ajusta la posición horizontal del ícono */
+  top: 15px;
+  /* Ajusta la posición vertical del ícono */
+  right: 10px;
+  /* Ajusta la posición horizontal del ícono */
   cursor: pointer;
-  user-select: none; /* Evita que el ícono se seleccione como texto */
+  user-select: none;
+  /* Evita que el ícono se seleccione como texto */
   font-size: 20px;
 }
 
@@ -66,7 +77,8 @@ body {
   margin-bottom: 20px;
   font-size: 16px;
   background-color: transparent;
-  outline: none; /* Quita el borde azul al hacer clic */
+  outline: none;
+  /* Quita el borde azul al hacer clic */
 }
 
 .login-input::placeholder {
@@ -74,7 +86,8 @@ body {
 }
 
 .login-button {
-  background-color: #007bff; /* Un azul estándar */
+  background-color: #007bff;
+  /* Un azul estándar */
   color: white;
   border: none;
   padding: 15px;
@@ -87,7 +100,8 @@ body {
 }
 
 .login-button:hover {
-  background-color: #0056b3; /* Un azul más oscuro al pasar el mouse */
+  background-color: #0056b3;
+  /* Un azul más oscuro al pasar el mouse */
 }
 
 .forgot-password {
@@ -111,7 +125,8 @@ body {
 
 .sidebar {
   width: 250px;
-  background-color: #2c3e50; /* Un color oscuro */
+  background-color: #2c3e50;
+  /* Un color oscuro */
   color: white;
   display: flex;
   flex-direction: column;
@@ -126,7 +141,8 @@ body {
 .sidebar-menu {
   list-style: none;
   padding: 0;
-  flex-grow: 1; /* Empuja el footer hacia abajo */
+  flex-grow: 1;
+  /* Empuja el footer hacia abajo */
 }
 
 .sidebar-menu li button {
@@ -149,7 +165,8 @@ body {
   margin-right: 10px;
   vertical-align: middle;
   display: inline-block;
-  filter: invert(1) brightness(200%); /* Hace el icono blanco sobre fondo oscuro */
+  filter: invert(1) brightness(200%);
+  /* Hace el icono blanco sobre fondo oscuro */
 }
 
 .sidebar-menu li button:hover {
@@ -157,7 +174,8 @@ body {
 }
 
 .logout-button {
-  background-color: #e74c3c; /* Un color rojo para salir */
+  background-color: #e74c3c;
+  /* Un color rojo para salir */
   color: white;
   border: none;
   width: 100%;
@@ -176,8 +194,10 @@ body {
 .main-content {
   flex-grow: 1;
   padding: 40px;
-  background-color: #f4f6f9; /* Un fondo gris claro para el contenido */
-  overflow-y: auto; /* Permite scroll si el contenido es muy largo */
+  background-color: #f4f6f9;
+  /* Un fondo gris claro para el contenido */
+  overflow-y: auto;
+  /* Permite scroll si el contenido es muy largo */
 }
 
 /* --- Estilos para el Formulario de Inventario --- */
@@ -195,8 +215,10 @@ body {
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 columnas */
-  gap: 20px; /* Espacio entre campos */
+  grid-template-columns: 1fr 1fr;
+  /* 2 columnas */
+  gap: 20px;
+  /* Espacio entre campos */
   margin-bottom: 20px;
 }
 
@@ -206,11 +228,13 @@ body {
   font-size: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  box-sizing: border-box; /* Importante para que el padding no afecte el ancho */
+  box-sizing: border-box;
+  /* Importante para que el padding no afecte el ancho */
 }
 
 .producto-form button {
-  background-color: #2ecc71; /* Un verde para "añadir" */
+  background-color: #2ecc71;
+  /* Un verde para "añadir" */
   color: white;
   border: none;
   padding: 12px 20px;
@@ -226,7 +250,8 @@ body {
 }
 
 .producto-form button:disabled {
-  background-color: #95a5a6; /* Un gris si está deshabilitado */
+  background-color: #95a5a6;
+  /* Un gris si está deshabilitado */
   cursor: not-allowed;
 }
 
@@ -240,7 +265,8 @@ body {
 
 .productos-tabla {
   width: 100%;
-  border-collapse: collapse; /* Une los bordes de las celdas */
+  border-collapse: collapse;
+  /* Une los bordes de las celdas */
   margin-top: 20px;
 }
 
@@ -252,27 +278,32 @@ body {
 }
 
 .productos-tabla th {
-  background-color: #f4f6f9; /* Un fondo gris claro para el encabezado */
+  background-color: #f4f6f9;
+  /* Un fondo gris claro para el encabezado */
   font-weight: bold;
 }
 
 .productos-tabla tr:nth-child(even) {
-  background-color: #f9f9f9; /* Colorea las filas pares */
+  background-color: #f9f9f9;
+  /* Colorea las filas pares */
 }
 
 .productos-tabla tr:hover {
-  background-color: #f1f1f1; /* Resalta la fila al pasar el mouse */
+  background-color: #f1f1f1;
+  /* Resalta la fila al pasar el mouse */
 }
 
 /* --- Estilos para los botones del formulario --- */
 .form-botones {
   display: flex;
-  gap: 10px; /* Espacio entre botones */
+  gap: 10px;
+  /* Espacio entre botones */
 }
 
 /* Botón de eliminar */
 .boton-eliminar {
-  background-color: #e74c3c; /* Rojo */
+  background-color: #e74c3c;
+  /* Rojo */
   color: white;
   border: none;
   padding: 12px 20px;
@@ -282,6 +313,7 @@ body {
   border-radius: 5px;
   transition: background-color 0.2s ease;
 }
+
 .boton-eliminar:hover {
   background-color: #c0392b;
 }
@@ -296,13 +328,15 @@ body {
   border-radius: 3px;
   cursor: pointer;
 }
+
 .btn-imprimir:hover {
   background-color: #2980b9 !important;
 }
 
 /* Botón de eliminar (CORREGIDO) */
 .producto-form .boton-eliminar {
-  background-color: #e74c3c; /* Rojo */
+  background-color: #e74c3c;
+  /* Rojo */
   color: white;
   border: none;
   padding: 12px 20px;
@@ -312,13 +346,15 @@ body {
   border-radius: 5px;
   transition: background-color 0.2s ease;
 }
+
 .producto-form .boton-eliminar:hover {
   background-color: #c0392b;
 }
 
 /* Botón de limpiar/cancelar (CORREGIDO) */
 .producto-form .boton-limpiar {
-  background-color: #7f8c8d; /* Gris */
+  background-color: #7f8c8d;
+  /* Gris */
   color: white;
   border: none;
   padding: 12px 20px;
@@ -328,6 +364,7 @@ body {
   border-radius: 5px;
   transition: background-color 0.2s ease;
 }
+
 .producto-form .boton-limpiar:hover {
   background-color: #95a5a6;
 }
@@ -337,7 +374,8 @@ body {
 .pos-container {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Ocupa todo el alto del 'main-content' */
+  height: 100%;
+  /* Ocupa todo el alto del 'main-content' */
   gap: 20px;
 }
 
@@ -350,7 +388,8 @@ body {
 }
 
 .pos-search-bar {
-  flex-grow: 1; /* Ocupa el espacio disponible */
+  flex-grow: 1;
+  /* Ocupa el espacio disponible */
   padding: 15px;
   font-size: 16px;
   border: 1px solid #ccc;
@@ -365,24 +404,29 @@ body {
   text-align: right;
   min-width: 200px;
 }
+
 .pos-total h2 {
   margin: 0;
   color: #333;
 }
+
 .pos-total span {
   font-size: 28px;
   font-weight: bold;
-  color: #2ecc71; /* Verde */
+  color: #2ecc71;
+  /* Verde */
 }
 
 /* --- Tabla del Carrito --- */
 .pos-cart-container {
-  flex-grow: 1; /* Esta es la tabla que ocupa el espacio principal */
+  flex-grow: 1;
+  /* Esta es la tabla que ocupa el espacio principal */
   background-color: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  overflow-y: auto; /* Permite scroll si hay muchos productos */
+  overflow-y: auto;
+  /* Permite scroll si hay muchos productos */
 }
 
 .pos-cart-table {
@@ -415,14 +459,18 @@ body {
 /* --- Pie de Página (Botones de Acción) --- */
 .pos-footer {
   display: flex;
-  flex-wrap: wrap; /* Se ajustan si la pantalla es pequeña */
+  flex-wrap: wrap;
+  /* Se ajustan si la pantalla es pequeña */
   gap: 15px;
-  justify-content: center; /* Centra los botones */
+  justify-content: center;
+  /* Centra los botones */
 }
 
 .pos-button {
-  flex-grow: 1; /* Los botones crecen para ocupar espacio */
-  background-color: #34495e; /* Azul oscuro */
+  flex-grow: 1;
+  /* Los botones crecen para ocupar espacio */
+  background-color: #34495e;
+  /* Azul oscuro */
   color: white;
   border: none;
   padding: 20px;
@@ -431,7 +479,8 @@ body {
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.2s ease;
-  min-width: 150px; /* Ancho mínimo */
+  min-width: 150px;
+  /* Ancho mínimo */
 }
 
 .pos-button:hover {
@@ -440,8 +489,10 @@ body {
 
 /* Botón especial de Venta */
 .pos-button.venta {
-  background-color: #2ecc71; /* Verde */
+  background-color: #2ecc71;
+  /* Verde */
 }
+
 .pos-button.venta:hover {
   background-color: #27ae60;
 }
@@ -449,13 +500,15 @@ body {
 
 /* --- Estilos para la Búsqueda de Productos --- */
 .pos-search-container {
-  position: relative; /* Clave para posicionar los resultados */
+  position: relative;
+  /* Clave para posicionar los resultados */
   flex-grow: 1;
 }
 
 .search-results {
   position: absolute;
-  top: 100%; /* Justo debajo de la barra de búsqueda */
+  top: 100%;
+  /* Justo debajo de la barra de búsqueda */
   left: 0;
   right: 0;
   background-color: white;
@@ -463,7 +516,8 @@ body {
   border-top: none;
   border-radius: 0 0 5px 5px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 999; /* Por encima de la tabla */
+  z-index: 999;
+  /* Por encima de la tabla */
   max-height: 300px;
   overflow-y: auto;
 }
@@ -480,12 +534,14 @@ body {
 
 /* --- Estilos para el Modal de Añadir Producto --- */
 .modal-backdrop {
-  position: fixed; /* Se superpone a todo */
+  position: fixed;
+  /* Se superpone a todo */
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Fondo oscuro semitransparente */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -675,17 +731,21 @@ body {
 }
 
 .boton-modal-agregar {
-  background-color: #2ecc71; /* Verde */
+  background-color: #2ecc71;
+  /* Verde */
   color: white;
 }
+
 .boton-modal-agregar:hover {
   background-color: #27ae60;
 }
 
 .boton-modal-cancelar {
-  background-color: #f1f1f1; /* Gris claro */
+  background-color: #f1f1f1;
+  /* Gris claro */
   color: #333;
 }
+
 .boton-modal-cancelar:hover {
   background-color: #ddd;
 }
@@ -702,10 +762,12 @@ body {
   padding-bottom: 15px;
   margin-bottom: 20px;
 }
+
 .factura-header h3 {
   margin: 0;
   font-size: 24px;
 }
+
 .factura-header p {
   margin: 5px 0;
   font-size: 14px;
@@ -716,12 +778,14 @@ body {
   border-collapse: collapse;
   margin-bottom: 20px;
 }
+
 .factura-tabla th,
 .factura-tabla td {
   padding: 8px;
   border-bottom: 1px solid #eee;
   text-align: left;
 }
+
 .factura-tabla th {
   background-color: #f9f9f9;
 }
@@ -739,79 +803,46 @@ body {
   display: flex;
   justify-content: space-between;
   gap: 15px;
-  margin-top: 30px;
-}
-
-/* --- ESTILOS DE IMPRESIÓN --- */
-/* Esto se aplica SOLO al imprimir (Ctrl+P) */
-@media print {
-  /* Oculta todo menos la factura */
-  body * {
-    visibility: hidden;
-  }
-  #factura-imprimible, #factura-imprimible * {
-    visibility: visible;
-  }
-  
-  /* Posiciona la factura en la hoja */
-  #factura-imprimible {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-  
-  /* Oculta los botones en la impresión */
-  .no-print {
-    display: none !important;
-  }
-  
-  /* Quita sombras y fondos innecesarios */
-  .modal-backdrop {
-    position: relative;
-    background-color: white !important;
-  }
-  .modal-content {
-    box-shadow: none !important;
-    border: none !important;
-  }
-}
-
-/* --- Estilos para el Input de Cliente --- */
-.pos-cliente-input {
-  padding: 15px;
-  font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 300px; /* Ancho fijo */
+  width: 300px;
+  /* Ancho fijo */
 }
+
 /* Ajusta el header para el nuevo input */
 .pos-header {
-  flex-wrap: wrap; /* Permite que los items bajen si no caben */
+  flex-wrap: wrap;
+  /* Permite que los items bajen si no caben */
 }
 
 
 /* --- Estilos para el Modal de Factura (Recibo Térmico) --- */
 .factura-modal {
-  max-width: 320px; /* Ancho de recibo térmico */
-  font-family: 'Courier New', Courier, monospace; /* Fuente de recibo */
+  max-width: 320px;
+  /* Ancho de recibo térmico */
+  font-family: 'Courier New', Courier, monospace;
+  /* Fuente de recibo */
   font-size: 12px;
   color: #000;
   padding: 20px;
-  font-weight: bold; /* Hacer todas las letras en negrita */
+  font-weight: bold;
+  /* Hacer todas las letras en negrita */
 }
 
 .factura-header {
   text-align: center;
-  border-bottom: 1px dashed #000; /* Línea de guiones */
+  border-bottom: 1px dashed #000;
+  /* Línea de guiones */
   padding-bottom: 10px;
   margin-bottom: 10px;
 }
+
 .factura-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: bold;
 }
+
 .factura-header p {
   margin: 2px 0;
   font-size: 12px;
@@ -823,12 +854,14 @@ body {
   margin-bottom: 10px;
   font-size: 12px;
 }
+
 .factura-tabla th,
 .factura-tabla td {
   padding: 4px 2px;
   border-bottom: 1px solid #eee;
   text-align: left;
 }
+
 .factura-tabla th {
   background-color: #f9f9f9;
 }
@@ -845,58 +878,13 @@ body {
 .factura-botones {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-/* --- ESTILOS DE IMPRESIÓN (CORREGIDOS) --- */
-@media print {
-  /* 1. Oculta todo en la página por defecto */
-  body * {
-    visibility: hidden;
-  }
-  
-  /* 2. MUESTRA el backdrop del modal y TODO su contenido */
-  .modal-backdrop, .modal-backdrop * {
-    visibility: visible;
-  }
-
-  /* 3. Oculta los botones de "Imprimir" y "Cerrar" */
-  .no-print {
-    display: none !important;
-  }
-  
-  /* 4. Resetea el modal para que se ajuste a la página */
-  .modal-backdrop {
-    position: static !important;
-    background: none !important;
-    width: auto !important;
-    height: auto !important;
-    overflow: visible !important;
-    display: block !important;
-  }
-
-  /* 5. Posiciona la factura en la hoja */
-  #factura-imprimible {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    box-shadow: none !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-}
-
-/* --- Estilos para el Modal de Historial de Ventas --- */
-.historial-modal {
-  max-width: 600px; /* Un poco más ancho que la factura */
 }
 
 .historial-lista-container {
-  max-height: 400px; /* Altura máxima para la lista */
-  overflow-y: auto; /* Scroll si hay muchas ventas */
+  max-height: 400px;
+  /* Altura máxima para la lista */
+  overflow-y: auto;
+  /* Scroll si hay muchas ventas */
   border: 1px solid #eee;
   border-radius: 5px;
 }
@@ -927,10 +915,13 @@ body {
 .historial-cliente {
   font-weight: bold;
 }
+
 .historial-total {
-  color: #2ecc71; /* Verde */
+  color: #2ecc71;
+  /* Verde */
   font-weight: bold;
 }
+
 .historial-hora {
   color: #7f8c8d;
 }
@@ -959,18 +950,21 @@ body {
 }
 
 .cobro-total {
-  font-size: 24px !important; /* !important para forzarlo */
+  font-size: 24px !important;
+  /* !important para forzarlo */
   border-bottom: 1px solid #ddd;
   padding-bottom: 15px;
   margin-bottom: 15px;
 }
 
 .cobro-total strong {
-  color: #e74c3c; /* Rojo para el total */
+  color: #e74c3c;
+  /* Rojo para el total */
 }
 
 .cobro-vuelto strong {
-  color: #2ecc71; /* Verde para el vuelto */
+  color: #2ecc71;
+  /* Verde para el vuelto */
   font-size: 26px;
 }
 
@@ -991,11 +985,13 @@ body {
   border-top: 1px solid #000;
   padding-top: 5px;
 }
+
 .factura-total p {
   margin: 5px 0;
   display: flex;
   justify-content: space-between;
 }
+
 .factura-total p strong {
   font-size: 16px;
 }
@@ -1009,18 +1005,22 @@ body {
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(4px);
-  z-index: 998; /* Debajo de los modales */
+  z-index: 998;
+  /* Debajo de los modales */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  border-radius: 8px; /* Para que coincida con .pos-container si tiene padding */
+  border-radius: 8px;
+  /* Para que coincida con .pos-container si tiene padding */
 }
+
 .pos-overlay-disabled h2 {
   font-size: 32px;
   color: #34495e;
 }
+
 .pos-overlay-disabled p {
   font-size: 18px;
   color: #7f8c8d;
@@ -1045,8 +1045,10 @@ body {
 /* --- Estilo para el Contenedor Principal del POS --- */
 /* (Este es el nuevo contenedor que creamos) */
 .pos-main-content {
-  position: relative; /* Clave para que el overlay se posicione dentro de él */
-  flex-grow: 1; /* Ocupa el espacio vertical disponible */
+  position: relative;
+  /* Clave para que el overlay se posicione dentro de él */
+  flex-grow: 1;
+  /* Ocupa el espacio vertical disponible */
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1054,23 +1056,31 @@ body {
 
 /* --- Estilos Adicionales para Cierre X/Z --- */
 .cierre-diferencia {
-  margin-top: 15px !important; /* Forzar margen */
+  margin-top: 15px !important;
+  /* Forzar margen */
   padding-top: 15px;
   border-top: 1px dashed #ccc;
 }
+
 .cierre-diferencia strong {
   font-size: 20px;
 }
+
 .cierre-diferencia.faltante strong {
-  color: #e74c3c; /* Rojo para faltante */
+  color: #e74c3c;
+  /* Rojo para faltante */
 }
+
 .cierre-diferencia.sobrante strong {
-  color: #27ae60; /* Verde oscuro para sobrante */
+  color: #27ae60;
+  /* Verde oscuro para sobrante */
 }
+
 /* Estilo para botón imprimir (opcional, puedes usar uno existente) */
 .boton-modal-imprimir {
   flex-grow: 1;
-  background-color: #3498db; /* Azul */
+  background-color: #3498db;
+  /* Azul */
   color: white;
   border: none;
   padding: 15px;
@@ -1080,39 +1090,46 @@ body {
   border-radius: 5px;
   transition: background-color 0.2s ease;
 }
+
 .boton-modal-imprimir:hover {
   background-color: #2980b9;
 }
 
 /* --- ESTILOS DE IMPRESIÓN PARA CIERRE X/Z --- */
 @media print {
+
   /* Oculta todo por defecto */
   body * {
     visibility: hidden;
   }
+
   /* Muestra solo el reporte y su contenido */
-  #reporte-imprimible, #reporte-imprimible * {
+  #reporte-imprimible,
+  #reporte-imprimible * {
     visibility: visible;
   }
-  
+
   /* Posiciona el reporte en la hoja */
   #reporte-imprimible {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%; /* O ajusta a un ancho específico si prefieres */
+    width: 100%;
+    /* O ajusta a un ancho específico si prefieres */
     margin: 0;
     padding: 0;
     border: none !important;
     box-shadow: none !important;
   }
-  
+
   /* Oculta elementos no deseados en la impresión */
-  .no-print, .no-print * { /* Usa !important si es necesario */
-    display: none !important; 
+  .no-print,
+  .no-print * {
+    /* Usa !important si es necesario */
+    display: none !important;
     visibility: hidden !important;
   }
-  
+
   /* Quita el fondo oscuro del modal */
   .modal-backdrop {
     position: static !important;
@@ -1122,78 +1139,97 @@ body {
     overflow: visible !important;
     display: block !important;
   }
-  
+
   /* Ajusta el modal para impresión */
   .cierre-modal {
-     max-width: 100%;
-     font-size: 10pt;
-     color: #000;
+    max-width: 100%;
+    font-size: 10pt;
+    color: #000;
   }
-/* --- Estilos para Modal Simple de Mensaje --- */
-.simple-modal-backdrop {
-  position: fixed; /* Asegura que se superponga */
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1050; /* Asegura que esté por encima de otros modales si es necesario */
-}
 
-.simple-modal-content {
-  max-width: 400px;
-  text-align: center;
-  padding: 30px;
-  border-radius: 8px; /* Bordes redondeados */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra */
-}
+  /* --- Estilos para Modal Simple de Mensaje --- */
+  .simple-modal-backdrop {
+    position: fixed;
+    /* Asegura que se superponga */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Fondo oscuro semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    /* Asegura que esté por encima de otros modales si es necesario */
+  }
 
-.simple-modal-content p {
-  font-size: 18px;
-  margin-top: 0; /* Quita margen superior del párrafo */
-  margin-bottom: 20px;
-}
+  .simple-modal-content {
+    max-width: 400px;
+    text-align: center;
+    padding: 30px;
+    border-radius: 8px;
+    /* Bordes redondeados */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    /* Sombra */
+  }
 
-/* Estilo para éxito */
-.exito-modal {
-  background-color: #d4edda; /* Fondo verde claro */
-  color: #155724; /* Texto verde oscuro */
-  border: 1px solid #c3e6cb;
-}
+  .simple-modal-content p {
+    font-size: 18px;
+    margin-top: 0;
+    /* Quita margen superior del párrafo */
+    margin-bottom: 20px;
+  }
 
-/* Estilo para error */
-.error-modal {
-  background-color: #f8d7da; /* Fondo rojo claro */
-  color: #721c24; /* Texto rojo oscuro */
-  border: 1px solid #f5c6cb;
-}
+  /* Estilo para éxito */
+  .exito-modal {
+    background-color: #d4edda;
+    /* Fondo verde claro */
+    color: #155724;
+    /* Texto verde oscuro */
+    border: 1px solid #c3e6cb;
+  }
 
-/* Estilo para el botón Cerrar */
-.simple-modal-close-button {
-  background-color: transparent;
-  border: 1px solid currentColor; /* Usa el color del texto (verde o rojo) */
-  color: currentColor; /* Hereda el color del texto */
-  padding: 8px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 14px; /* Tamaño de fuente del botón */
-  transition: background-color 0.2s ease, color 0.2s ease; /* Transición suave */
-}
+  /* Estilo para error */
+  .error-modal {
+    background-color: #f8d7da;
+    /* Fondo rojo claro */
+    color: #721c24;
+    /* Texto rojo oscuro */
+    border: 1px solid #f5c6cb;
+  }
 
-/* Efecto hover para el botón */
-.exito-modal .simple-modal-close-button:hover {
-  background-color: #155724; /* Fondo verde oscuro */
-  color: #d4edda; /* Texto verde claro */
-}
+  /* Estilo para el botón Cerrar */
+  .simple-modal-close-button {
+    background-color: transparent;
+    border: 1px solid currentColor;
+    /* Usa el color del texto (verde o rojo) */
+    color: currentColor;
+    /* Hereda el color del texto */
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    /* Tamaño de fuente del botón */
+    transition: background-color 0.2s ease, color 0.2s ease;
+    /* Transición suave */
+  }
 
-.error-modal .simple-modal-close-button:hover {
-  background-color: #721c24; /* Fondo rojo oscuro */
-  color: #f8d7da; /* Texto rojo claro */
-}
+  /* Efecto hover para el botón */
+  .exito-modal .simple-modal-close-button:hover {
+    background-color: #155724;
+    /* Fondo verde oscuro */
+    color: #d4edda;
+    /* Texto verde claro */
+  }
+
+  .error-modal .simple-modal-close-button:hover {
+    background-color: #721c24;
+    /* Fondo rojo oscuro */
+    color: #f8d7da;
+    /* Texto rojo claro */
+  }
 }
 
 /* ========================
@@ -1213,40 +1249,50 @@ body {
 .cierre-details p {
   display: flex;
   justify-content: space-between;
-  font-size: 16px; /* Ajusta tamaño si prefieres */
-  margin: 12px 0; /* Espaciado vertical */
+  font-size: 16px;
+  /* Ajusta tamaño si prefieres */
+  margin: 12px 0;
+  /* Espaciado vertical */
 }
 
 .cierre-details span {
-  color: #555; /* Color para etiquetas */
+  color: #555;
+  /* Color para etiquetas */
 }
 
 .cierre-details strong {
-  color: #333; /* Color para valores */
+  color: #333;
+  /* Color para valores */
 }
 
 .cierre-details hr {
   border: none;
-  border-top: 1px dashed #ccc; /* Línea punteada */
+  border-top: 1px dashed #ccc;
+  /* Línea punteada */
   margin: 15px 0;
 }
 
 /* Estilo específico para el total final esperado */
 .cierre-total strong {
-  font-size: 20px; /* Más grande */
-  color: #2ecc71; /* Verde */
+  font-size: 20px;
+  /* Más grande */
+  color: #2ecc71;
+  /* Verde */
   font-weight: bold;
 }
 
 /* Estilo para la sección de diferencia */
 .cierre-diferencia {
-  margin-top: 15px !important; /* Forzar margen superior */
+  margin-top: 15px !important;
+  /* Forzar margen superior */
   padding-top: 15px;
-  border-top: 1px dashed #ccc; /* Línea punteada separadora */
+  border-top: 1px dashed #ccc;
+  /* Línea punteada separadora */
 }
 
 .cierre-diferencia strong {
-  font-size: 18px; /* Tamaño para la diferencia */
+  font-size: 18px;
+  /* Tamaño para la diferencia */
   font-weight: bold;
 }
 
@@ -1263,8 +1309,10 @@ body {
 /* --- Botón Confirmar Cierre Z --- */
 /* Asegúrate que las clases base .modal-botones y .boton-modal-* estén definidas */
 .boton-modal-confirmar-cierre {
-  flex-grow: 1; /* Ocupa espacio disponible */
-  background-color: #2ecc71; /* Verde (como el de Venta) */
+  flex-grow: 1;
+  /* Ocupa espacio disponible */
+  background-color: #2ecc71;
+  /* Verde (como el de Venta) */
   color: white;
   border: none;
   padding: 15px;
@@ -1273,15 +1321,18 @@ body {
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.2s ease;
-  min-width: 120px; /* Ancho mínimo */
+  min-width: 120px;
+  /* Ancho mínimo */
 }
 
 .boton-modal-confirmar-cierre:hover {
-  background-color: #27ae60; /* Verde más oscuro */
+  background-color: #27ae60;
+  /* Verde más oscuro */
 }
 
 .boton-modal-confirmar-cierre:disabled {
-  background-color: #bdc3c7; /* Gris */
+  background-color: #bdc3c7;
+  /* Gris */
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -1290,42 +1341,102 @@ body {
 /* Asegúrate de que las reglas @media print globales estén definidas */
 /* Estas reglas específicas se aplican dentro del @media print */
 @media print {
-  #reporte-imprimible, #reporte-imprimible * {
+
+  #reporte-imprimible,
+  #reporte-imprimible * {
     visibility: visible;
   }
+
   #reporte-imprimible {
-    position: absolute; left: 0; top: 0; width: 100%;
-    margin: 0; padding: 0; border: none !important; box-shadow: none !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none !important;
+    box-shadow: none !important;
   }
+
   .cierre-modal {
-     max-width: 100%; font-size: 10pt; color: #000;
+    max-width: 100%;
+    font-size: 10pt;
+    color: #000;
   }
+
   .cierre-details p {
-    padding: 3px 1px; /* Menos padding al imprimir */
-    font-size: 9pt; /* Letra más pequeña */
+    padding: 3px 1px;
+    /* Menos padding al imprimir */
+    font-size: 9pt;
+    /* Letra más pequeña */
   }
-   .cierre-total strong { font-size: 12pt; }
-   hr { margin: 8px 0 !important; border-top: 1px dashed #000 !important;}
+
+  .cierre-total strong {
+    font-size: 12pt;
+  }
+
+  hr {
+    margin: 8px 0 !important;
+    border-top: 1px dashed #000 !important;
+  }
 }
 
 /* --- Asegúrate de tener estas clases generales (o adáptalas) --- */
 /* Estas vienen de otros modales pero CierreZ las usa */
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
-.cobro-input { /* Usado para el input de dinero contado */
-  width: 100%; padding: 15px; font-size: 24px; border: 1px solid #ccc;
-  border-radius: 5px; box-sizing: border-box; text-align: center;
+.form-group {
+  margin-bottom: 20px;
 }
-.modal-botones { display: flex; justify-content: space-between; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
-.boton-modal-cancelar { /* Botón cancelar */
-  flex-grow: 1; background-color: #ecf0f1; color: #333; border: 1px solid #bdc3c7;
-  padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer;
-  border-radius: 5px; transition: background-color 0.2s ease; min-width: 120px;
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 14px;
 }
-.boton-modal-cancelar:hover { background-color: #bdc3c7; }
-.no-print { /* Para ocultar elementos al imprimir */
+
+.cobro-input {
+  /* Usado para el input de dinero contado */
+  width: 100%;
+  padding: 15px;
+  font-size: 24px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.modal-botones {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.boton-modal-cancelar {
+  /* Botón cancelar */
+  flex-grow: 1;
+  background-color: #ecf0f1;
+  color: #333;
+  border: 1px solid #bdc3c7;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  min-width: 120px;
+}
+
+.boton-modal-cancelar:hover {
+  background-color: #bdc3c7;
+}
+
+.no-print {
+  /* Para ocultar elementos al imprimir */
   /* Esta clase se usa en el div del input y en el div de botones */
-  display: inline-block; /* valor por defecto no intrusivo en layout */
+  display: inline-block;
+  /* valor por defecto no intrusivo en layout */
 }
 
 /* --- Estilos para Formulario de Clientes --- */
@@ -1342,13 +1453,15 @@ body {
   left: 12px;
   font-size: 15px;
   color: #555;
-  pointer-events: none; /* Permite hacer clic "a través" del prefijo */
+  pointer-events: none;
+  /* Permite hacer clic "a través" del prefijo */
 }
 
 /* Input de teléfono con padding para el prefijo */
 .phone-input {
   width: 100%;
-  padding: 12px 12px 12px 55px; /* Padding izquierdo para el +504 */
+  padding: 12px 12px 12px 55px;
+  /* Padding izquierdo para el +504 */
   font-size: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -1361,7 +1474,7 @@ body {
   flex-direction: column;
   gap: 8px;
   /* Ocupa un espacio en el grid */
-  grid-column: span 1; 
+  grid-column: span 1;
   /* Si quieres que ocupe las 2 columnas, usa: grid-column: span 2; */
 }
 
@@ -1381,7 +1494,8 @@ body {
 }
 
 .boton-guardar-ubicacion {
-  background-color: #3498db; /* Azul */
+  background-color: #3498db;
+  /* Azul */
   color: white;
   border: none;
   padding: 10px 15px;
@@ -1391,6 +1505,7 @@ body {
   border-radius: 5px;
   transition: background-color 0.2s ease;
 }
+
 .boton-guardar-ubicacion:hover {
   background-color: #2980b9;
 }
@@ -1401,6 +1516,7 @@ body {
   text-decoration: none;
   font-weight: bold;
 }
+
 .productos-tabla a:hover {
   text-decoration: underline;
 }
@@ -1414,7 +1530,7 @@ body {
   display: flex;
   flex-direction: column;
   /* Ocupa todo el alto disponible en .main-content */
-  height: 100%; 
+  height: 100%;
   box-sizing: border-box;
 }
 
@@ -1423,8 +1539,10 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  flex-shrink: 0; /* No se encoje */
+  flex-shrink: 0;
+  /* No se encoje */
 }
+
 .controles-tablero h2 {
   margin: 0;
   font-size: 24px;
@@ -1435,13 +1553,17 @@ body {
   background-color: #6c757d;
   border-color: #6c757d;
   color: white;
-  flex-grow: 0; /* No crece */
+  flex-grow: 0;
+  /* No crece */
   min-width: 150px;
-  padding: 15px 20px; /* Un poco más pequeño que los botones del footer */
+  padding: 15px 20px;
+  /* Un poco más pequeño que los botones del footer */
 }
+
 .controles-tablero .pos-button:hover {
   background-color: #5a6268;
 }
+
 .controles-tablero .pos-button:disabled {
   background-color: #95a5a6;
   opacity: 0.7;
@@ -1466,26 +1588,34 @@ body {
 
 .columnas-pedidos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
+  grid-template-columns: repeat(3, 1fr);
+  /* 3 columnas iguales */
   gap: 20px;
-  flex-grow: 1; /* Ocupa el espacio restante */
-  overflow: hidden; /* Evita doble scroll */
-  min-height: 0; /* Clave para que el scroll interno funcione */
+  flex-grow: 1;
+  /* Ocupa el espacio restante */
+  overflow: hidden;
+  /* Evita doble scroll */
+  min-height: 0;
+  /* Clave para que el scroll interno funcione */
 }
 
 .columna-pedido {
   display: flex;
   flex-direction: column;
-  background-color: #e9ecef; /* Fondo gris claro */
+  background-color: #e9ecef;
+  /* Fondo gris claro */
   border-radius: 8px;
-  overflow: hidden; /* Esconde contenido que se desborde */
+  overflow: hidden;
+  /* Esconde contenido que se desborde */
 }
 
 .columna-header {
   padding: 15px;
   color: white;
-  flex-shrink: 0; /* No se encoje */
+  flex-shrink: 0;
+  /* No se encoje */
 }
+
 .columna-header h3 {
   margin: 0;
   font-size: 18px;
@@ -1494,7 +1624,8 @@ body {
 
 .columna-body {
   padding: 10px;
-  overflow-y: auto; /* Permite scroll de tarjetas */
+  overflow-y: auto;
+  /* Permite scroll de tarjetas */
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -1511,10 +1642,11 @@ body {
 .pedido-card {
   background-color: #fff;
   border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 15px;
   flex-shrink: 0;
 }
+
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -1522,9 +1654,11 @@ body {
   padding-bottom: 10px;
   margin-bottom: 10px;
 }
+
 .card-header strong {
   font-size: 16px;
 }
+
 .card-header span {
   font-size: 14px;
   color: #555;
@@ -1533,13 +1667,16 @@ body {
 .card-body p {
   font-size: 14px;
   margin: 0 0 10px 0;
-  word-break: break-word; /* Evita que direcciones largas rompan el layout */
+  word-break: break-word;
+  /* Evita que direcciones largas rompan el layout */
 }
+
 .card-body ul {
   padding-left: 20px;
   margin: 0 0 10px 0;
   font-size: 14px;
 }
+
 .card-body strong {
   font-size: 16px;
   color: #2ecc71;
@@ -1557,6 +1694,7 @@ body {
   border-top: 1px solid #eee;
   position: relative;
 }
+
 .card-footer button {
   background-color: #3498db;
   color: white;
@@ -1566,9 +1704,11 @@ body {
   border-radius: 3px;
   cursor: pointer;
 }
+
 .card-footer button:hover {
   background-color: #2980b9;
 }
+
 .btn-eliminar-simple {
   background-color: transparent !important;
   color: #e74c3c !important;
@@ -1579,6 +1719,7 @@ body {
   right: 0;
   padding: 0 5px !important;
 }
+
 .btn-eliminar-simple:hover {
   background-color: #fdf2f2 !important;
 }
@@ -1590,15 +1731,19 @@ body {
   padding: 15px;
   margin-bottom: 20px;
 }
+
 .pedido-fieldset legend {
   font-weight: bold;
   padding: 0 10px;
   margin-left: 5px;
 }
+
 /* Reutiliza la clase .full-width del formulario de clientes */
 .pedido-fieldset .form-grid .full-width {
-  grid-column: 1 / -1; /* Ocupa todo el ancho */
+  grid-column: 1 / -1;
+  /* Ocupa todo el ancho */
 }
+
 .pedido-total-modal {
   text-align: right;
   font-size: 20px;
