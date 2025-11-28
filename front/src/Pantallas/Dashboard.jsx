@@ -41,7 +41,7 @@ function VistaPrincipal() {
   );
 }
 
-function Dashboard({ alCerrarSesion }) {
+function Dashboard({ alCerrarSesion, usuario }) {
   const [vistaActual, setVistaActual] = useState('principal');
   const [cajaActual, setCajaActual] = useState(null);
   const [cargandoCaja, setCargandoCaja] = useState(true);
@@ -144,9 +144,9 @@ function Dashboard({ alCerrarSesion }) {
           onCierreZ={handleCierreZ}
         />;
       case 'inventario':
-        return <Inventario />;
+        return <Inventario usuario={usuario} />;
       case 'clientes':
-        return <GestionClientes />;
+        return <GestionClientes usuario={usuario} />;
       case 'pedidos':
         return <GestionPedidos cajaActual={cajaActual} />;
       case 'reportes':
@@ -205,15 +205,17 @@ function Dashboard({ alCerrarSesion }) {
               <span className="menu-text">Pedidos</span>
             </button>
           </li>
-          <li>
-            <button
-              onClick={() => setVistaActual('reportes')}
-              className={vistaActual === 'reportes' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge">📊</span>
-              <span className="menu-text">Reportes</span>
-            </button>
-          </li>
+          {usuario?.rol === 'admin' && (
+            <li>
+              <button
+                onClick={() => setVistaActual('reportes')}
+                className={vistaActual === 'reportes' ? 'active' : ''}
+              >
+                <span className="menu-icon-badge">📊</span>
+                <span className="menu-text">Reportes</span>
+              </button>
+            </li>
+          )}
         </ul>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="logout-button">

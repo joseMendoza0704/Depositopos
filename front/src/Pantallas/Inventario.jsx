@@ -1,36 +1,38 @@
 // En: src/pantallas/Inventario.jsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../firebaseConfig';
-import { 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  doc, 
-  updateDoc, 
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
   deleteDoc,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
-import '../styles/Inventario.css'; //
+import '../styles/Inventario.css';
+import RetiroInventario from '../components/RetiroInventario'; // Importar componente
 
 /**
  * Componente de Gestión de Inventario
  * Permite crear, editar, eliminar y visualizar productos
  */
-function Inventario() {
+function Inventario({ usuario }) {
   // --- Estados del Formulario ---
   const [nombre, setNombre] = useState('');
   const [tamaño, setTamaño] = useState('');
   const [stock, setStock] = useState('');
   const [costo, setCosto] = useState('');
   const [precioUnidad, setPrecioUnidad] = useState('');
-  const [fechaCaducidad, setFechaCaducidad] = useState(''); // NUEVO campo
-  
+  const [fechaCaducidad, setFechaCaducidad] = useState('');
+
   // --- Estados de UI ---
   const [cargandoForm, setCargandoForm] = useState(false);
   const [productos, setProductos] = useState([]);
   const [cargandoProductos, setCargandoProductos] = useState(true);
   const [productoIdSeleccionado, setProductoIdSeleccionado] = useState(null);
-  
+  const [mostrarRetiro, setMostrarRetiro] = useState(false); // Estado para mostrar modal de retiro
+
   // --- Estados de Filtros ---
   const [filtroTexto, setFiltroTexto] = useState('');
   const [filtroVencidos, setFiltroVencidos] = useState(false);
@@ -38,7 +40,7 @@ function Inventario() {
   // --- Suscripción a productos en tiempo real ---
   useEffect(() => {
     const productosCollection = collection(db, 'productos');
-    
+
     const unsubscribe = onSnapshot(
       productosCollection,
       (snapshot) => {
@@ -77,7 +79,7 @@ function Inventario() {
     setStock(producto.stockUnidades ?? '');
     setCosto(producto.precioCostoUnidad ?? '');
     setPrecioUnidad(producto.formatosVenta?.[0]?.precio ?? '');
-    
+
     // Convertir Timestamp a formato de input date (YYYY-MM-DD)
     if (producto.fechaCaducidad) {
       const fecha = producto.fechaCaducidad.toDate();
@@ -116,7 +118,7 @@ function Inventario() {
   // --- Maneja el envío del formulario ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (cargandoForm) return;
     if (!validarFormulario()) return;
 
@@ -129,10 +131,10 @@ function Inventario() {
       stockUnidades: Number(stock),
       precioCostoUnidad: Number(costo),
       formatosVenta: [
-        { 
-          nombre: "Unidad", 
-          precio: Number(precioUnidad), 
-          unidades: 1 
+        {
+          nombre: "Unidad",
+          precio: Number(precioUnidad),
+          unidades: 1
         }
       ],
       activo: true
@@ -171,7 +173,7 @@ function Inventario() {
   // --- Elimina un producto ---
   const handleDelete = async () => {
     if (!productoIdSeleccionado) return;
-    
+
     if (!window.confirm(`¿Estás seguro de eliminar "${nombre}"?`)) {
       return;
     }
@@ -232,88 +234,113 @@ function Inventario() {
 
   return (
     <div className="inventario-container">
-      <h2>Gestión de Inventario</h2>
-      
+      <div className="inventario-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2>Gestión de Inventario</h2>
+        <button
+          className="btn-retiro"
+          onClick={() => setMostrarRetiro(true)}
+          style={{
+            backgroundColor: '#ffc107',
+            color: '#333',
+            border: 'none',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}
+        >
+          📤 Retiro de Productos
+        </button>
+      </div>
+
+      {/* --- Modal de Retiro --- */}
+      {mostrarRetiro && (
+        <RetiroInventario onClose={() => setMostrarRetiro(false)} />
+      )}
+
       {/* --- Formulario --- */}
       <form onSubmit={handleSubmit} className="producto-form">
         <h3>
           {productoIdSeleccionado ? '✏️ Editar Producto' : '➕ Añadir Nuevo Producto'}
         </h3>
-        
+
         <div className="form-grid">
           <div className="form-group">
             <label htmlFor="nombre">Nombre del Producto*</label>
-            <input 
+            <input
               id="nombre"
-              type="text" 
-              placeholder="Ej: Coca-Cola" 
-              value={nombre} 
-              onChange={(e) => setNombre(e.target.value)} 
-              required 
+              type="text"
+              placeholder="Ej: Coca-Cola"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              required
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="tamaño">Tamaño*</label>
-            <input 
+            <input
               id="tamaño"
-              type="text" 
-              placeholder="Ej: ml o Lts" 
-              value={tamaño} 
-              onChange={(e) => setTamaño(e.target.value)} 
-              required 
+              type="text"
+              placeholder="Ej: ml o Lts"
+              value={tamaño}
+              onChange={(e) => setTamaño(e.target.value)}
+              required
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="stock">Stock </label>
-            <input 
+            <input
               id="stock"
-              type="number" 
-              placeholder="Cantidad en inventario" 
-              value={stock} 
-              onChange={(e) => setStock(e.target.value)} 
+              type="number"
+              placeholder="Cantidad en inventario"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
               min="0"
-              required 
+              required
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="costo">Precio Costo </label>
-            <input 
+            <input
               id="costo"
-              type="number" 
-              placeholder="Costo unitario" 
-              value={costo} 
-              onChange={(e) => setCosto(e.target.value)} 
+              type="number"
+              placeholder="Costo unitario"
+              value={costo}
+              onChange={(e) => setCosto(e.target.value)}
               min="0"
               step="0.01"
-              required 
+              required
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="precioVenta">Precio Venta </label>
-            <input 
+            <input
               id="precioVenta"
-              type="number" 
-              placeholder="Precio de venta" 
-              value={precioUnidad} 
-              onChange={(e) => setPrecioUnidad(e.target.value)} 
+              type="number"
+              placeholder="Precio de venta"
+              value={precioUnidad}
+              onChange={(e) => setPrecioUnidad(e.target.value)}
               min="0"
               step="0.01"
-              required 
+              required
             />
           </div>
 
           {/* NUEVO CAMPO: Fecha de Caducidad */}
           <div className="form-group">
             <label htmlFor="fechaCaducidad">Fecha de Vencimiento</label>
-            <input 
+            <input
               id="fechaCaducidad"
-              type="date" 
-              value={fechaCaducidad} 
-              onChange={(e) => setFechaCaducidad(e.target.value)} 
+              type="date"
+              value={fechaCaducidad}
+              onChange={(e) => setFechaCaducidad(e.target.value)}
             />
           </div>
         </div>
@@ -322,21 +349,23 @@ function Inventario() {
           <button type="submit" disabled={cargandoForm} className="btn-submit">
             {cargandoForm ? '⏳ Guardando...' : (productoIdSeleccionado ? '💾 Actualizar Producto' : '➕ Añadir Producto')}
           </button>
-          
+
           {productoIdSeleccionado && (
             <>
-              <button 
-                type="button" 
-                onClick={handleDelete} 
-                disabled={cargandoForm} 
-                className="btn-eliminar"
-              >
-                🗑️ Eliminar
-              </button>
-              <button 
-                type="button" 
-                onClick={limpiarFormulario} 
-                disabled={cargandoForm} 
+              {usuario?.rol === 'admin' && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={cargandoForm}
+                  className="btn-eliminar"
+                >
+                  🗑️ Eliminar
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={limpiarFormulario}
+                disabled={cargandoForm}
                 className="btn-cancelar"
               >
                 ❌ Cancelar
@@ -350,7 +379,7 @@ function Inventario() {
       <div className="filtros-inventario">
         <h3>Filtrar Productos</h3>
         <div className="filtros-grupo">
-          <input 
+          <input
             type="text"
             placeholder="🔍 Buscar por nombre o tamaño..."
             className="input-filtro"
@@ -358,7 +387,7 @@ function Inventario() {
             onChange={(e) => setFiltroTexto(e.target.value)}
           />
           <div className="filtro-checkbox">
-            <input 
+            <input
               id="filtro-vencidos"
               type="checkbox"
               checked={filtroVencidos}
@@ -400,10 +429,10 @@ function Inventario() {
                 {productosFiltrados.map(producto => {
                   const vencido = estaVencido(producto.fechaCaducidad);
                   const proximo = proximoAVencer(producto.fechaCaducidad);
-                  
+
                   return (
-                    <tr 
-                      key={producto.id} 
+                    <tr
+                      key={producto.id}
                       onClick={() => handleSelectProducto(producto)}
                       className={`
                         ${productoIdSeleccionado === producto.id ? 'fila-seleccionada' : ''}

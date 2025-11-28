@@ -14,11 +14,11 @@ function App() {
   if (!usuario) {
     return <Login alIniciarSesion={setUsuario} />;
   }
-  
+
   // Ahora le pasamos la función de logout al Dashboard
   return (
     <div className="App">
-      <Dashboard alCerrarSesion={handleLogout} />
+      <Dashboard usuario={usuario} alCerrarSesion={handleLogout} />
     </div>
   );
 }

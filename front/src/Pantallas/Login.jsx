@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import Loading from '../components/Loading';
 
 function Login({ alIniciarSesion }) {
@@ -19,7 +20,19 @@ function Login({ alIniciarSesion }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, contraseña);
       // El componente se desmontará al iniciar sesión, así que no es estrictamente necesario setLoading(false)
       // pero por seguridad lo dejamos si la transición no es inmediata.
-      alIniciarSesion(userCredential.user);
+      const user = userCredential.user;
+
+      // Obtener rol desde Firestore
+      const docRef = doc(db, "usuarios", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      let rol = 'cajero'; // Rol por defecto
+      if (docSnap.exists()) {
+        rol = docSnap.data().rol;
+      }
+
+      // Pasar usuario con rol
+      alIniciarSesion({ ...user, rol });
     } catch (err) {
       console.error("Error al iniciar sesión:", err.message);
       setError("Error al iniciar sesión. Verifica tu email y contraseña.");
