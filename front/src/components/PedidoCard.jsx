@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { collection, doc, updateDoc, deleteDoc, addDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import FacturaPedido from './FacturaPedido';
+import { useNotification } from '../context/NotificationContext';
 import '../styles/PedidoCard.css';
 
 function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
+  const { showAlert } = useNotification();
   const [mostrarFactura, setMostrarFactura] = useState(false);
 
   // Validar que el pedido tenga todas las propiedades necesarias
@@ -92,7 +94,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
       onRecargarPedidos();
     } catch (error) {
       console.error('Error al mover pedido:', error);
-      alert(error.message || 'Error al mover el pedido. Intente nuevamente.');
+      showAlert(error.message || 'Error al mover el pedido. Intente nuevamente.', 'error');
     }
   };
 
@@ -104,7 +106,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
       onRecargarPedidos();
     } catch (error) {
       console.error('Error al eliminar pedido:', error);
-      alert('Error al eliminar el pedido. Intente nuevamente.');
+      showAlert('Error al eliminar el pedido. Intente nuevamente.', 'error');
     }
   };
 

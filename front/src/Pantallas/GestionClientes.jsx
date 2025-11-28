@@ -9,9 +9,11 @@ import {
   query,
   orderBy
 } from 'firebase/firestore';
+import { useNotification } from '../context/NotificationContext';
 import '../styles/GestionClientes.css';
 
 function GestionClientes({ usuario }) {
+  const { showAlert } = useNotification();
   // Estados formulario
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
@@ -78,11 +80,11 @@ function GestionClientes({ usuario }) {
   // Validar formulario
   const validarFormulario = () => {
     if (!nombre.trim()) {
-      alert('El nombre es obligatorio');
+      showAlert('El nombre es obligatorio', 'error');
       return false;
     }
     if (!telefono.replace(/\D/g, '').length) {
-      alert('El teléfono debe contener números');
+      showAlert('El teléfono debe contener números', 'error');
       return false;
     }
     return true;
@@ -110,15 +112,15 @@ function GestionClientes({ usuario }) {
       if (clienteIdSeleccionado) {
         const clienteRef = doc(db, 'clientes', clienteIdSeleccionado);
         await updateDoc(clienteRef, datosCliente);
-        alert('✅ Cliente actualizado con éxito!');
+        showAlert('✅ Cliente actualizado con éxito!', 'exito');
       } else {
         await addDoc(collection(db, 'clientes'), datosCliente);
-        alert('✅ Cliente agregado con éxito!');
+        showAlert('✅ Cliente agregado con éxito!', 'exito');
       }
       limpiarFormulario();
     } catch (err) {
       console.error('Error al guardar cliente:', err);
-      alert('❌ Error al guardar cliente');
+      showAlert('❌ Error al guardar cliente', 'error');
     } finally {
       setCargando(false);
     }
@@ -133,11 +135,11 @@ function GestionClientes({ usuario }) {
     try {
       const clienteRef = doc(db, 'clientes', clienteIdSeleccionado);
       await updateDoc(clienteRef, { activo: false });
-      alert('✅ Cliente eliminado con éxito!');
+      showAlert('✅ Cliente eliminado con éxito!', 'exito');
       limpiarFormulario();
     } catch (err) {
       console.error('Error al eliminar cliente:', err);
-      alert('❌ Error al eliminar cliente');
+      showAlert('❌ Error al eliminar cliente', 'error');
     } finally {
       setCargando(false);
     }

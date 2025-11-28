@@ -3,9 +3,11 @@ import { db } from '../firebaseConfig';
 import { doc, updateDoc, increment, Timestamp } from 'firebase/firestore';
 import ModalBuscarProducto from './ModalBuscarProducto';
 import ComprobanteRetiro from './ComprobanteRetiro';
+import { useNotification } from '../context/NotificationContext';
 import '../styles/Inventario.css'; // Reutilizamos estilos o creamos nuevos si es necesario
 
 function RetiroInventario({ onClose }) {
+    const { showAlert } = useNotification();
     const [itemsRetiro, setItemsRetiro] = useState([]);
     const [responsable, setResponsable] = useState('');
     const [destino, setDestino] = useState('');
@@ -18,7 +20,7 @@ function RetiroInventario({ onClose }) {
     const agregarProducto = (producto) => {
         const existe = itemsRetiro.find(item => item.id === producto.id);
         if (existe) {
-            alert('El producto ya está en la lista. Ajusta la cantidad si necesitas más.');
+            showAlert('El producto ya está en la lista. Ajusta la cantidad si necesitas más.', 'info');
             return;
         }
         setItemsRetiro([...itemsRetiro, { ...producto, cantidad: 1 }]);
@@ -33,7 +35,7 @@ function RetiroInventario({ onClose }) {
             if (item.id === id) {
                 // Validar stock disponible
                 if (cantidad > item.stock) {
-                    alert(`Solo hay ${item.stock} unidades disponibles de ${item.nombre}`);
+                    showAlert(`Solo hay ${item.stock} unidades disponibles de ${item.nombre}`, 'error');
                     return item;
                 }
                 return { ...item, cantidad };
@@ -50,11 +52,11 @@ function RetiroInventario({ onClose }) {
     // Procesar el retiro
     const handleConfirmarRetiro = async () => {
         if (itemsRetiro.length === 0) {
-            alert('Agrega al menos un producto para retirar.');
+            showAlert('Agrega al menos un producto para retirar.', 'error');
             return;
         }
         if (!responsable.trim()) {
-            alert('Debes indicar quién retira los productos.');
+            showAlert('Debes indicar quién retira los productos.', 'error');
             return;
         }
 
@@ -88,7 +90,7 @@ function RetiroInventario({ onClose }) {
 
         } catch (error) {
             console.error("Error al procesar retiro:", error);
-            alert("Hubo un error al procesar el retiro. Revisa la consola.");
+            showAlert("Hubo un error al procesar el retiro. Revisa la consola.", 'error');
         } finally {
             setProcesando(false);
         }

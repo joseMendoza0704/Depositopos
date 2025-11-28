@@ -5,8 +5,10 @@ import ModalAgregarProducto from './ModalAgregarProducto';
 import { collection, addDoc, Timestamp, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import FacturaPedido from './FacturaPedido';
+import { useNotification } from '../context/NotificationContext';
 
 function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
+  const { showAlert } = useNotification();
   const [showBuscarCliente, setShowBuscarCliente] = useState(!pedidoParaEditar);
   const [showBuscarProducto, setShowBuscarProducto] = useState(false);
   const [showAgregarProducto, setShowAgregarProducto] = useState(false);
@@ -42,7 +44,7 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
 
   const handleCrearPedido = async () => {
     if (!cliente || items.length === 0) {
-      alert('Debe seleccionar un cliente y al menos un producto.');
+      showAlert('Debe seleccionar un cliente y al menos un producto.', 'error');
       return;
     }
 
@@ -78,7 +80,7 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
         fechaCreacion: pedidoParaEditar?.fechaCreacion || Timestamp.now(),
         total: Number(total)
       };
-  
+
       console.log('Guardando pedido:', pedidoData); // Para debug
 
       try {
@@ -97,23 +99,23 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
           if (docRef.id) {
             console.log('Pedido guardado con ID:', docRef.id);
             const pedidoConId = { ...pedidoData, id: docRef.id };
-            
+
             // Primero notificamos la creación
             if (onCrear) {
               onCrear(pedidoConId);
             }
-            
+
             // Luego mostramos la factura
             setShowFactura(true);
           }
         }
       } catch (error) {
         console.error('Error al guardar pedido:', error);
-        alert('Error al guardar el pedido: ' + error.message);
+        showAlert('Error al guardar el pedido: ' + error.message, 'error');
       }
     } catch (error) {
       console.error('Error al crear pedido:', error);
-      alert('Error al crear el pedido. Por favor, intente nuevamente.\nError: ' + error.message);
+      showAlert('Error al crear el pedido. Por favor, intente nuevamente.\nError: ' + error.message, 'error');
     }
   };
 
@@ -130,11 +132,11 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
         {!showBuscarCliente && !showBuscarProducto && !showAgregarProducto && !showFactura && (
           <>
             <h3>Nuevo Pedido</h3>
-            
+
             <div className="cliente-seleccionado">
               <div className="cliente-header">
                 <h4>Cliente:</h4>
-                <button 
+                <button
                   onClick={() => setShowBuscarCliente(true)}
                   className="boton-cambiar-cliente"
                 >
@@ -152,7 +154,7 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
                     <span>{item.cantidad}x {item.nombre} ({item.formato})</span>
                     <span>L. {item.subtotal.toFixed(2)}</span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       const nuevosItems = items.filter((_, i) => i !== index);
                       setItems(nuevosItems);
@@ -164,20 +166,20 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
                   </button>
                 </div>
               ))}
-              
+
               <div className="total-row">
                 <strong>Total: L. {total.toFixed(2)}</strong>
               </div>
             </div>
 
             <div className="modal-botones">
-              <button 
+              <button
                 onClick={() => setShowBuscarProducto(true)}
                 className="boton-modal-agregar"
               >
                 + Agregar Producto
               </button>
-              <button 
+              <button
                 onClick={handleCrearPedido}
                 className="boton-modal-agregar"
                 disabled={items.length === 0}

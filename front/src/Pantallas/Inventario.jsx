@@ -12,12 +12,14 @@ import {
 } from 'firebase/firestore';
 import '../styles/Inventario.css';
 import RetiroInventario from '../components/RetiroInventario'; // Importar componente
+import { useNotification } from '../context/NotificationContext';
 
 /**
  * Componente de Gestión de Inventario
  * Permite crear, editar, eliminar y visualizar productos
  */
 function Inventario({ usuario }) {
+  const { showAlert } = useNotification();
   // --- Estados del Formulario ---
   const [nombre, setNombre] = useState('');
   const [tamaño, setTamaño] = useState('');
@@ -93,23 +95,23 @@ function Inventario({ usuario }) {
   // --- Valida el formulario ---
   const validarFormulario = () => {
     if (!nombre.trim()) {
-      alert('El nombre del producto es requerido');
+      showAlert('El nombre del producto es requerido', 'error');
       return false;
     }
     if (!tamaño.trim()) {
-      alert('El tamaño del producto es requerido');
+      showAlert('El tamaño del producto es requerido', 'error');
       return false;
     }
     if (!stock || Number(stock) < 0) {
-      alert('El stock debe ser un número válido mayor o igual a 0');
+      showAlert('El stock debe ser un número válido mayor o igual a 0', 'error');
       return false;
     }
     if (!costo || Number(costo) < 0) {
-      alert('El costo debe ser un número válido mayor o igual a 0');
+      showAlert('El costo debe ser un número válido mayor o igual a 0', 'error');
       return false;
     }
     if (!precioUnidad || Number(precioUnidad) < 0) {
-      alert('El precio de venta debe ser un número válido mayor o igual a 0');
+      showAlert('El precio de venta debe ser un número válido mayor o igual a 0', 'error');
       return false;
     }
     return true;
@@ -154,17 +156,17 @@ function Inventario({ usuario }) {
         // --- MODO ACTUALIZAR ---
         const productoDoc = doc(db, 'productos', productoIdSeleccionado);
         await updateDoc(productoDoc, datosProducto);
-        alert("✅ ¡Producto actualizado con éxito!");
+        showAlert("✅ ¡Producto actualizado con éxito!", 'exito');
       } else {
         // --- MODO CREAR ---
         const productosCollection = collection(db, 'productos');
         await addDoc(productosCollection, datosProducto);
-        alert("✅ ¡Producto agregado con éxito!");
+        showAlert("✅ ¡Producto agregado con éxito!", 'exito');
       }
       limpiarFormulario();
     } catch (error) {
       console.error("Error al guardar el producto:", error);
-      alert("❌ Error al guardar el producto. Revisa la consola.");
+      showAlert("❌ Error al guardar el producto. Revisa la consola.", 'error');
     } finally {
       setCargandoForm(false);
     }
@@ -183,11 +185,11 @@ function Inventario({ usuario }) {
     try {
       const productoDoc = doc(db, 'productos', productoIdSeleccionado);
       await deleteDoc(productoDoc);
-      alert("✅ ¡Producto eliminado con éxito!");
+      showAlert("✅ ¡Producto eliminado con éxito!", 'exito');
       limpiarFormulario();
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
-      alert("❌ Error al eliminar el producto. Revisa la consola.");
+      showAlert("❌ Error al eliminar el producto. Revisa la consola.", 'error');
     } finally {
       setCargandoForm(false);
     }
