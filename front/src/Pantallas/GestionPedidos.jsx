@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebaseConfig.js';
-import { collection, query, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
+// Asegúrate de que las rutas sean correctas
+import { db, auth } from '../firebaseConfig.js';
+import { collection, query, where, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
 import ModalNuevoPedido from '../components/ModalNuevoPedido.jsx';
 import PedidoCard from '../components/PedidoCard.jsx';
 import '../styles/pedidos.css';
@@ -9,10 +10,15 @@ import '../styles/pedidos.css';
 const ColumnaCarrusel = ({ titulo, pedidos, colorHeader, onEdit, textoVacio }) => {
   const [indiceActual, setIndiceActual] = useState(0);
 
-  // Resetear índice si cambia la longitud de pedidos (ej. filtro o nuevos pedidos)
+  // Resetear o ajustar índice si cambia la lista de pedidos
   useEffect(() => {
-    setIndiceActual(0);
-  }, [pedidos.length]);
+    if (pedidos.length === 0) {
+      setIndiceActual(0);
+    } else if (indiceActual >= pedidos.length) {
+      // Si el índice actual se sale del rango (ej. borraste el último), regresa al anterior válido
+      setIndiceActual(Math.max(0, pedidos.length - 1));
+    }
+  }, [pedidos.length, indiceActual]);
 
   const handlePrev = () => {
     setIndiceActual(prev => (prev > 0 ? prev - 1 : prev));
@@ -22,6 +28,7 @@ const ColumnaCarrusel = ({ titulo, pedidos, colorHeader, onEdit, textoVacio }) =
     setIndiceActual(prev => (prev < pedidos.length - 1 ? prev + 1 : prev));
   };
 
+  // Obtener el pedido actual de forma segura
   const pedidoActual = pedidos[indiceActual];
 
   return (
@@ -31,7 +38,8 @@ const ColumnaCarrusel = ({ titulo, pedidos, colorHeader, onEdit, textoVacio }) =
       </div>
 
       <div className="carrusel-container">
-        {pedidos.length > 0 ? (
+        {/* CORRECCIÓN: Verificamos que pedidoActual exista antes de renderizar */}
+        {pedidos.length > 0 && pedidoActual ? (
           <>
             <div className="carrusel-controles">
               <button
@@ -50,7 +58,7 @@ const ColumnaCarrusel = ({ titulo, pedidos, colorHeader, onEdit, textoVacio }) =
               <button
                 className="btn-carrusel"
                 onClick={handleNext}
-                disabled={indiceActual === pedidos.length - 1}
+                disabled={indiceActual >= pedidos.length - 1}
                 title="Siguiente"
               >
                 ›
@@ -73,30 +81,39 @@ const ColumnaCarrusel = ({ titulo, pedidos, colorHeader, onEdit, textoVacio }) =
   );
 };
 
-// --- Componente Principal ---
+//Componente principal de la pantalla de Pedidos
+// Recibe 'cajaActual' desde el Dashboard para saber si puede crear pedidos
 function GestionPedidos({ cajaActual }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Empezamos en false, se activará al cargar datos
   const [pedidos, setPedidos] = useState([]);
-  const [filtro, setFiltro] = useState('');
+  const [filtro, setFiltro] = useState(''); // Para el buscador
   const [showNuevoPedido, setShowNuevoPedido] = useState(false);
   const [pedidoParaEditar, setPedidoParaEditar] = useState(null);
 
+  // Función para manejar la edición de pedidos
   const handleEditarPedido = (pedido) => {
     setPedidoParaEditar(pedido);
     setShowNuevoPedido(true);
   };
 
+  // Efecto para suscribirse a los cambios en pedidos
   useEffect(() => {
     setLoading(true);
+
+    // Crear la consulta ordenada por fecha de creación descendente
     const pedidosRef = collection(db, 'pedidos');
-    // Ordenamos por fecha para que salgan primero los nuevos
     const q = query(pedidosRef, orderBy('fechaCreacion', 'desc'));
 
+    // Suscribirse a los cambios
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const pedidosData = querySnapshot.docs.map(doc => {
         const data = doc.data();
-        if (!data.items || !Array.isArray(data.items)) data.items = [];
+        // Validar que el documento tenga los campos necesarios
+        if (!data.items || !Array.isArray(data.items)) {
+          data.items = [];
+        }
 
+        // Construir el objeto pedido con la estructura correcta
         return {
           id: doc.id,
           cliente: {
@@ -129,45 +146,60 @@ function GestionPedidos({ cajaActual }) {
       setLoading(false);
     });
 
+    // Limpiar la suscripción al desmontar
     return () => unsubscribe();
   }, []);
 
+  // Lógica para filtrar pedidos con validación
   const pedidosFiltrados = pedidos.filter(p => {
     if (!p || !p.cliente) return false;
+
     const termino = filtro.toLowerCase();
-    const nombreMatch = p.cliente.nombre ? p.cliente.nombre.toLowerCase().includes(termino) : false;
-    const telefonoMatch = p.cliente.telefono ? String(p.cliente.telefono).includes(termino) : false;
+    const nombreMatch = p.cliente.nombre ?
+      p.cliente.nombre.toLowerCase().includes(termino) :
+      false;
+
+    const telefonoMatch = p.cliente.telefono ?
+      String(p.cliente.telefono).includes(termino) :
+      false;
+
     return nombreMatch || telefonoMatch;
   });
 
+  // Filtra por estado para las columnas
   const pedidosRecibidos = pedidosFiltrados.filter(p => p.estado === 'recibido');
   const pedidosEnviados = pedidosFiltrados.filter(p => p.estado === 'enviado');
   const pedidosPagados = pedidosFiltrados.filter(p => p.estado === 'pagado');
 
   return (
     <div className="tablero-pedidos">
+
+      {/* Header: Título, Botón y Filtro */}
       <div className="controles-tablero">
         <h2>Gestión de Pedidos</h2>
+        {/* Usamos el estilo del botón del POS pero lo personalizamos */}
         <button
           className="pos-button"
           style={{ backgroundColor: '#6c757d', borderColor: '#6c757d', color: 'white', flexGrow: 0.5 }}
-          disabled={!cajaActual}
+          disabled={!cajaActual} // Deshabilitado si la caja está cerrada
           onClick={() => setShowNuevoPedido(true)}
         >
           + Nuevo Pedido
         </button>
       </div>
 
+      {/* Filtro de Búsqueda */}
       <div className="controles-tablero-filtro">
         <input
           type="text"
           placeholder="Buscar por nombre o teléfono de cliente..."
-          className="pos-search-bar"
+          className="pos-search-bar" // Reutilizamos el estilo del POS
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
         />
       </div>
 
+      {/* Modal para crear/editar pedido */}
       {showNuevoPedido && (
         <ModalNuevoPedido
           pedidoParaEditar={pedidoParaEditar}
@@ -182,6 +214,7 @@ function GestionPedidos({ cajaActual }) {
         />
       )}
 
+      {/* Mensaje de Caja Cerrada */}
       {loading && <p>Cargando pedidos...</p>}
       {!cajaActual && !loading && (
         <p className="advertencia-caja-cerrada">
@@ -189,7 +222,9 @@ function GestionPedidos({ cajaActual }) {
         </p>
       )}
 
+      {/* --- Tablero de 3 Columnas (Carrusel) --- */}
       <div className="columnas-pedidos">
+
         <ColumnaCarrusel
           titulo="Recibido"
           pedidos={pedidosRecibidos}
