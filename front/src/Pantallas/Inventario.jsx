@@ -11,15 +11,16 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import '../styles/Inventario.css';
-import RetiroInventario from '../components/RetiroInventario'; // Importar componente
+import RetiroInventario from '../components/RetiroInventario';
+import ModalTransformarProducto from '../components/ModalTransformarProducto'; // <--- NUEVO IMPORT
 import { useNotification } from '../context/NotificationContext';
 
 /**
  * Componente de Gestión de Inventario
- * Permite crear, editar, eliminar y visualizar productos
  */
 function Inventario({ usuario }) {
   const { showAlert } = useNotification();
+
   // --- Estados del Formulario ---
   const [nombre, setNombre] = useState('');
   const [tamaño, setTamaño] = useState('');
@@ -33,7 +34,9 @@ function Inventario({ usuario }) {
   const [productos, setProductos] = useState([]);
   const [cargandoProductos, setCargandoProductos] = useState(true);
   const [productoIdSeleccionado, setProductoIdSeleccionado] = useState(null);
-  const [mostrarRetiro, setMostrarRetiro] = useState(false); // Estado para mostrar modal de retiro
+
+  const [mostrarRetiro, setMostrarRetiro] = useState(false);
+  const [mostrarTransformar, setMostrarTransformar] = useState(false); // <--- NUEVO ESTADO
 
   // --- Estados de Filtros ---
   const [filtroTexto, setFiltroTexto] = useState('');
@@ -82,7 +85,6 @@ function Inventario({ usuario }) {
     setCosto(producto.precioCostoUnidad ?? '');
     setPrecioUnidad(producto.formatosVenta?.[0]?.precio ?? '');
 
-    // Convertir Timestamp a formato de input date (YYYY-MM-DD)
     if (producto.fechaCaducidad) {
       const fecha = producto.fechaCaducidad.toDate();
       const fechaFormateada = fecha.toISOString().split('T')[0];
@@ -126,7 +128,6 @@ function Inventario({ usuario }) {
 
     setCargandoForm(true);
 
-    // Preparar datos del producto
     const datosProducto = {
       nombre: nombre.trim(),
       tamaño: tamaño.trim(),
@@ -142,7 +143,6 @@ function Inventario({ usuario }) {
       activo: true
     };
 
-    // Agregar fecha de caducidad si existe
     if (fechaCaducidad) {
       const fecha = new Date(fechaCaducidad);
       fecha.setHours(0, 0, 0, 0);
@@ -153,12 +153,10 @@ function Inventario({ usuario }) {
 
     try {
       if (productoIdSeleccionado) {
-        // --- MODO ACTUALIZAR ---
         const productoDoc = doc(db, 'productos', productoIdSeleccionado);
         await updateDoc(productoDoc, datosProducto);
         showAlert("✅ ¡Producto actualizado con éxito!", 'exito');
       } else {
-        // --- MODO CREAR ---
         const productosCollection = collection(db, 'productos');
         await addDoc(productosCollection, datosProducto);
         showAlert("✅ ¡Producto agregado con éxito!", 'exito');
@@ -166,22 +164,17 @@ function Inventario({ usuario }) {
       limpiarFormulario();
     } catch (error) {
       console.error("Error al guardar el producto:", error);
-      showAlert("❌ Error al guardar el producto. Revisa la consola.", 'error');
+      showAlert("❌ Error al guardar el producto.", 'error');
     } finally {
       setCargandoForm(false);
     }
   };
 
-  // --- Elimina un producto ---
   const handleDelete = async () => {
     if (!productoIdSeleccionado) return;
-
-    if (!window.confirm(`¿Estás seguro de eliminar "${nombre}"?`)) {
-      return;
-    }
+    if (!window.confirm(`¿Estás seguro de eliminar "${nombre}"?`)) return;
 
     setCargandoForm(true);
-
     try {
       const productoDoc = doc(db, 'productos', productoIdSeleccionado);
       await deleteDoc(productoDoc);
@@ -189,16 +182,14 @@ function Inventario({ usuario }) {
       limpiarFormulario();
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
-      showAlert("❌ Error al eliminar el producto. Revisa la consola.", 'error');
+      showAlert("❌ Error al eliminar el producto.", 'error');
     } finally {
       setCargandoForm(false);
     }
   };
 
-  // --- Filtra productos ---
   const productosFiltrados = useMemo(() => {
     return productos.filter(producto => {
-      // Filtro por texto
       if (filtroTexto) {
         const textoLower = filtroTexto.toLowerCase();
         const nombreMatch = producto.nombre?.toLowerCase().includes(textoLower);
@@ -206,7 +197,6 @@ function Inventario({ usuario }) {
         if (!nombreMatch && !tamañoMatch) return false;
       }
 
-      // Filtro por vencidos
       if (filtroVencidos && producto.fechaCaducidad) {
         const ahora = new Date();
         const fechaCad = producto.fechaCaducidad.toDate();
@@ -217,7 +207,6 @@ function Inventario({ usuario }) {
     });
   }, [productos, filtroTexto, filtroVencidos]);
 
-  // --- Verifica si un producto está vencido ---
   const estaVencido = (fechaCaducidad) => {
     if (!fechaCaducidad) return false;
     const ahora = new Date();
@@ -225,7 +214,6 @@ function Inventario({ usuario }) {
     return fechaCad < ahora;
   };
 
-  // --- Verifica si un producto está próximo a vencer (7 días) ---
   const proximoAVencer = (fechaCaducidad) => {
     if (!fechaCaducidad) return false;
     const ahora = new Date();
@@ -236,31 +224,61 @@ function Inventario({ usuario }) {
 
   return (
     <div className="inventario-container">
-      <div className="inventario-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div className="inventario-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <h2>Gestión de Inventario</h2>
-        <button
-          className="btn-retiro"
-          onClick={() => setMostrarRetiro(true)}
-          style={{
-            backgroundColor: '#ffc107',
-            color: '#333',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}
-        >
-          📤 Retiro de Productos
-        </button>
+
+        <div style={{ display: 'flex', gap: '10px' }}>
+          {/* BOTÓN NUEVO: Transformar */}
+          <button
+            onClick={() => setMostrarTransformar(true)}
+            style={{
+              backgroundColor: '#3498db', // Azul
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+          >
+            🔄 Transformar / Mezclar
+          </button>
+
+          <button
+            className="btn-retiro"
+            onClick={() => setMostrarRetiro(true)}
+            style={{
+              backgroundColor: '#ffc107', // Amarillo
+              color: '#333',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+          >
+            📤 Retiro de Productos
+          </button>
+        </div>
       </div>
 
-      {/* --- Modal de Retiro --- */}
+      {/* --- Modales --- */}
       {mostrarRetiro && (
         <RetiroInventario onClose={() => setMostrarRetiro(false)} />
+      )}
+
+      {/* --- Nuevo Modal --- */}
+      {mostrarTransformar && (
+        <ModalTransformarProducto
+          onClose={() => setMostrarTransformar(false)}
+          productos={productos}
+        />
       )}
 
       {/* --- Formulario --- */}
@@ -335,7 +353,6 @@ function Inventario({ usuario }) {
             />
           </div>
 
-          {/* NUEVO CAMPO: Fecha de Caducidad */}
           <div className="form-group">
             <label htmlFor="fechaCaducidad">Fecha de Vencimiento</label>
             <input
@@ -377,7 +394,7 @@ function Inventario({ usuario }) {
         </div>
       </form>
 
-      {/* --- Filtros --- */}
+      {/* --- Filtros y Tabla --- */}
       <div className="filtros-inventario">
         <h3>Filtrar Productos</h3>
         <div className="filtros-grupo">
@@ -403,7 +420,6 @@ function Inventario({ usuario }) {
         </p>
       </div>
 
-      {/* --- Tabla de Productos --- */}
       <div className="lista-productos">
         <h3>📦 Productos Actuales</h3>
         {cargandoProductos ? (
