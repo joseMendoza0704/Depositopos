@@ -1,44 +1,102 @@
 import React, { useState, useEffect } from 'react';
-// Asegúrate de que las rutas sean correctas
-import { db, auth } from '../firebaseConfig.js'; 
-import { collection, query, where, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
+import { db } from '../firebaseConfig.js';
+import { collection, query, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
 import ModalNuevoPedido from '../components/ModalNuevoPedido.jsx';
 import PedidoCard from '../components/PedidoCard.jsx';
 import '../styles/pedidos.css';
 
-// Componente principal de la pantalla de Pedidos
-// Recibe 'cajaActual' desde el Dashboard para saber si puede crear pedidos
+// --- Sub-componente para manejar el Carrusel de cada columna ---
+const ColumnaCarrusel = ({ titulo, pedidos, colorHeader, onEdit, textoVacio }) => {
+  const [indiceActual, setIndiceActual] = useState(0);
+
+  // Resetear índice si cambia la longitud de pedidos (ej. filtro o nuevos pedidos)
+  useEffect(() => {
+    setIndiceActual(0);
+  }, [pedidos.length]);
+
+  const handlePrev = () => {
+    setIndiceActual(prev => (prev > 0 ? prev - 1 : prev));
+  };
+
+  const handleNext = () => {
+    setIndiceActual(prev => (prev < pedidos.length - 1 ? prev + 1 : prev));
+  };
+
+  const pedidoActual = pedidos[indiceActual];
+
+  return (
+    <div className="columna-pedido">
+      <div className="columna-header" style={{ backgroundColor: colorHeader, color: colorHeader === '#ffc107' ? '#333' : 'white' }}>
+        <h3>{titulo} ({pedidos.length})</h3>
+      </div>
+
+      <div className="carrusel-container">
+        {pedidos.length > 0 ? (
+          <>
+            <div className="carrusel-controles">
+              <button
+                className="btn-carrusel"
+                onClick={handlePrev}
+                disabled={indiceActual === 0}
+                title="Anterior"
+              >
+                ‹
+              </button>
+
+              <span className="carrusel-contador">
+                {indiceActual + 1} / {pedidos.length}
+              </span>
+
+              <button
+                className="btn-carrusel"
+                onClick={handleNext}
+                disabled={indiceActual === pedidos.length - 1}
+                title="Siguiente"
+              >
+                ›
+              </button>
+            </div>
+
+            {/* Renderizamos solo el pedido actual */}
+            <PedidoCard
+              key={pedidoActual.id}
+              pedido={pedidoActual}
+              onEdit={onEdit}
+              onRecargarPedidos={() => { }} // Automático por snapshot
+            />
+          </>
+        ) : (
+          <p className="columna-vacia-msg">{textoVacio}</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- Componente Principal ---
 function GestionPedidos({ cajaActual }) {
-  const [loading, setLoading] = useState(false); // Empezamos en false, se activará al cargar datos
+  const [loading, setLoading] = useState(false);
   const [pedidos, setPedidos] = useState([]);
-  const [filtro, setFiltro] = useState(''); // Para el buscador
+  const [filtro, setFiltro] = useState('');
   const [showNuevoPedido, setShowNuevoPedido] = useState(false);
   const [pedidoParaEditar, setPedidoParaEditar] = useState(null);
 
-  // Función para manejar la edición de pedidos
   const handleEditarPedido = (pedido) => {
     setPedidoParaEditar(pedido);
     setShowNuevoPedido(true);
   };
 
-  // Efecto para suscribirse a los cambios en pedidos
   useEffect(() => {
     setLoading(true);
-    
-    // Crear la consulta ordenada por fecha de creación descendente
     const pedidosRef = collection(db, 'pedidos');
+    // Ordenamos por fecha para que salgan primero los nuevos
     const q = query(pedidosRef, orderBy('fechaCreacion', 'desc'));
 
-    // Suscribirse a los cambios
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const pedidosData = querySnapshot.docs.map(doc => {
         const data = doc.data();
-        // Validar que el documento tenga los campos necesarios
-        if (!data.items || !Array.isArray(data.items)) {
-          data.items = [];
-        }
-        
-        // Construir el objeto pedido con la estructura correcta
+        if (!data.items || !Array.isArray(data.items)) data.items = [];
+
         return {
           id: doc.id,
           cliente: {
@@ -63,7 +121,7 @@ function GestionPedidos({ cajaActual }) {
           total: Number(data.total) || 0
         };
       });
-      
+
       setPedidos(pedidosData);
       setLoading(false);
     }, (error) => {
@@ -71,59 +129,45 @@ function GestionPedidos({ cajaActual }) {
       setLoading(false);
     });
 
-    // Limpiar la suscripción al desmontar
     return () => unsubscribe();
   }, []);
 
-  // Lógica para filtrar pedidos con validación
   const pedidosFiltrados = pedidos.filter(p => {
     if (!p || !p.cliente) return false;
-    
-    const nombreMatch = p.cliente.nombre ? 
-      p.cliente.nombre.toLowerCase().includes(filtro.toLowerCase()) : 
-      false;
-    
-    const telefonoMatch = p.cliente.telefono ? 
-      String(p.cliente.telefono).includes(filtro) : 
-      false;
-    
+    const termino = filtro.toLowerCase();
+    const nombreMatch = p.cliente.nombre ? p.cliente.nombre.toLowerCase().includes(termino) : false;
+    const telefonoMatch = p.cliente.telefono ? String(p.cliente.telefono).includes(termino) : false;
     return nombreMatch || telefonoMatch;
   });
 
-  // Filtra por estado para las columnas
   const pedidosRecibidos = pedidosFiltrados.filter(p => p.estado === 'recibido');
   const pedidosEnviados = pedidosFiltrados.filter(p => p.estado === 'enviado');
   const pedidosPagados = pedidosFiltrados.filter(p => p.estado === 'pagado');
 
   return (
     <div className="tablero-pedidos">
-      
-      {/* Header: Título, Botón y Filtro */}
       <div className="controles-tablero">
         <h2>Gestión de Pedidos</h2>
-        {/* Usamos el estilo del botón del POS pero lo personalizamos */}
-        <button 
-          className="pos-button" 
+        <button
+          className="pos-button"
           style={{ backgroundColor: '#6c757d', borderColor: '#6c757d', color: 'white', flexGrow: 0.5 }}
-          disabled={!cajaActual} // Deshabilitado si la caja está cerrada
+          disabled={!cajaActual}
           onClick={() => setShowNuevoPedido(true)}
         >
           + Nuevo Pedido
         </button>
       </div>
-      
-      {/* Filtro de Búsqueda */}
+
       <div className="controles-tablero-filtro">
-        <input 
+        <input
           type="text"
           placeholder="Buscar por nombre o teléfono de cliente..."
-          className="pos-search-bar" // Reutilizamos el estilo del POS
+          className="pos-search-bar"
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
         />
       </div>
 
-      {/* Modal para crear/editar pedido */}
       {showNuevoPedido && (
         <ModalNuevoPedido
           pedidoParaEditar={pedidoParaEditar}
@@ -138,76 +182,37 @@ function GestionPedidos({ cajaActual }) {
         />
       )}
 
-      {/* Mensaje de Caja Cerrada */}
       {loading && <p>Cargando pedidos...</p>}
       {!cajaActual && !loading && (
-          <p className="advertencia-caja-cerrada">
-            La caja está cerrada. No puedes crear nuevos pedidos ni marcarlos como pagados.
-          </p>
+        <p className="advertencia-caja-cerrada">
+          La caja está cerrada. No puedes crear nuevos pedidos ni marcarlos como pagados.
+        </p>
       )}
 
-      {/* --- Tablero de 3 Columnas --- */}
       <div className="columnas-pedidos">
-        
-        {/* Columna Recibido */}
-        <div className="columna-pedido">
-          <div className="columna-header" style={{ backgroundColor: '#ffc107', color: '#333' }}>
-            <h3>Recibido ({pedidosRecibidos.length})</h3>
-          </div>
-          <div className="columna-body">
-            {pedidosRecibidos.map((pedido) => (
-              <PedidoCard
-                key={pedido.id}
-                pedido={pedido}
-                onEdit={handleEditarPedido}
-                onRecargarPedidos={() => {
-                  // La recarga es automática por el onSnapshot
-                }}
-              />
-            ))}
-            {pedidosRecibidos.length === 0 && <p className="columna-vacia-msg">No hay pedidos recibidos.</p>}
-          </div>
-        </div>
-        
-        {/* Columna Enviado */}
-        <div className="columna-pedido">
-          <div className="columna-header" style={{ backgroundColor: '#007bff' }}>
-            <h3>Enviado ({pedidosEnviados.length})</h3>
-          </div>
-          <div className="columna-body">
-            {pedidosEnviados.map((pedido) => (
-              <PedidoCard
-                key={pedido.id}
-                pedido={pedido}
-                onEdit={handleEditarPedido}
-                onRecargarPedidos={() => {
-                  // La recarga es automática por el onSnapshot
-                }}
-              />
-            ))}
-            {pedidosEnviados.length === 0 && <p className="columna-vacia-msg">No hay pedidos en ruta.</p>}
-          </div>
-        </div>
-        
-        {/* Columna Pagado (Hoy) */}
-        <div className="columna-pedido">
-          <div className="columna-header" style={{ backgroundColor: '#28a745' }}>
-            <h3>Pagado (Hoy) ({pedidosPagados.length})</h3>
-          </div>
-          <div className="columna-body">
-            {pedidosPagados.map((pedido) => (
-              <PedidoCard
-                key={pedido.id}
-                pedido={pedido}
-                onEdit={handleEditarPedido}
-                onRecargarPedidos={() => {
-                  // La recarga es automática por el onSnapshot
-                }}
-              />
-            ))}
-            {pedidosPagados.length === 0 && <p className="columna-vacia-msg">No hay pedidos pagados hoy.</p>}
-          </div>
-        </div>
+        <ColumnaCarrusel
+          titulo="Recibido"
+          pedidos={pedidosRecibidos}
+          colorHeader="#ffc107"
+          onEdit={handleEditarPedido}
+          textoVacio="No hay pedidos recibidos."
+        />
+
+        <ColumnaCarrusel
+          titulo="Enviado"
+          pedidos={pedidosEnviados}
+          colorHeader="#007bff"
+          onEdit={handleEditarPedido}
+          textoVacio="No hay pedidos en ruta."
+        />
+
+        <ColumnaCarrusel
+          titulo="Pagado (Hoy)"
+          pedidos={pedidosPagados}
+          colorHeader="#28a745"
+          onEdit={handleEditarPedido}
+          textoVacio="No hay pedidos pagados hoy."
+        />
       </div>
     </div>
   );
