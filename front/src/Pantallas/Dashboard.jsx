@@ -205,17 +205,15 @@ function Dashboard({ alCerrarSesion, usuario }) {
               <span className="menu-text">Pedidos</span>
             </button>
           </li>
-          {usuario?.rol === 'admin' && (
-            <li>
-              <button
-                onClick={() => setVistaActual('reportes')}
-                className={vistaActual === 'reportes' ? 'active' : ''}
-              >
-                <span className="menu-icon-badge">📊</span>
-                <span className="menu-text">Reportes</span>
-              </button>
-            </li>
-          )}
+          <li>
+            <button
+              onClick={() => setVistaActual('reportes')}
+              className={vistaActual === 'reportes' ? 'active' : ''}
+            >
+              <span className="menu-icon-badge">📊</span>
+              <span className="menu-text">Reportes</span>
+            </button>
+          </li>
         </ul>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="logout-button">

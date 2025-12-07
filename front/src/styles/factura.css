@@ -282,6 +282,8 @@
 
     /* Ocultar todo excepto la factura */
     body * {
+        color: #000 !important;
+        font-weight: bold !important;
         visibility: hidden;
     }
 
