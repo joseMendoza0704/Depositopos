@@ -43,7 +43,7 @@ export const getProductosMasVendidos = async (fechaInicio, fechaFin) => {
                     productosMap[key] = { nombre: item.nombre, cantidad: 0, total: 0 };
                 }
                 productosMap[key].cantidad += (item.cantidad || 0);
-                productosMap[key].total += (item.total || 0); // Asumiendo que item tiene total, si no calcular
+                productosMap[key].total += (item.subtotal || 0); // Usar subtotal que es el campo correcto
             });
         }
     });
