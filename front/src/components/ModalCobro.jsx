@@ -1,7 +1,9 @@
 // En: src/components/ModalCobro.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { useNotification } from '../context/NotificationContext';
 
 function ModalCobro({ totalAPagar, onClose, onConfirmarVenta }) {
+  const { showAlert } = useNotification();
   const [dineroRecibido, setDineroRecibido] = useState('');
   const [vuelto, setVuelto] = useState(0);
 
@@ -29,7 +31,7 @@ function ModalCobro({ totalAPagar, onClose, onConfirmarVenta }) {
   const handleConfirmClick = () => {
     const recibidoNum = Number(dineroRecibido) || 0;
     if (recibidoNum < totalAPagar) {
-      alert("El monto recibido no puede ser menor al total.");
+      showAlert("El monto recibido no puede ser menor al total.", 'error');
       return;
     }
     // Llama a la función de 'PuntoDeVenta' para guardar la venta
@@ -40,7 +42,7 @@ function ModalCobro({ totalAPagar, onClose, onConfirmarVenta }) {
     <div className="modal-backdrop">
       <div className="modal-content cobro-modal">
         <h3>Realizar Cobro</h3>
-        
+
         <div className="cobro-display">
           <div className="cobro-total">
             <span>Total a Pagar:</span>
@@ -54,8 +56,8 @@ function ModalCobro({ totalAPagar, onClose, onConfirmarVenta }) {
 
         <div className="form-group">
           <label>Dinero Recibido:</label>
-          <input 
-            type="number" 
+          <input
+            type="number"
             className="cobro-input"
             value={dineroRecibido}
             onChange={(e) => setDineroRecibido(e.target.value)}
@@ -66,8 +68,8 @@ function ModalCobro({ totalAPagar, onClose, onConfirmarVenta }) {
         </div>
 
         <div className="modal-botones">
-          <button 
-            onClick={handleConfirmClick} 
+          <button
+            onClick={handleConfirmClick}
             className="boton-modal-agregar"
             // Deshabilita el botón si no se ha pagado completo
             disabled={Number(dineroRecibido) < totalAPagar}

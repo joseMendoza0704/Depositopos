@@ -2,23 +2,18 @@ import React, { useState } from 'react';
 import { collection, doc, updateDoc, deleteDoc, addDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import FacturaPedido from './FacturaPedido';
+import { useNotification } from '../context/NotificationContext';
+import '../styles/PedidoCard.css'; // Asegúrate de que el CSS esté importado
 
 function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
+  const { showAlert } = useNotification();
   const [mostrarFactura, setMostrarFactura] = useState(false);
 
-  // Validar que el pedido tenga todas las propiedades necesarias
   if (!pedido || !pedido.cliente || !pedido.items || !Array.isArray(pedido.items)) {
-    console.error('Pedido inválido:', pedido);
     return null;
   }
 
   const { id, cliente, items, total, estado } = pedido;
-
-  // Validar que los campos requeridos existan
-  if (!id || !cliente.nombre || !items || typeof total === 'undefined' || !estado) {
-    console.error('Pedido con campos faltantes:', pedido);
-    return null;
-  }
 
   const actualizarInventario = async (items) => {
     try {
@@ -27,7 +22,6 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
         const productoDoc = await getDoc(productoRef);
         if (!productoDoc.exists()) throw new Error(`Producto no encontrado: ${item.nombre}`);
         const stockActualUnidades = productoDoc.data().stockUnidades || 0;
-        // Si tu item tiene formato.unidades, úsalo; si no, asegúrate que item.formato es el nombre y busca el número de unidades en la base según formato.
         const unidadesPorFormato = item.formato.unidades || 1;
         const cantidadARestar = unidadesPorFormato * item.cantidad;
         if (stockActualUnidades < cantidadARestar) {
@@ -39,10 +33,9 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
       }
     } catch (error) {
       console.error('Error al actualizar inventario:', error);
-      throw new Error('Error al actualizar el inventario');
+      throw error;
     }
   };
-
 
   const registrarVentaEnCaja = async (pedido) => {
     try {
@@ -54,13 +47,12 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
         items: pedido.items,
         total: pedido.total,
         pedidoId: pedido.id,
-        metodoPago: 'efectivo', // o podrías tener esto como parte del pedido
+        metodoPago: 'efectivo',
       };
-
       await addDoc(cajaDiariaRef, ventaData);
     } catch (error) {
       console.error('Error al registrar venta en caja:', error);
-      throw new Error('Error al registrar la venta en caja');
+      throw error;
     }
   };
 
@@ -68,119 +60,164 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
     try {
       const pedidoRef = doc(db, 'pedidos', id);
 
-      // Si el nuevo estado es 'pagado', actualizar inventario y registrar venta
       if (nuevoEstado === 'pagado') {
-        // Primero verificar stock actual
+        // Validaciones y movimientos de inventario/caja solo al pagar
         const productosPromises = items.map(async (item) => {
           const productoDoc = await getDoc(doc(db, 'productos', item.id));
-          const stockActual = productoDoc.data().stock;
-
-          if (stockActual < item.cantidad) {
-            throw new Error(`Stock insuficiente para ${item.nombre}`);
-          }
-
-          return { ...item, stockActual };
+          if (!productoDoc.exists()) throw new Error(`Producto no encontrado: ${item.nombre}`);
+          return item;
         });
 
-        const itemsConStock = await Promise.all(productosPromises);
-
-        // Actualizar inventario
-        await actualizarInventario(itemsConStock);
-
-        // Registrar venta en caja
+        const itemsVerificados = await Promise.all(productosPromises);
+        await actualizarInventario(itemsVerificados);
         await registrarVentaEnCaja(pedido);
       }
 
-      // Actualizar estado del pedido
       await updateDoc(pedidoRef, {
         estado: nuevoEstado,
         fechaPago: nuevoEstado === 'pagado' ? new Date() : null
       });
 
-      onRecargarPedidos(); // Recargar lista de pedidos
+      onRecargarPedidos();
     } catch (error) {
       console.error('Error al mover pedido:', error);
-      alert(error.message || 'Error al mover el pedido. Intente nuevamente.');
+      showAlert(error.message || 'Error al mover el pedido.', 'error');
     }
   };
 
   const handleEliminar = async () => {
     if (!window.confirm('¿Está seguro de eliminar este pedido?')) return;
-
     try {
       await deleteDoc(doc(db, 'pedidos', id));
-      onRecargarPedidos(); // Recargar lista de pedidos
+      onRecargarPedidos();
     } catch (error) {
       console.error('Error al eliminar pedido:', error);
-      alert('Error al eliminar el pedido. Intente nuevamente.');
+      showAlert('Error al eliminar el pedido.', 'error');
     }
   };
 
+  const isPagado = estado === 'pagado';
+
   return (
-    <div className="pedido-card">
-      <div className="pedido-header">
-        <h4>{cliente.nombre}</h4>
-        <span>{cliente.telefono}</span>
-      </div>
-
-      <div className="pedido-items">
-        {items.map((item, index) => (
-          <div key={index} className="pedido-item">
-            <span className="item-cantidad">{item.cantidad}x</span>
-            <span className="item-nombre">{item.nombre}</span>
-            <span className="item-formato">({item.formato})</span>
-            <span className="item-subtotal">L. {item.subtotal.toFixed(2)}</span>
+    <div className="pedido-card-modern">
+      {/* Header */}
+      <div className="pedido-card-header">
+        <div className="cliente-info">
+          <div className="cliente-nombre">
+            <span className="icon-cliente">👤</span>
+            <h4>{cliente.nombre}</h4>
           </div>
-        ))}
+          <div className="cliente-contacto">
+            <span className="icon-telefono">📱</span>
+            <span>{cliente.telefono}</span>
+          </div>
+          {cliente.direccion && (
+            <div className="cliente-direccion">
+              <span className="icon-direccion">📍</span>
+              <span>{cliente.direccion}</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="pedido-footer">
-        <div className="pedido-total">
-          <strong>Total: L. {total.toFixed(2)}</strong>
+      {/* Items */}
+      <div className="pedido-card-body">
+        <div className="items-header">
+          <span className="icon-lista">📦</span>
+          <span className="items-title">Productos</span>
+        </div>
+        <div className="pedido-items-list">
+          {items.map((item, index) => (
+            <div key={index} className="pedido-item-modern">
+              <div className="item-info">
+                <span className="item-cantidad-badge">{item.cantidad}x</span>
+                <div className="item-detalles">
+                  <span className="item-nombre-modern">{item.nombre}</span>
+                  <span className="item-formato-modern">{item.formato}</span>
+                </div>
+              </div>
+              <span className="item-subtotal-modern">L. {item.subtotal.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer y Botones */}
+      <div className="pedido-card-footer">
+        <div className="pedido-total-modern">
+          <span className="total-label">Total</span>
+          <span className="total-monto">L. {total.toFixed(2)}</span>
         </div>
 
-        <div className={estado === 'recibido' ? 'pedido-acciones-grid' : 'pedido-acciones'}>
+        <div className="pedido-acciones-modern-grid">
+          {/* Botón Imprimir: Disponible SIEMPRE */}
           <button
-            onClick={() => onEdit(pedido)}
-            className="btn-editar"
+            onClick={() => setMostrarFactura(true)}
+            className="btn-modern btn-imprimir-modern"
+            title="Imprimir factura"
           >
-            Editar
+            <span className="btn-icon">🖨️</span>
+            <span className="btn-text">Imprimir</span>
           </button>
 
+          {/* Botón Eliminar: Disponible SIEMPRE */}
           <button
             onClick={handleEliminar}
-            className="btn-eliminar"
+            className="btn-modern btn-eliminar-modern"
+            title="Eliminar pedido"
           >
-            Eliminar
+            <span className="btn-icon">🗑️</span>
+            <span className="btn-text">Eliminar</span>
           </button>
 
+          {/* Botón Editar: NO disponible si está pagado */}
+          {!isPagado && (
+            <button
+              onClick={() => onEdit(pedido)}
+              className="btn-modern btn-editar-modern"
+              title="Editar pedido"
+            >
+              <span className="btn-icon">✏️</span>
+              <span className="btn-text">Editar</span>
+            </button>
+          )}
+
+          {/* Acciones Específicas por Estado */}
           {estado === 'recibido' && (
-            <>
-              <button
-                onClick={() => handleMoverPedido('enviado')}
-                className="btn-mover"
-              >
-                → Enviado
-              </button>
-              <button
-                onClick={() => setMostrarFactura(true)}
-                className="btn-imprimir"
-              >
-                Imprimir
-              </button>
-            </>
+            <button
+              onClick={() => handleMoverPedido('enviado')}
+              className="btn-modern btn-mover-modern"
+              title="Marcar como enviado"
+            >
+              <span className="btn-icon">🚚</span>
+              <span className="btn-text">Enviar</span>
+            </button>
           )}
 
           {estado === 'enviado' && (
-            <button
-              onClick={() => handleMoverPedido('pagado')}
-              className="btn-mover"
-            >
-              → Pagado
-            </button>
+            <>
+              <button
+                onClick={() => handleMoverPedido('recibido')}
+                className="btn-modern btn-regresar-modern"
+                title="Regresar a Recibido"
+              >
+                <span className="btn-icon">↩️</span>
+                <span className="btn-text">Regresar</span>
+              </button>
+
+              <button
+                onClick={() => handleMoverPedido('pagado')}
+                className="btn-modern btn-pagar-modern"
+                title="Marcar como pagado"
+              >
+                <span className="btn-icon">✅</span>
+                <span className="btn-text">Pagar</span>
+              </button>
+            </>
           )}
         </div>
       </div>
+
       {mostrarFactura && (
         <FacturaPedido
           pedido={pedido}

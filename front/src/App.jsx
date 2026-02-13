@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Login from './Pantallas/Login';
 import Dashboard from './Pantallas/Dashboard';
+import { NotificationProvider } from './context/NotificationContext';
 import './App.css';
 
 function App() {
@@ -11,15 +12,16 @@ function App() {
     setUsuario(null); // Simplemente limpiamos el estado del usuario
   };
 
-  if (!usuario) {
-    return <Login alIniciarSesion={setUsuario} />;
-  }
-  
-  // Ahora le pasamos la función de logout al Dashboard
   return (
-    <div className="App">
-      <Dashboard alCerrarSesion={handleLogout} />
-    </div>
+    <NotificationProvider>
+      <div className="App">
+        {!usuario ? (
+          <Login alIniciarSesion={setUsuario} />
+        ) : (
+          <Dashboard usuario={usuario} alCerrarSesion={handleLogout} />
+        )}
+      </div>
+    </NotificationProvider>
   );
 }
 

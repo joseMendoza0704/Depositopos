@@ -1,7 +1,9 @@
 // En: src/components/ModalApertura.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { useNotification } from '../context/NotificationContext';
 
 function ModalApertura({ onClose, onConfirmarApertura }) {
+  const { showAlert } = useNotification();
   const [montoInicial, setMontoInicial] = useState('');
 
   // Este 'ref' es para auto-enfocar el input cuando el modal se abre
@@ -22,7 +24,7 @@ function ModalApertura({ onClose, onConfirmarApertura }) {
   const handleConfirmClick = () => {
     const montoNum = Number(montoInicial) || 0;
     if (montoNum < 0) {
-      alert("El monto no puede ser negativo.");
+      showAlert("El monto no puede ser negativo.", 'error');
       return;
     }
     // Llama a la función de 'Dashboard' para guardar la apertura
@@ -33,11 +35,11 @@ function ModalApertura({ onClose, onConfirmarApertura }) {
     <div className="modal-backdrop">
       <div className="modal-content cobro-modal">
         <h3>Apertura de Caja</h3>
-        
+
         <div className="form-group">
           <label>Fondo de Caja Inicial:</label>
-          <input 
-            type="number" 
+          <input
+            type="number"
             className="cobro-input"
             value={montoInicial}
             onChange={(e) => setMontoInicial(e.target.value)}
@@ -48,8 +50,8 @@ function ModalApertura({ onClose, onConfirmarApertura }) {
         </div>
 
         <div className="modal-botones">
-          <button 
-            onClick={handleConfirmClick} 
+          <button
+            onClick={handleConfirmClick}
             className="boton-modal-agregar"
           >
             Confirmar Apertura

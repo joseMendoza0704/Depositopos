@@ -1,0 +1,360 @@
+/* =========================================
+   MODAL TRANSFORMAR / MEZCLAR PRODUCTOS
+   Estilo Optimizado (Ligero y Rápido)
+   ========================================= */
+
+/* Fondo oscuro simple (sin efectos pesados de blur) */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Fondo oscuro simple */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Contenedor Principal - Tarjeta Limpia */
+.modal-transformar {
+    background-color: #ffffff;
+    width: 95%;
+    /* Adaptable en móviles */
+    max-width: 600px;
+    /* Ancho máximo tipo tarjeta */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    /* Evita que sea más alto que la pantalla */
+    overflow: hidden;
+}
+
+/* Cabecera */
+.modal-header {
+    background-color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Cuerpo del modal con scroll */
+.modal-body-scroll {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    background-color: #fff;
+}
+
+/* --- BLOQUES DE COLOR (Origen y Destino) --- */
+.seccion-transformacion {
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Bloque Origen (Amarillo) */
+.seccion-transformacion.origen {
+    background-color: #fffde7;
+    /* Amarillo pastel muy suave */
+    border-color: #fff59d;
+}
+
+.seccion-transformacion.origen h4 {
+    color: #f57f17;
+    /* Naranja/Amarillo oscuro */
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Bloque Destino (Verde) */
+.seccion-transformacion.destino {
+    background-color: #e8f5e9;
+    /* Verde pastel muy suave */
+    border-color: #c8e6c9;
+}
+
+.seccion-transformacion.destino h4 {
+    color: #2e7d32;
+    /* Verde oscuro */
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hint {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 12px;
+    display: block;
+}
+
+/* Flecha central */
+.flecha-transformacion {
+    display: flex;
+    justify-content: center;
+    margin: -5px 0;
+}
+
+.flecha-icono-azul {
+    background-color: #3498db;
+    /* Azul */
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* --- ELEMENTOS DE FORMULARIO --- */
+
+/* Filas de inputs */
+.fila-origen {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.input-producto-contenedor {
+    flex-grow: 1;
+}
+
+/* Botón falso de búsqueda (Input look-alike) */
+.btn-buscar-producto-origen {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #757575;
+    /* Gris texto */
+    text-align: left;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-buscar-producto-origen:hover {
+    border-color: #999;
+}
+
+/* Input de búsqueda destino real */
+.input-buscador-destino {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+/* Producto ya seleccionado (tarjeta blanca pequeña) */
+.producto-seleccionado-display {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #333;
+}
+
+.producto-seleccionado-display strong {
+    color: #000;
+}
+
+.detalle-stock {
+    color: #666;
+    font-size: 11px;
+    margin-left: 5px;
+}
+
+/* Inputs numéricos pequeños */
+.input-cantidad {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 13px;
+}
+
+/* Input numérico grande (Destino) */
+.input-cantidad-grande {
+    width: 70px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #fff;
+    color: #333;
+}
+
+/* Botones pequeños de acción */
+.btn-eliminar-fila {
+    background: none;
+    border: none;
+    color: #e57373;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 5px;
+}
+
+.btn-agregar-fila {
+    background: none;
+    border: none;
+    color: #3498db;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+    margin-top: 5px;
+}
+
+.btn-agregar-fila:hover {
+    text-decoration: underline;
+}
+
+/* Contenedor del buscador destino */
+.buscador-destino-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+/* Lista de sugerencias flotante */
+.sugerencias-lista {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    z-index: 50;
+    max-height: 150px;
+    overflow-y: auto;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sugerencia-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+}
+
+.sugerencia-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* Info extra del destino */
+.destino-seleccionado-info {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 4px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- FOOTER Y BOTONES PRINCIPALES --- */
+.modal-footer {
+    padding: 15px 20px;
+    display: flex;
+    gap: 10px;
+    background-color: #fff;
+    border-top: 1px solid #f0f0f0;
+    justify-content: space-between;
+}
+
+.btn-confirmar-transformacion {
+    background-color: #4caf50;
+    /* Verde */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    flex-grow: 2;
+    font-size: 14px;
+}
+
+.btn-confirmar-transformacion:hover:not(:disabled) {
+    background-color: #43a047;
+}
+
+.btn-confirmar-transformacion:disabled {
+    background-color: #a5d6a7;
+    cursor: default;
+}
+
+.btn-cancelar {
+    background-color: #f5f5f5;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-grow: 1;
+    font-size: 14px;
+    text-align: center;
+}
+
+.btn-cancelar:hover {
+    background-color: #eeeeee;
+}
+
+.btn-cerrar-x {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+}
+
+.btn-cerrar-x:hover {
+    color: #666;
+}

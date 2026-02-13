@@ -1,23 +1,25 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '../firebaseConfig.js';
-import { 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  doc, 
-  updateDoc, 
-  query, 
-  orderBy 
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  query,
+  orderBy
 } from 'firebase/firestore';
-import '../styles/GestionClientes.css'; 
+import { useNotification } from '../context/NotificationContext';
+import '../styles/GestionClientes.css';
 
-function GestionClientes() {
+function GestionClientes({ usuario }) {
+  const { showAlert } = useNotification();
   // Estados formulario
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
   const [direccion, setDireccion] = useState('');
-  
+
   // Carga y lista
   const [cargando, setCargando] = useState(false);
   const [clientes, setClientes] = useState([]);
@@ -56,8 +58,8 @@ function GestionClientes() {
 
   // Formatea teléfono para mostrar
   const formatearTelefono = (tel) => {
-    const digits = (tel ?? '').replace(/\D/g, '').slice(0,8);
-    return digits.length > 4 ? `${digits.slice(0,4)}-${digits.slice(4)}` : digits;
+    const digits = (tel ?? '').replace(/\D/g, '').slice(0, 8);
+    return digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
   };
 
   // Seleccionar cliente para editar
@@ -71,18 +73,18 @@ function GestionClientes() {
 
   // Manejar input teléfono
   const handlePhoneChange = useCallback((e) => {
-    let digits = e.target.value.replace(/\D/g, '').slice(0,8);
-    setTelefono(digits.length > 4 ? `${digits.slice(0,4)}-${digits.slice(4)}` : digits);
+    let digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+    setTelefono(digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits);
   }, []);
 
   // Validar formulario
   const validarFormulario = () => {
     if (!nombre.trim()) {
-      alert('El nombre es obligatorio');
+      showAlert('El nombre es obligatorio', 'error');
       return false;
     }
     if (!telefono.replace(/\D/g, '').length) {
-      alert('El teléfono debe contener números');
+      showAlert('El teléfono debe contener números', 'error');
       return false;
     }
     return true;
@@ -110,15 +112,15 @@ function GestionClientes() {
       if (clienteIdSeleccionado) {
         const clienteRef = doc(db, 'clientes', clienteIdSeleccionado);
         await updateDoc(clienteRef, datosCliente);
-        alert('✅ Cliente actualizado con éxito!');
+        showAlert('✅ Cliente actualizado con éxito!', 'exito');
       } else {
         await addDoc(collection(db, 'clientes'), datosCliente);
-        alert('✅ Cliente agregado con éxito!');
+        showAlert('✅ Cliente agregado con éxito!', 'exito');
       }
       limpiarFormulario();
     } catch (err) {
       console.error('Error al guardar cliente:', err);
-      alert('❌ Error al guardar cliente');
+      showAlert('❌ Error al guardar cliente', 'error');
     } finally {
       setCargando(false);
     }
@@ -133,11 +135,11 @@ function GestionClientes() {
     try {
       const clienteRef = doc(db, 'clientes', clienteIdSeleccionado);
       await updateDoc(clienteRef, { activo: false });
-      alert('✅ Cliente eliminado con éxito!');
+      showAlert('✅ Cliente eliminado con éxito!', 'exito');
       limpiarFormulario();
     } catch (err) {
       console.error('Error al eliminar cliente:', err);
-      alert('❌ Error al eliminar cliente');
+      showAlert('❌ Error al eliminar cliente', 'error');
     } finally {
       setCargando(false);
     }
@@ -158,16 +160,16 @@ function GestionClientes() {
       switch (criterioBusqueda) {
         case 'nombre':
           return (cliente.nombre?.toLowerCase() || '').includes(textoBusqueda);
-        
+
         case 'direccion':
           return (cliente.direccion?.toLowerCase() || '').includes(textoBusqueda);
-        
+
         case 'telefono':
           // Para teléfono, limpiamos caracteres no numéricos tanto en la búsqueda como en el dato
           const busquedaNumeros = textoBusqueda.replace(/\D/g, '');
           const clienteTelefono = (cliente.telefono || '').replace(/\D/g, '');
           return clienteTelefono.includes(busquedaNumeros);
-        
+
         default:
           return false;
       }
@@ -184,25 +186,25 @@ function GestionClientes() {
         <div className="form-grid">
           <div className="form-group">
             <label htmlFor="nombre">Nombre Completo*</label>
-            <input 
-              id="nombre" 
-              type="text" 
-              placeholder="Nombre completo" 
-              value={nombre} 
-              onChange={(e) => setNombre(e.target.value)} 
-              required 
+            <input
+              id="nombre"
+              type="text"
+              placeholder="Nombre completo"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              required
             />
           </div>
 
           <div className="form-group phone-container">
             <label htmlFor="telefono">Teléfono*</label>
-            <input 
-              id="telefono" 
-              type="tel" 
-              placeholder="0000-0000" 
-              value={telefono} 
-              onChange={handlePhoneChange} 
-              maxLength={9} 
+            <input
+              id="telefono"
+              type="tel"
+              placeholder="0000-0000"
+              value={telefono}
+              onChange={handlePhoneChange}
+              maxLength={9}
               required
               className="phone-input"
             />
@@ -210,7 +212,7 @@ function GestionClientes() {
 
           <div className="form-group">
             <label htmlFor="email">Email (Opcional)</label>
-            <input 
+            <input
               id="email"
               type="email"
               placeholder="correo@dominio.com"
@@ -222,7 +224,7 @@ function GestionClientes() {
 
           <div className="form-group">
             <label htmlFor="direccion">Dirección</label>
-            <input 
+            <input
               id="direccion"
               type="text"
               placeholder="Dirección completa"
@@ -239,9 +241,11 @@ function GestionClientes() {
 
           {clienteIdSeleccionado && (
             <>
-              <button type="button" onClick={handleDelete} disabled={cargando} className="btn-eliminar">
-                🗑️ Eliminar
-              </button>
+              {usuario?.rol === 'admin' && (
+                <button type="button" onClick={handleDelete} disabled={cargando} className="btn-eliminar">
+                  🗑️ Eliminar
+                </button>
+              )}
               <button type="button" onClick={limpiarFormulario} disabled={cargando} className="btn-cancelar">
                 ❌ Cancelar
               </button>
@@ -252,36 +256,36 @@ function GestionClientes() {
 
       <div className="filtro-busqueda-container">
         <h3>Buscar Clientes</h3>
-        
+
         {/* SECCIÓN DE RADIO BUTTONS NUEVA */}
         <div className="criterios-busqueda">
-            <label className={`radio-label ${criterioBusqueda === 'nombre' ? 'active' : ''}`}>
-                <input 
-                    type="radio" 
-                    value="nombre" 
-                    checked={criterioBusqueda === 'nombre'} 
-                    onChange={() => setCriterioBusqueda('nombre')} 
-                />
-                Nombre
-            </label>
-            <label className={`radio-label ${criterioBusqueda === 'telefono' ? 'active' : ''}`}>
-                <input 
-                    type="radio" 
-                    value="telefono" 
-                    checked={criterioBusqueda === 'telefono'} 
-                    onChange={() => setCriterioBusqueda('telefono')} 
-                />
-                Teléfono
-            </label>
-            <label className={`radio-label ${criterioBusqueda === 'direccion' ? 'active' : ''}`}>
-                <input 
-                    type="radio" 
-                    value="direccion" 
-                    checked={criterioBusqueda === 'direccion'} 
-                    onChange={() => setCriterioBusqueda('direccion')} 
-                />
-                Dirección
-            </label>
+          <label className={`radio-label ${criterioBusqueda === 'nombre' ? 'active' : ''}`}>
+            <input
+              type="radio"
+              value="nombre"
+              checked={criterioBusqueda === 'nombre'}
+              onChange={() => setCriterioBusqueda('nombre')}
+            />
+            Nombre
+          </label>
+          <label className={`radio-label ${criterioBusqueda === 'telefono' ? 'active' : ''}`}>
+            <input
+              type="radio"
+              value="telefono"
+              checked={criterioBusqueda === 'telefono'}
+              onChange={() => setCriterioBusqueda('telefono')}
+            />
+            Teléfono
+          </label>
+          <label className={`radio-label ${criterioBusqueda === 'direccion' ? 'active' : ''}`}>
+            <input
+              type="radio"
+              value="direccion"
+              checked={criterioBusqueda === 'direccion'}
+              onChange={() => setCriterioBusqueda('direccion')}
+            />
+            Dirección
+          </label>
         </div>
 
         <input
@@ -313,9 +317,9 @@ function GestionClientes() {
               </thead>
               <tbody>
                 {clientesFiltrados.map(cliente => (
-                  <tr 
-                    key={cliente.id} 
-                    onClick={() => handleSelectCliente(cliente)} 
+                  <tr
+                    key={cliente.id}
+                    onClick={() => handleSelectCliente(cliente)}
                     className={clienteIdSeleccionado === cliente.id ? 'fila-seleccionada' : ''}
                     tabIndex={0}
                   >

@@ -5,12 +5,18 @@ import ModalAgregarProducto from './ModalAgregarProducto';
 import { collection, addDoc, Timestamp, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import FacturaPedido from './FacturaPedido';
+import { useNotification } from '../context/NotificationContext';
 
 function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
+  const { showAlert } = useNotification();
   const [showBuscarCliente, setShowBuscarCliente] = useState(!pedidoParaEditar);
   const [showBuscarProducto, setShowBuscarProducto] = useState(false);
   const [showAgregarProducto, setShowAgregarProducto] = useState(false);
   const [showFactura, setShowFactura] = useState(false);
+
+  // State to hold the finalized order data for the invoice
+  const [pedidoGuardado, setPedidoGuardado] = useState(null);
+
   const [cliente, setCliente] = useState(pedidoParaEditar?.cliente || null);
   const [items, setItems] = useState(pedidoParaEditar?.items || []);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
@@ -19,7 +25,6 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
   const handleSelectCliente = (clienteSeleccionado) => {
     setCliente(clienteSeleccionado);
     setShowBuscarCliente(false);
-    // Mantenemos los items y el total al cambiar de cliente
   };
 
   const handleAgregarProducto = (producto, formato, cantidad) => {
@@ -42,33 +47,26 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
 
   const handleCrearPedido = async () => {
     if (!cliente || items.length === 0) {
-      alert('Debe seleccionar un cliente y al menos un producto.');
+      showAlert('Debe seleccionar un cliente y al menos un producto.', 'error');
       return;
     }
 
     try {
-      // Asegurarnos que todos los campos numéricos sean números
-      const itemsNormalizados = items.map(item => ({
-        ...item,
-        cantidad: Number(item.cantidad),
-        precio: Number(item.precio),
-        subtotal: Number(item.subtotal),
-        unidades: Number(item.unidades || item.cantidad)
-      }));
-
+      // FIX 1: Sanitize data to avoid "undefined" values
       const pedidoData = {
         cliente: {
-          id: cliente.id,
-          nombre: cliente.nombre,
+          // Use || '' (empty string) or || null to prevent 'undefined' error
+          id: cliente.id || '',
+          nombre: cliente.nombre || '',
           direccion: cliente.direccion || '',
           telefono: cliente.telefono || ''
         },
         items: items.map(item => ({
           cantidad: Number(item.cantidad),
           costoTotalItem: 0,
-          formato: item.formato,
-          id: item.id,
-          nombre: item.nombre,
+          formato: item.formato || '',
+          id: item.id || '',
+          nombre: item.nombre || '',
           precio: Number(item.precio),
           subtotal: Number(item.subtotal),
           tamaño: item.tamaño || '',
@@ -78,42 +76,46 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
         fechaCreacion: pedidoParaEditar?.fechaCreacion || Timestamp.now(),
         total: Number(total)
       };
-  
-      console.log('Guardando pedido:', pedidoData); // Para debug
+
+      console.log('Guardando pedido:', pedidoData);
 
       try {
         if (pedidoParaEditar) {
-          // Si estamos editando, actualizamos el documento existente
+          // Update existing document
           const pedidoRef = doc(db, 'pedidos', pedidoParaEditar.id);
           await updateDoc(pedidoRef, pedidoData);
+
+          const pedidoEditado = { ...pedidoData, id: pedidoParaEditar.id };
+
           if (onCrear) {
-            onCrear({ ...pedidoData, id: pedidoParaEditar.id });
+            onCrear(pedidoEditado);
           }
           onClose();
         } else {
-          // Si es nuevo, creamos un nuevo documento
+          // Create new document
           const pedidosRef = collection(db, 'pedidos');
           const docRef = await addDoc(pedidosRef, pedidoData);
+
           if (docRef.id) {
             console.log('Pedido guardado con ID:', docRef.id);
             const pedidoConId = { ...pedidoData, id: docRef.id };
-            
-            // Primero notificamos la creación
+
             if (onCrear) {
               onCrear(pedidoConId);
             }
-            
-            // Luego mostramos la factura
+
+            // FIX 2: Save the complete object to state before showing invoice
+            setPedidoGuardado(pedidoConId);
             setShowFactura(true);
           }
         }
       } catch (error) {
         console.error('Error al guardar pedido:', error);
-        alert('Error al guardar el pedido: ' + error.message);
+        showAlert('Error al guardar el pedido: ' + error.message, 'error');
       }
     } catch (error) {
       console.error('Error al crear pedido:', error);
-      alert('Error al crear el pedido. Por favor, intente nuevamente.\nError: ' + error.message);
+      showAlert('Error al crear el pedido. ' + error.message, 'error');
     }
   };
 
@@ -130,11 +132,11 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
         {!showBuscarCliente && !showBuscarProducto && !showAgregarProducto && !showFactura && (
           <>
             <h3>Nuevo Pedido</h3>
-            
+
             <div className="cliente-seleccionado">
               <div className="cliente-header">
                 <h4>Cliente:</h4>
-                <button 
+                <button
                   onClick={() => setShowBuscarCliente(true)}
                   className="boton-cambiar-cliente"
                 >
@@ -152,7 +154,7 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
                     <span>{item.cantidad}x {item.nombre} ({item.formato})</span>
                     <span>L. {item.subtotal.toFixed(2)}</span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       const nuevosItems = items.filter((_, i) => i !== index);
                       setItems(nuevosItems);
@@ -164,20 +166,20 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
                   </button>
                 </div>
               ))}
-              
+
               <div className="total-row">
                 <strong>Total: L. {total.toFixed(2)}</strong>
               </div>
             </div>
 
             <div className="modal-botones">
-              <button 
+              <button
                 onClick={() => setShowBuscarProducto(true)}
                 className="boton-modal-agregar"
               >
                 + Agregar Producto
               </button>
-              <button 
+              <button
                 onClick={handleCrearPedido}
                 className="boton-modal-agregar"
                 disabled={items.length === 0}
@@ -210,9 +212,10 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
           />
         )}
 
-        {showFactura && (
+        {/* FIX 2: Use pedidoGuardado state here instead of the undefined pedidoData variable */}
+        {showFactura && pedidoGuardado && (
           <FacturaPedido
-            pedido={pedidoData}
+            pedido={pedidoGuardado}
             onClose={() => {
               setShowFactura(false);
               onClose();

@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
+import { useNotification } from '../context/NotificationContext';
 import '../styles/factura.css';
 
 function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
+  const { showAlert } = useNotification();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [ventasNormales, setVentasNormales] = useState(0);
@@ -126,7 +128,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
   const handleConfirmar = async () => {
     const contadoNum = Number(dineroContado) || 0;
     if (contadoNum <= 0) {
-      alert("Por favor, ingrese el monto contado en caja.");
+      showAlert("Por favor, ingrese el monto contado en caja.", 'error');
       return;
     }
 
@@ -153,7 +155,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
 
     } catch (error) {
       console.error('Error al realizar el cierre Z:', error);
-      alert('Error al realizar el cierre Z. Por favor, intente nuevamente.');
+      showAlert('Error al realizar el cierre Z. Por favor, intente nuevamente.', 'error');
 
     } finally {
       setConfirmando(false);
