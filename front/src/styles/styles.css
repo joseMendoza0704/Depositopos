@@ -1,4 +1,3 @@
-/* Estilos para modales */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -9,18 +8,25 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
+  /* Mayor que el bottom nav (1000) */
+  padding: 15px;
+  /* Espacio alrededor en móvil */
 }
 
 .modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  width: 90%;
+  width: 100%;
   max-width: 500px;
-  max-height: 90vh;
+  max-height: 85vh;
+  /* Un poco menos para dar margen */
   overflow-y: auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Para asegurar que el footer se vea */
 }
 
 /* Estilos para la búsqueda */
@@ -65,7 +71,7 @@
 .cliente-item:hover,
 .producto-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-color: #007bff;
 }
 
@@ -187,4 +193,32 @@
   padding: 12px;
   border-radius: 4px;
   margin-bottom: 16px;
+}
+
+/* Ajustes Responsive para Modales */
+@media (max-width: 768px) {
+  .modal-botones {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+  }
+
+  .boton-modal-agregar,
+  .boton-modal-cancelar {
+    width: 100%;
+    padding: 12px;
+    /* Botones más altos para tocar fácil */
+    font-size: 14px;
+    order: 1;
+    /* El botón principal primero si se desea, o normal */
+  }
+
+  /* Opcional: poner cancelar abajo visualmente si se precfiere */
+  .boton-modal-cancelar {
+    order: 2;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+  }
 }
