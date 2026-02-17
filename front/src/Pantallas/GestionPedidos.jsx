@@ -89,6 +89,7 @@ function GestionPedidos({ cajaActual }) {
   const [filtro, setFiltro] = useState(''); // Para el buscador
   const [showNuevoPedido, setShowNuevoPedido] = useState(false);
   const [pedidoParaEditar, setPedidoParaEditar] = useState(null);
+  const [activeTab, setActiveTab] = useState('recibido'); // Estado para pestañas móviles
 
   // Función para manejar la edición de pedidos
   const handleEditarPedido = (pedido) => {
@@ -223,31 +224,64 @@ function GestionPedidos({ cajaActual }) {
       )}
 
       {/* --- Tablero de 3 Columnas (Carrusel) --- */}
+      {/* --- Pestañas para Móvil --- */}
+      <div className="tabs-movil">
+        <button
+          className={`tab-btn ${activeTab === 'recibido' ? 'active' : ''}`}
+          onClick={() => setActiveTab('recibido')}
+          style={{ borderColor: '#ffc107', color: activeTab === 'recibido' ? '#333' : '#666', backgroundColor: activeTab === 'recibido' ? '#ffc107' : 'transparent' }}
+        >
+          Recibido ({pedidosRecibidos.length})
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'enviado' ? 'active' : ''}`}
+          onClick={() => setActiveTab('enviado')}
+          style={{ borderColor: '#007bff', color: activeTab === 'enviado' ? 'white' : '#666', backgroundColor: activeTab === 'enviado' ? '#007bff' : 'transparent' }}
+        >
+          Enviado ({pedidosEnviados.length})
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'pagado' ? 'active' : ''}`}
+          onClick={() => setActiveTab('pagado')}
+          style={{ borderColor: '#28a745', color: activeTab === 'pagado' ? 'white' : '#666', backgroundColor: activeTab === 'pagado' ? '#28a745' : 'transparent' }}
+        >
+          Pagado ({pedidosPagados.length})
+        </button>
+      </div>
+
+
+      {/* --- Tablero de Columnas (Responsive) --- */}
       <div className="columnas-pedidos">
 
-        <ColumnaCarrusel
-          titulo="Recibido"
-          pedidos={pedidosRecibidos}
-          colorHeader="#ffc107"
-          onEdit={handleEditarPedido}
-          textoVacio="No hay pedidos recibidos."
-        />
+        <div className={`columna-wrapper ${activeTab === 'recibido' ? 'active' : ''}`}>
+          <ColumnaCarrusel
+            titulo="Recibido"
+            pedidos={pedidosRecibidos}
+            colorHeader="#ffc107"
+            onEdit={handleEditarPedido}
+            textoVacio="No hay pedidos recibidos."
+          />
+        </div>
 
-        <ColumnaCarrusel
-          titulo="Enviado"
-          pedidos={pedidosEnviados}
-          colorHeader="#007bff"
-          onEdit={handleEditarPedido}
-          textoVacio="No hay pedidos en ruta."
-        />
+        <div className={`columna-wrapper ${activeTab === 'enviado' ? 'active' : ''}`}>
+          <ColumnaCarrusel
+            titulo="Enviado"
+            pedidos={pedidosEnviados}
+            colorHeader="#007bff"
+            onEdit={handleEditarPedido}
+            textoVacio="No hay pedidos en ruta."
+          />
+        </div>
 
-        <ColumnaCarrusel
-          titulo="Pagado (Hoy)"
-          pedidos={pedidosPagados}
-          colorHeader="#28a745"
-          onEdit={handleEditarPedido}
-          textoVacio="No hay pedidos pagados hoy."
-        />
+        <div className={`columna-wrapper ${activeTab === 'pagado' ? 'active' : ''}`}>
+          <ColumnaCarrusel
+            titulo="Pagado (Hoy)"
+            pedidos={pedidosPagados}
+            colorHeader="#28a745"
+            onEdit={handleEditarPedido}
+            textoVacio="No hay pedidos pagados hoy."
+          />
+        </div>
       </div>
     </div>
   );

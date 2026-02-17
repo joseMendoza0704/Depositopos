@@ -8,6 +8,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -15,8 +16,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes slideIn {
@@ -24,6 +30,7 @@
     transform: translateX(-10px);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -135,6 +142,7 @@ input[type="number"] {
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 
@@ -353,7 +361,7 @@ button:disabled {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
-  color: #2e3b4e; 
+  color: #2e3b4e;
 }
 
 .productos-tabla tbody tr {
@@ -394,6 +402,50 @@ button:disabled {
 }
 
 /* ============================================
+   PAGINACIÓN
+   ============================================ */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  /* Centrar controles */
+  align-items: center;
+  gap: 15px;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.pagination-btn {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #e9ecef;
+  border-color: #ccc;
+  color: #333;
+}
+
+.pagination-btn:disabled {
+  background-color: #f1f1f1;
+  color: #aaa;
+  cursor: not-allowed;
+  border-color: #eee;
+}
+
+.pagination-info {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.95em;
+}
+
+/* ============================================
    BADGES Y ETIQUETAS
    ============================================ */
 .badge {
@@ -429,9 +481,12 @@ button:disabled {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.6;
   }
@@ -447,9 +502,12 @@ button:disabled {
 }
 
 @keyframes parpadeo {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }

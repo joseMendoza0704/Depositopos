@@ -145,6 +145,10 @@ function GestionClientes({ usuario }) {
     }
   };
 
+  // --- Estados de Paginación ---
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [itemsPorPagina] = useState(20);
+
   // Lógica de filtrado actualizada con switch
   const clientesFiltrados = useMemo(() => {
     const textoBusqueda = busqueda.trim().toLowerCase();
@@ -175,6 +179,19 @@ function GestionClientes({ usuario }) {
       }
     });
   }, [clientes, busqueda, criterioBusqueda]);
+
+  // Resetear a página 1 cuando cambian los filtros
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [busqueda, criterioBusqueda]);
+
+  // Lógica de Paginación
+  const indiceUltimoItem = paginaActual * itemsPorPagina;
+  const indicePrimerItem = indiceUltimoItem - itemsPorPagina;
+  const clientesPaginados = clientesFiltrados.slice(indicePrimerItem, indiceUltimoItem);
+  const totalPaginas = Math.ceil(clientesFiltrados.length / itemsPorPagina);
+
+  const cambiarPagina = (numeroPagina) => setPaginaActual(numeroPagina);
 
   return (
     <div className="gestion-clientes-container">
@@ -316,7 +333,7 @@ function GestionClientes({ usuario }) {
                 </tr>
               </thead>
               <tbody>
-                {clientesFiltrados.map(cliente => (
+                {clientesPaginados.map(cliente => (
                   <tr
                     key={cliente.id}
                     onClick={() => handleSelectCliente(cliente)}
@@ -331,6 +348,29 @@ function GestionClientes({ usuario }) {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Controles de Paginación */}
+        {!cargandoClientes && clientesFiltrados.length > 0 && totalPaginas > 1 && (
+          <div className="pagination-container">
+            <button
+              className="pagination-btn"
+              onClick={() => cambiarPagina(paginaActual - 1)}
+              disabled={paginaActual === 1}
+            >
+              Anterior
+            </button>
+            <span className="pagination-info">
+              Página {paginaActual} de {totalPaginas}
+            </span>
+            <button
+              className="pagination-btn"
+              onClick={() => cambiarPagina(paginaActual + 1)}
+              disabled={paginaActual === totalPaginas}
+            >
+              Siguiente
+            </button>
           </div>
         )}
       </div>

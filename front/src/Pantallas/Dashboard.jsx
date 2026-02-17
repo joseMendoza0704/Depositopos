@@ -31,6 +31,7 @@ import iconInventario from '../assets/inventario.png';
 import iconReportes from '../assets/reportes.png';
 import iconClientes from '../assets/clientes.png';
 import iconPedidos from '../assets/pedidos.png';
+import BusquedaPedidos from './BusquedaPedidos.jsx';
 
 function VistaPrincipal() {
   return (
@@ -151,6 +152,8 @@ function Dashboard({ alCerrarSesion, usuario }) {
         return <GestionPedidos cajaActual={cajaActual} />;
       case 'reportes':
         return <Reportes />;
+      case 'busquedaPedidos':
+        return <BusquedaPedidos />;
       default:
         return <VistaPrincipal />;
     }
@@ -214,6 +217,15 @@ function Dashboard({ alCerrarSesion, usuario }) {
               <span className="menu-text">Reportes</span>
             </button>
           </li>
+          <li>
+            <button
+              onClick={() => setVistaActual('busquedaPedidos')}
+              className={vistaActual === 'busquedaPedidos' ? 'active' : ''}
+            >
+              <span className="menu-icon-badge">🔍</span>
+              <span className="menu-text">Historial Pedidos</span>
+            </button>
+          </li>
         </ul>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="logout-button">
@@ -250,6 +262,55 @@ function Dashboard({ alCerrarSesion, usuario }) {
           onClose={() => setMensajeModal(null)}
         />
       )}
+      {/* Bottom Navigation para móviles */}
+      <nav className="bottom-nav">
+        <button
+          onClick={() => setVistaActual('pos')}
+          className={vistaActual === 'pos' ? 'active' : ''}
+        >
+          <span className="nav-icon">💰</span>
+          <span className="nav-label">POS</span>
+        </button>
+        <button
+          onClick={() => setVistaActual('inventario')}
+          className={vistaActual === 'inventario' ? 'active' : ''}
+        >
+          <span className="nav-icon">📦</span>
+          <span className="nav-label">Inv.</span>
+        </button>
+        <button
+          onClick={() => setVistaActual('clientes')}
+          className={vistaActual === 'clientes' ? 'active' : ''}
+        >
+          <span className="nav-icon">👥</span>
+          <span className="nav-label">Clientes</span>
+        </button>
+        <button
+          onClick={() => setVistaActual('pedidos')}
+          className={vistaActual === 'pedidos' ? 'active' : ''}
+        >
+          <span className="nav-icon">📋</span>
+          <span className="nav-label">Pedidos</span>
+        </button>
+        <button
+          onClick={() => setVistaActual('reportes')}
+          className={vistaActual === 'reportes' ? 'active' : ''}
+        >
+          <span className="nav-icon">📊</span>
+          <span className="nav-label">Reportes</span>
+        </button>
+        <button
+          onClick={() => setVistaActual('busquedaPedidos')}
+          className={vistaActual === 'busquedaPedidos' ? 'active' : ''}
+        >
+          <span className="nav-icon">🔍</span>
+          <span className="nav-label">Historial</span>
+        </button>
+        <button onClick={handleLogout} className="logout-btn-mobile">
+          <span className="nav-icon">🚪</span>
+          <span className="nav-label">Salir</span>
+        </button>
+      </nav>
     </div>
   );
 }
