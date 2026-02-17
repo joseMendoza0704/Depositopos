@@ -336,3 +336,87 @@
   background-color: #27ae60;
   /* Verde más oscuro al pasar el mouse */
 }
+
+/* =========================================
+   ESTILOS RESPONSIVE PARA PEDIDOS
+   ========================================= */
+
+/* Pestañas para móvil (ocultas en escritorio) */
+.tabs-movil {
+  display: none;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 5px;
+  border: 2px solid transparent;
+  background: transparent;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* En escritorio, siempre mostramos las columnas */
+.columna-wrapper {
+  display: block;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+
+  /* Layout de una sola columna en móvil */
+  .columnas-pedidos {
+    display: block;
+    /* Quitamos grid */
+    padding: 0;
+  }
+
+  /* Ocultamos wrappers que no estén activos */
+  .columna-wrapper {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .columna-wrapper.active {
+    display: block;
+  }
+
+  /* Mostrar controles de pestañas */
+  .tabs-movil {
+    display: flex;
+  }
+
+  /* Ajustes de la tarjeta en móvil */
+  .columna-pedido {
+    min-height: auto;
+    /* Altura automática */
+    margin-bottom: 20px;
+  }
+
+  .controles-tablero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .pos-button {
+    width: 100%;
+  }
+
+  .controles-tablero-filtro {
+    margin-bottom: 15px;
+  }
+}
