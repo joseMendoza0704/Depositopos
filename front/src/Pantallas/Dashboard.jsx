@@ -20,6 +20,7 @@ import PuntoDeVenta from './PuntoDeVenta.jsx';
 import GestionClientes from './GestionClientes.jsx';
 import GestionPedidos from './GestionPedidos.jsx';
 import Reportes from './Reportes.jsx';
+import GestionCategorias from './GestionCategorias.jsx';
 
 import ModalApertura from '../components/ModalApertura.jsx';
 import ModalCierreZ from '../components/ModalCierreZ.jsx';
@@ -146,6 +147,8 @@ function Dashboard({ alCerrarSesion, usuario }) {
         />;
       case 'inventario':
         return <Inventario usuario={usuario} />;
+      case 'categorias':
+        return <GestionCategorias usuario={usuario} />;
       case 'clientes':
         return <GestionClientes usuario={usuario} />;
       case 'pedidos':
@@ -188,6 +191,15 @@ function Dashboard({ alCerrarSesion, usuario }) {
             >
               <span className="menu-icon-badge">📦</span>
               <span className="menu-text">Inventario</span>
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => setVistaActual('categorias')}
+              className={vistaActual === 'categorias' ? 'active' : ''}
+            >
+              <span className="menu-icon-badge">🏷️</span>
+              <span className="menu-text">Categorías</span>
             </button>
           </li>
           <li>
@@ -277,6 +289,13 @@ function Dashboard({ alCerrarSesion, usuario }) {
         >
           <span className="nav-icon">📦</span>
           <span className="nav-label">Inv.</span>
+        </button>
+        <button
+          onClick={() => setVistaActual('categorias')}
+          className={vistaActual === 'categorias' ? 'active' : ''}
+        >
+          <span className="nav-icon">🏷️</span>
+          <span className="nav-label">Categorías</span>
         </button>
         <button
           onClick={() => setVistaActual('clientes')}
