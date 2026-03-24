@@ -419,4 +419,13 @@
   .controles-tablero-filtro {
     margin-bottom: 15px;
   }
+
+  .tablero-pedidos {
+    overflow-x: hidden;
+  }
+
+  .pedido-card-modern {
+    overflow-x: hidden;
+    word-break: break-word;
+  }
 }

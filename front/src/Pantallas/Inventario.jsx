@@ -10,6 +10,8 @@ import {
   deleteDoc,
   Timestamp
 } from 'firebase/firestore';
+import { storage } from '../firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import '../styles/Inventario.css';
 import RetiroInventario from '../components/RetiroInventario';
 import ModalTransformarProducto from '../components/ModalTransformarProducto'; // <--- NUEVO IMPORT
@@ -34,6 +36,16 @@ function Inventario({ usuario }) {
   const [productos, setProductos] = useState([]);
   const [cargandoProductos, setCargandoProductos] = useState(true);
   const [productoIdSeleccionado, setProductoIdSeleccionado] = useState(null);
+
+  // --- Estados de Imagen ---
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState(null);
+  const [imageUrlManual, setImageUrlManual] = useState('');
+
+  // --- Estados de Categorías ---
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaId, setCategoriaId] = useState('');
 
   const [mostrarRetiro, setMostrarRetiro] = useState(false);
   const [mostrarTransformar, setMostrarTransformar] = useState(false); // <--- NUEVO ESTADO
@@ -65,6 +77,27 @@ function Inventario({ usuario }) {
     return () => unsubscribe();
   }, []);
 
+  // --- Suscripción a categorías en tiempo real ---
+  useEffect(() => {
+    const categoriasCollection = collection(db, 'categorias');
+
+    const unsubscribe = onSnapshot(
+      categoriasCollection,
+      (snapshot) => {
+        const listaDeCategorias = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setCategorias(listaDeCategorias);
+      },
+      (error) => {
+        console.error("Error al cargar categorías:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
   // --- Limpia el formulario ---
   const limpiarFormulario = useCallback(() => {
     setNombre('');
@@ -73,7 +106,12 @@ function Inventario({ usuario }) {
     setCosto('');
     setPrecioUnidad('');
     setFechaCaducidad('');
+    setCategoriaId('');
     setProductoIdSeleccionado(null);
+    setImageFile(null);
+    setImagePreview(null);
+    setCurrentImageUrl(null);
+    setImageUrlManual('');
   }, []);
 
   // --- Selecciona un producto para editar ---
@@ -84,6 +122,7 @@ function Inventario({ usuario }) {
     setStock(producto.stockUnidades ?? '');
     setCosto(producto.precioCostoUnidad ?? '');
     setPrecioUnidad(producto.formatosVenta?.[0]?.precio ?? '');
+    setCategoriaId(producto.categoriaId ?? '');
 
     if (producto.fechaCaducidad) {
       const fecha = producto.fechaCaducidad.toDate();
@@ -92,6 +131,10 @@ function Inventario({ usuario }) {
     } else {
       setFechaCaducidad('');
     }
+    setCurrentImageUrl(producto.imagen || null);
+    setImagePreview(producto.imagen || null);
+    setImageUrlManual(producto.imagen || '');
+    setImageFile(null);
   }, []);
 
   // --- Valida el formulario ---
@@ -128,6 +171,10 @@ function Inventario({ usuario }) {
 
     setCargandoForm(true);
 
+    // Obtener el nombre de la categoría seleccionada
+    const categoriaSeleccionada = categorias.find(c => c.id === categoriaId);
+    const categoriaNombre = categoriaSeleccionada ? categoriaSeleccionada.nombre : null;
+
     const datosProducto = {
       nombre: nombre.trim(),
       tamaño: tamaño.trim(),
@@ -140,7 +187,10 @@ function Inventario({ usuario }) {
           unidades: 1
         }
       ],
-      activo: true
+      activo: true,
+      imagen: imageUrlManual || currentImageUrl || null,
+      categoriaId: categoriaId || null,
+      categoriaNombre: categoriaNombre
     };
 
     if (fechaCaducidad) {
@@ -152,6 +202,16 @@ function Inventario({ usuario }) {
     }
 
     try {
+      let finalImageUrl = currentImageUrl;
+
+      // Subir imagen si hay una nueva seleccionada
+      if (imageFile) {
+        const imageRef = ref(storage, `productos/${Date.now()}_${imageFile.name}`);
+        const snapshot = await uploadBytes(imageRef, imageFile);
+        finalImageUrl = await getDownloadURL(snapshot.ref);
+        datosProducto.imagen = finalImageUrl;
+      }
+
       if (productoIdSeleccionado) {
         const productoDoc = doc(db, 'productos', productoIdSeleccionado);
         await updateDoc(productoDoc, datosProducto);
@@ -379,6 +439,67 @@ function Inventario({ usuario }) {
               onChange={(e) => setFechaCaducidad(e.target.value)}
             />
           </div>
+
+          <div className="form-group">
+            <label htmlFor="categoria">Categoría</label>
+            <select
+              id="categoria"
+              value={categoriaId}
+              onChange={(e) => setCategoriaId(e.target.value)}
+              className="select-categoria"
+            >
+              <option value="">Sin categoría</option>
+              {categorias.map(categoria => (
+                <option key={categoria.id} value={categoria.id}>
+                  {categoria.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Link de Imagen (PostImages, etc.)</label>
+            <input
+              type="text"
+              placeholder="Pegar Link Directo aquí..."
+              value={imageUrlManual}
+              onChange={(e) => {
+                setImageUrlManual(e.target.value);
+                setImagePreview(e.target.value || currentImageUrl);
+              }}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>O Subir Archivo</label>
+            <div className="image-upload-container">
+              {imagePreview ? (
+                <div className="image-preview">
+                  <img src={imagePreview} alt="Vista previa" />
+                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); setCurrentImageUrl(null); }} className="btn-remove-image">
+                    Remover
+                  </button>
+                </div>
+              ) : (
+                <div className="image-placeholder" onClick={() => document.getElementById('imageInput').click()}>
+                  <span>Seleccionar Imagen</span>
+                </div>
+              )}
+              <input
+                id="imageInput"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }
+                }}
+                style={{ display: 'none' }}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="form-botones">
@@ -453,6 +574,7 @@ function Inventario({ usuario }) {
                 <tr>
                   <th>Descripción</th>
                   <th>Tamaño</th>
+                  <th>Categoría</th>
                   <th>Stock (Uds.)</th>
                   <th>Costo (U.)</th>
                   <th>Precio Venta (U.)</th>
@@ -477,6 +599,11 @@ function Inventario({ usuario }) {
                     >
                       <td>{producto.nombre}</td>
                       <td>{producto.tamaño}</td>
+                      <td>
+                        <span className="categoria-badge">
+                          {producto.categoriaNombre || '—'}
+                        </span>
+                      </td>
                       <td>
                         <span className={producto.stockUnidades < 10 ? 'stock-bajo' : ''}>
                           {producto.stockUnidades}

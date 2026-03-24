@@ -1,4 +1,21 @@
-/* En: src/pantallas/Dashboard.css o en tu archivo global de estilos */
+/* Variables CSS para consistencia */
+:root {
+  --primary-color: #1e3a5f;
+  --secondary-color: #2c5282;
+  --accent-color: #4a90e2;
+  --danger-color: #e74c3c;
+  --bg-main: #f8fafc;
+  --bg-sidebar: linear-gradient(180deg, #1e3a5f 0%, #2c5282 100%);
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: rgba(255, 255, 255, 0.95);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.3);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --transition: all 0.3s ease;
+}
 
 /* Animación de fade-in para el contenido cuando cambias de vista */
 @keyframes fadeIn {
@@ -22,11 +39,14 @@
   width: 255px !important;
   min-width: 255px;
   max-width: 255px;
-  background: linear-gradient(180deg, #1e3a5f 0%, #2c5282 100%);
-  transition: width 0.3s ease, transform 0.3s ease;
+  background: var(--bg-sidebar);
+  transition: var(--transition);
   overflow: hidden;
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 .sidebar.collapsed {
@@ -59,12 +79,12 @@
 .toggle-sidebar-btn {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: #fff;
   font-size: 18px;
   cursor: pointer;
   padding: 6px 10px;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .toggle-sidebar-btn:hover {
@@ -72,49 +92,12 @@
   transform: scale(1.1);
 }
 
-/* Header de sidebar con flexbox para alinear título y botón */
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.sidebar-header h3 {
-  margin: 0;
-  white-space: nowrap;
-  transition: opacity 0.3s ease;
-  font-size: 18px;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Icono del header (tienda) */
-.header-icon {
-  font-size: 24px;
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
-.sidebar-header:hover .header-icon {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.sidebar.collapsed .header-icon {
-  display: none;
-}
-
 /* Menú del sidebar */
 .sidebar-menu {
   list-style: none;
   padding: 15px 10px;
   margin: 0;
+  flex: 1;
 }
 
 .sidebar-menu li {
@@ -129,8 +112,8 @@
   padding: 14px 16px;
   background: transparent;
   border: none;
-  border-radius: 12px;
-  color: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-md);
+  color: var(--text-light);
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
@@ -145,7 +128,7 @@
 }
 
 .sidebar-menu li button.active {
-  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  background: linear-gradient(135deg, var(--accent-color) 0%, #357abd 100%);
   box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
   color: white;
 }
@@ -160,7 +143,6 @@
   width: 4px;
   background: white;
   border-radius: 0 4px 4px 0;
-  animation: slideIn 0.3s ease;
 }
 
 @keyframes slideIn {
@@ -185,7 +167,7 @@
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.15);
   margin-right: 14px;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .sidebar-menu li button:hover .menu-icon-badge,
@@ -214,9 +196,37 @@
 
 /* Footer del sidebar */
 .sidebar-footer {
-  padding: 15px 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.15);
+  padding: 10px 10px 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-top: auto; /* Empuja el footer al fondo */
+}
+
+.version-info {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 11px;
+  margin: 0;
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+.logout-li {
+  margin-top: 25px !important;
+  padding: 0 10px;
+}
+
+/* Forzar el color rojo del botón de logout */
+.sidebar-menu li .logout-button {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4) !important;
+}
+
+.sidebar-menu li .logout-button:hover {
+  background: linear-gradient(135deg, #ff4d4d 0%, #ff0000 100%) !important; /* Rojo más intenso on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 0, 0, 0.4) !important;
 }
 
 /* Botón de logout con diseño moderno */
@@ -225,14 +235,14 @@
   align-items: center;
   width: 100%;
   padding: 14px 16px;
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   color: white;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
@@ -276,9 +286,29 @@
   }
 }
 
-/* Vista principal con animación */
+/* Vista principal - MEJORADA */
 .vista-principal {
   animation: fadeIn 0.5s ease-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  text-align: center;
+  padding: 20px;
+}
+
+.vista-principal h1 {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0 0 8px 0;
+}
+
+.vista-principal p {
+  font-size: clamp(0.875rem, 3vw, 1rem);
+  color: var(--text-muted);
+  margin: 0;
 }
 
 /* Animación de entrada para los items del menú */
@@ -319,14 +349,14 @@
 }
 
 /* =========================================
-   ESTILOS RESPONSIVE AÑADIDOS
+   ESTILOS RESPONSIVE - MOBILE FIRST
    ========================================= */
 
 /* Estilos para el contenedor principal */
 .dashboard-container {
   display: flex;
   height: 100vh;
-  background-color: #f4f6f9;
+  background-color: var(--bg-main);
   overflow: hidden;
 }
 
@@ -337,90 +367,209 @@
   position: relative;
 }
 
-/* BOTTOM NAVIGATION (MÓVIL) */
-.bottom-nav {
-  display: flex !important;
-  /* Force display flex to override none if needed */
+/* BOTÓN HAMBURGUESA - ESQUINA SUPERIOR IZQUIERDA */
+.hamburger-btn {
+  display: none;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: white;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  justify-content: space-around;
-  align-items: center;
-  padding: 8px 0;
-  z-index: 1000;
-  height: 65px;
-}
-
-/* Ocultar en escritorio */
-@media (min-width: 769px) {
-  .bottom-nav {
-    display: none !important;
-  }
-}
-
-.bottom-nav button {
-  background: none;
+  top: 40px; /* Bajado aún más a petición del usuario (antes 23px) */
+  left: 15px;
+  z-index: 1001;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  background: var(--bg-sidebar);
   border: none;
-  display: flex;
-  flex-direction: column;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  color: #888;
-  font-size: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 5px;
-  flex: 1;
-  position: relative;
+  transition: var(--transition);
 }
 
-.bottom-nav button .nav-icon {
-  font-size: 20px;
-  margin-bottom: 2px;
-  transition: transform 0.2s;
+.hamburger-btn:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
 }
 
-.bottom-nav button.active {
-  color: #4a90e2;
-}
-
-.bottom-nav button.active .nav-icon {
-  transform: translateY(-2px);
-}
-
-.bottom-nav button.active::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40%;
-  height: 3px;
-  background-color: #4a90e2;
-  border-radius: 0 0 4px 4px;
-}
-
-.logout-btn-mobile {
-  color: #e74c3c !important;
+.hamburger-btn:active {
+  transform: scale(0.95);
 }
 
 /* RESPONSIVE DESIGN (MÓVIL) */
 @media (max-width: 768px) {
-  .sidebar {
-    display: none !important;
+  .hamburger-btn {
+    display: flex !important;
   }
 
   .main-content {
-    padding-bottom: 80px !important;
     padding: 15px;
+    padding-top: 80px;
+    padding-left: 20px;
   }
 
   .inventario-container,
   .gestion-clientes-container {
     padding: 10px 0;
+  }
+}
+
+/* HEADER DEL SIDEBAR CON FLEX */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Icono del header (tienda) */
+.header-icon {
+  font-size: 24px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header:hover .header-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.sidebar.collapsed .header-icon {
+  display: none;
+}
+
+/* BOTÓN CERRAR SIDEBAR */
+.sidebar-close-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-sm);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(231, 76, 60, 0.8);
+  border-color: rgba(231, 76, 60, 0.8);
+}
+
+@media (max-width: 768px) {
+  .sidebar-close-btn {
+    display: flex;
+  }
+}
+
+/* OVERLAY MÓVIL - CON BACKDROP Y ANIMACIÓN */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Ancho responsive del sidebar */
+  .sidebar {
+    width: 280px !important;
+    max-width: 85vw;
+  }
+
+  .sidebar.collapsed {
+    width: 280px !important;
+    min-width: 280px;
+    max-width: 85vw;
+  }
+
+  .sidebar.collapsed .menu-text,
+  .sidebar.collapsed .menu-icon-badge {
+    opacity: 1;
+    width: auto;
+    margin-right: 14px;
+  }
+
+  .sidebar.collapsed .sidebar-header h3 {
+    opacity: 1;
+    width: auto;
+  }
+
+  /* Footer del sidebar en móvil - más espacio arriba */
+  .sidebar-footer {
+    padding: 40px 15px 25px;
+  }
+
+  .logout-button {
+    padding: 16px 18px;
+  }
+}
+
+/* Desktop: sidebar siempre visible */
+@media (min-width: 769px) {
+  .hamburger-btn {
+    display: none !important;
+  }
+
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  .sidebar {
+    transform: translateX(0) !important;
+    position: relative;
   }
 }
