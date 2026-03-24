@@ -1,5 +1,7 @@
 # Dependencias y paquetes (Lo más importante)
 node_modules/
+android/
+ios/
 
 # Archivos de build y producción (Vite crea la carpeta 'dist')
 dist/

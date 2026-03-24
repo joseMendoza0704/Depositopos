@@ -50,7 +50,19 @@ function Dashboard({ alCerrarSesion, usuario }) {
   const [mostrandoModalApertura, setMostrandoModalApertura] = useState(false);
   const [mostrandoModalCierreZ, setMostrandoModalCierreZ] = useState(false);
   const [mensajeModal, setMensajeModal] = useState(null);
-  const [sidebarColapsada, setSidebarColapsada] = useState(false); // Estado para colapsar sidebar
+  const [sidebarColapsada, setSidebarColapsada] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  // --- useEffect para cerrar sidebar con Escape ---
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && sidebarVisible) {
+        setSidebarVisible(false);
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [sidebarVisible]);
 
   // --- useEffect para chequear caja abierta ---
   useEffect(() => {
@@ -169,15 +181,42 @@ function Dashboard({ alCerrarSesion, usuario }) {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar con clase condicional para colapsar */}
-      <div className={`sidebar ${sidebarColapsada ? 'collapsed' : ''}`}>
+      {/* Botón hamburguesa para móvil - esquina superior izquierda */}
+      {!sidebarVisible && (
+        <button
+          className="hamburger-btn"
+          onClick={() => setSidebarVisible(!sidebarVisible)}
+          aria-label="Abrir menú"
+        >
+          ☰
+        </button>
+      )}
+
+      {/* Overlay para móvil con backdrop */}
+      <div
+        className={`sidebar-overlay ${sidebarVisible ? 'visible' : ''}`}
+        onClick={() => setSidebarVisible(false)}
+        aria-hidden="true"
+      />
+
+      {/* Sidebar */}
+      <div className={`sidebar ${sidebarColapsada ? 'collapsed' : ''} ${sidebarVisible ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <h3><span className="header-icon">🛒</span> Depósito Mendoza</h3>
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setSidebarVisible(false)}
+          >
+            ✕
+          </button>
         </div>
         <ul className="sidebar-menu">
           <li>
             <button
-              onClick={() => setVistaActual('pos')}
+              onClick={() => {
+                setVistaActual('pos');
+                setSidebarVisible(false);
+              }}
               className={vistaActual === 'pos' ? 'active' : ''}
             >
               <span className="menu-icon-badge">💰</span>
@@ -186,7 +225,10 @@ function Dashboard({ alCerrarSesion, usuario }) {
           </li>
           <li>
             <button
-              onClick={() => setVistaActual('inventario')}
+              onClick={() => {
+                setVistaActual('inventario');
+                setSidebarVisible(false);
+              }}
               className={vistaActual === 'inventario' ? 'active' : ''}
             >
               <span className="menu-icon-badge">📦</span>
@@ -195,7 +237,10 @@ function Dashboard({ alCerrarSesion, usuario }) {
           </li>
           <li>
             <button
-              onClick={() => setVistaActual('categorias')}
+              onClick={() => {
+                setVistaActual('categorias');
+                setSidebarVisible(false);
+              }}
               className={vistaActual === 'categorias' ? 'active' : ''}
             >
               <span className="menu-icon-badge">🏷️</span>
@@ -204,7 +249,10 @@ function Dashboard({ alCerrarSesion, usuario }) {
           </li>
           <li>
             <button
-              onClick={() => setVistaActual('clientes')}
+              onClick={() => {
+                setVistaActual('clientes');
+                setSidebarVisible(false);
+              }}
               className={vistaActual === 'clientes' ? 'active' : ''}
             >
               <span className="menu-icon-badge">👥</span>
@@ -213,7 +261,10 @@ function Dashboard({ alCerrarSesion, usuario }) {
           </li>
           <li>
             <button
-              onClick={() => setVistaActual('pedidos')}
+              onClick={() => {
+                setVistaActual('pedidos');
+                setSidebarVisible(false);
+              }}
               className={vistaActual === 'pedidos' ? 'active' : ''}
             >
               <span className="menu-icon-badge">📋</span>
@@ -222,7 +273,10 @@ function Dashboard({ alCerrarSesion, usuario }) {
           </li>
           <li>
             <button
-              onClick={() => setVistaActual('reportes')}
+              onClick={() => {
+                setVistaActual('reportes');
+                setSidebarVisible(false);
+              }}
               className={vistaActual === 'reportes' ? 'active' : ''}
             >
               <span className="menu-icon-badge">📊</span>
@@ -231,107 +285,65 @@ function Dashboard({ alCerrarSesion, usuario }) {
           </li>
           <li>
             <button
-              onClick={() => setVistaActual('busquedaPedidos')}
+              onClick={() => {
+                setVistaActual('busquedaPedidos');
+                setSidebarVisible(false);
+              }}
               className={vistaActual === 'busquedaPedidos' ? 'active' : ''}
             >
               <span className="menu-icon-badge">🔍</span>
               <span className="menu-text">Historial Pedidos</span>
             </button>
           </li>
+          <li className="logout-li">
+            <button 
+              onClick={() => {
+                handleLogout();
+                setSidebarVisible(false);
+              }} 
+              className="logout-button"
+            >
+              <span className="menu-icon-badge">🚪</span>
+              <span className="menu-text">Cerrar Sesión</span>
+            </button>
+          </li>
         </ul>
-        <div className="sidebar-footer">
-          <button onClick={handleLogout} className="logout-button">
-            <span className="menu-text">Cerrar Sesión</span>
-          </button>
-        </div>
-      </div>
+            {/* Footer del sidebar - Opcional, reservado para versión o info extra */}
+            <div className="sidebar-footer">
+              <p className="version-info">v1.2.0</p>
+            </div>
+          </div>
 
-      {/* Contenido Principal con animación de entrada */}
-      <div className="main-content">
-        <div className="content-fade-in" key={vistaActual}>
-          {renderizarVista()}
-        </div>
-      </div>
+          {/* Contenido Principal con animación de entrada */}
+          <div className="main-content">
+            <div className="content-fade-in" key={vistaActual}>
+              {renderizarVista()}
+            </div>
+          </div>
 
-      {/* Modales */}
-      {mostrandoModalApertura && (
-        <ModalApertura
-          onClose={() => setMostrandoModalApertura(false)}
-          onConfirmarApertura={handleConfirmarApertura}
-        />
-      )}
-      {mostrandoModalCierreZ && cajaActual && (
-        <ModalCierreZ
-          cajaActual={cajaActual}
-          onClose={() => setMostrandoModalCierreZ(false)}
-          onConfirmarCierreZ={handleConfirmarCierreZ}
-        />
-      )}
-      {mensajeModal && (
-        <ModalMensaje
-          mensaje={mensajeModal.texto}
-          tipo={mensajeModal.tipo}
-          onClose={() => setMensajeModal(null)}
-        />
-      )}
-      {/* Bottom Navigation para móviles */}
-      <nav className="bottom-nav">
-        <button
-          onClick={() => setVistaActual('pos')}
-          className={vistaActual === 'pos' ? 'active' : ''}
-        >
-          <span className="nav-icon">💰</span>
-          <span className="nav-label">POS</span>
-        </button>
-        <button
-          onClick={() => setVistaActual('inventario')}
-          className={vistaActual === 'inventario' ? 'active' : ''}
-        >
-          <span className="nav-icon">📦</span>
-          <span className="nav-label">Inv.</span>
-        </button>
-        <button
-          onClick={() => setVistaActual('categorias')}
-          className={vistaActual === 'categorias' ? 'active' : ''}
-        >
-          <span className="nav-icon">🏷️</span>
-          <span className="nav-label">Categorías</span>
-        </button>
-        <button
-          onClick={() => setVistaActual('clientes')}
-          className={vistaActual === 'clientes' ? 'active' : ''}
-        >
-          <span className="nav-icon">👥</span>
-          <span className="nav-label">Clientes</span>
-        </button>
-        <button
-          onClick={() => setVistaActual('pedidos')}
-          className={vistaActual === 'pedidos' ? 'active' : ''}
-        >
-          <span className="nav-icon">📋</span>
-          <span className="nav-label">Pedidos</span>
-        </button>
-        <button
-          onClick={() => setVistaActual('reportes')}
-          className={vistaActual === 'reportes' ? 'active' : ''}
-        >
-          <span className="nav-icon">📊</span>
-          <span className="nav-label">Reportes</span>
-        </button>
-        <button
-          onClick={() => setVistaActual('busquedaPedidos')}
-          className={vistaActual === 'busquedaPedidos' ? 'active' : ''}
-        >
-          <span className="nav-icon">🔍</span>
-          <span className="nav-label">Historial</span>
-        </button>
-        <button onClick={handleLogout} className="logout-btn-mobile">
-          <span className="nav-icon">🚪</span>
-          <span className="nav-label">Salir</span>
-        </button>
-      </nav>
-    </div>
-  );
+          {/* Modales */}
+          {mostrandoModalApertura && (
+            <ModalApertura
+              onClose={() => setMostrandoModalApertura(false)}
+              onConfirmarApertura={handleConfirmarApertura}
+            />
+          )}
+          {mostrandoModalCierreZ && cajaActual && (
+            <ModalCierreZ
+              cajaActual={cajaActual}
+              onClose={() => setMostrandoModalCierreZ(false)}
+              onConfirmarCierreZ={handleConfirmarCierreZ}
+            />
+          )}
+          {mensajeModal && (
+            <ModalMensaje
+              mensaje={mensajeModal.texto}
+              tipo={mensajeModal.tipo}
+              onClose={() => setMensajeModal(null)}
+            />
+          )}
+      </div>
+      );
 }
 
-export default Dashboard;
+      export default Dashboard;
