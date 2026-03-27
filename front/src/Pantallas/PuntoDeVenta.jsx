@@ -18,7 +18,7 @@ import { useNotification } from '../context/NotificationContext';
 import '../styles/PuntoDeVenta.css';
 
 // Recibe cajaActual, onAbrirCaja y onCierreZ del Dashboard
-function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) {
+function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
   const { showAlert } = useNotification();
   // --- Estados Principales ---
   const [productosDB, setProductosDB] = useState([]);
@@ -355,6 +355,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ }) {
           cajaActualId={cajaActual.id}
           montoInicial={cajaActual.montoInicial}
           onClose={() => setMostrandoCierreX(false)}
+          usuario={usuario}
         />
       )}
     </div>

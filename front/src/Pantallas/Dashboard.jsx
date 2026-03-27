@@ -158,6 +158,7 @@ function Dashboard({ alCerrarSesion, usuario }) {
           cajaActual={cajaActual}
           onAbrirCaja={() => setMostrandoModalApertura(true)}
           onCierreZ={handleCierreZ}
+          usuario={usuario}
         />;
       case 'inventario':
         return <Inventario usuario={usuario} />;
@@ -310,10 +311,6 @@ function Dashboard({ alCerrarSesion, usuario }) {
             </button>
           </li>
         </ul>
-        {/* Footer del sidebar - Opcional, reservado para versión o info extra */}
-        <div className="sidebar-footer">
-          <p className="version-info">v1.2.0</p>
-        </div>
       </div>
 
       {/* Contenido Principal con animación de entrada */}
@@ -335,6 +332,7 @@ function Dashboard({ alCerrarSesion, usuario }) {
           cajaActual={cajaActual}
           onClose={() => setMostrandoModalCierreZ(false)}
           onConfirmarCierreZ={handleConfirmarCierreZ}
+          usuario={usuario}
         />
       )}
       {mensajeModal && (

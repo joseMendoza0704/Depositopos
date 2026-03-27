@@ -4,10 +4,13 @@ import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
 import { useNotification } from '../context/NotificationContext';
 import { Printer, AlertTriangle, CheckCircle } from 'lucide-react';
+import { formatearMoneda } from '../utils/formatoMoneda';
 import '../styles/factura.css';
 
-function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
+function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ, usuario }) {
   const { showAlert } = useNotification();
+  const NUMERO_WHATSAPP = '50489534082';
+  const nombreUsuario = usuario?.displayName || usuario?.email || 'Usuario';
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [ventasNormales, setVentasNormales] = useState(0);
@@ -163,13 +166,38 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
     }
   };
 
+  const fechaReporte = new Date().toLocaleDateString('es-HN');
+  const horaReporte = new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+
   const handlePrint = () => {
+    const mensaje = `*CIERRE Z - Deposito Mendoza*
+
+*Fecha:* ${fechaReporte}
+*Hora:* ${horaReporte}
+*Usuario:* ${nombreUsuario}
+
+*RESUMEN DE VENTAS*
+Ventas POS: L. ${formatearMoneda(ventasNormales)}
+Ventas Pedidos: L. ${formatearMoneda(ventasPedidos)}
+*Total Ventas: L. ${formatearMoneda(totalVentas)}*
+
+*DETALLE DE CAJA*
+Monto Inicial: L. ${formatearMoneda(montoInicialCongelado)}
+Efectivo Final Esperado: L. ${formatearMoneda(efectivoFinalEsperado)}
+
+*RESUMEN FINANCIERO*
+Costos: L. ${formatearMoneda(totalCostos)}
+*Ganancia Bruta: L. ${formatearMoneda(gananciaBruta)}*
+Donacion (1%): L. ${formatearMoneda(donacion)}
+
+Pedidos: ${totalPedidosPagados} pagados`;
+    
+    const urlWhatsApp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+    window.open(urlWhatsApp, '_blank');
+    
     document.title = `Cierre_Z_${new Date().toLocaleDateString()}`;
     window.print();
   };
-
-  const fechaReporte = new Date().toLocaleDateString('es-HN');
-  const horaReporte = new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="modal-backdrop">
