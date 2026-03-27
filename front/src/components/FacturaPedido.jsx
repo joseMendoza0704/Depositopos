@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Printer } from 'lucide-react';
 import '../styles/factura.css';
 
 function FacturaPedido({ pedido, onClose }) {
@@ -96,7 +97,7 @@ function FacturaPedido({ pedido, onClose }) {
         {/* Botones (no se imprimen) */}
         <div className="factura-botones no-print">
           <button onClick={handlePrint} className="boton-modal-agregar">
-            🖨️ Imprimir
+            <Printer size={18} /> Imprimir
           </button>
           <button onClick={onClose} className="boton-modal-cancelar">
             Cerrar

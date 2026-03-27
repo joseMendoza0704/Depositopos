@@ -1,16 +1,24 @@
 {
-  "name": "front",
+  "name": "deposit-pos",
+  "productName": "DepositPOS",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "description": "DepositPOS Desktop Application",
+  "author": "DepositPOS",
+  "main": "main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "electron .",
+    "electron:dev": "NODE_ENV=development electron .",
+    "electron:build": "vite build && electron-builder --win",
+    "electron:build:dir": "vite build && electron-builder --win --dir"
   },
   "dependencies": {
     "firebase": "^12.4.0",
+    "lucide-react": "^1.6.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
@@ -19,10 +27,41 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
+    "electron": "^41.0.4",
+    "electron-builder": "^26.8.1",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
     "vite": "^7.1.7"
+  },
+  "build": {
+    "appId": "com.depositpos.app",
+    "productName": "DepositPOS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "preload.js"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "public/iconoSideBar.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/iconoSideBar.ico",
+      "uninstallerIcon": "public/iconoSideBar.ico"
+    }
   }
 }

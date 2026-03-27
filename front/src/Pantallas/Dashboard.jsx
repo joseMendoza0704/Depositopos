@@ -15,6 +15,8 @@ import {
   updateDoc
 } from 'firebase/firestore';
 
+import { ShoppingCart, Package, Tag, Users, FileText, TrendingUp, Search, LogOut, Menu, X, Store } from 'lucide-react';
+
 import Inventario from './Inventario.jsx';
 import PuntoDeVenta from './PuntoDeVenta.jsx';
 import GestionClientes from './GestionClientes.jsx';
@@ -188,7 +190,7 @@ function Dashboard({ alCerrarSesion, usuario }) {
           onClick={() => setSidebarVisible(!sidebarVisible)}
           aria-label="Abrir menú"
         >
-          ☰
+          <Menu size={24} />
         </button>
       )}
 
@@ -202,12 +204,12 @@ function Dashboard({ alCerrarSesion, usuario }) {
       {/* Sidebar */}
       <div className={`sidebar ${sidebarColapsada ? 'collapsed' : ''} ${sidebarVisible ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
-          <h3><span className="header-icon">🛒</span> Depósito Mendoza</h3>
+          <h3><Store className="header-icon" size={22} /> Depósito Mendoza</h3>
           <button
             className="sidebar-close-btn"
             onClick={() => setSidebarVisible(false)}
           >
-            ✕
+            <X size={18} />
           </button>
         </div>
         <ul className="sidebar-menu">
@@ -219,8 +221,8 @@ function Dashboard({ alCerrarSesion, usuario }) {
               }}
               className={vistaActual === 'pos' ? 'active' : ''}
             >
-              <span className="menu-icon-badge">💰</span>
-              <span className="menu-text">POS</span>
+              <span className="menu-icon-badge"><ShoppingCart size={20} /></span>
+              <span className="menu-text">Punto de Venta</span>
             </button>
           </li>
           <li>
@@ -231,7 +233,7 @@ function Dashboard({ alCerrarSesion, usuario }) {
               }}
               className={vistaActual === 'inventario' ? 'active' : ''}
             >
-              <span className="menu-icon-badge">📦</span>
+              <span className="menu-icon-badge"><Package size={20} /></span>
               <span className="menu-text">Inventario</span>
             </button>
           </li>
@@ -243,7 +245,7 @@ function Dashboard({ alCerrarSesion, usuario }) {
               }}
               className={vistaActual === 'categorias' ? 'active' : ''}
             >
-              <span className="menu-icon-badge">🏷️</span>
+              <span className="menu-icon-badge"><Tag size={20} /></span>
               <span className="menu-text">Categorías</span>
             </button>
           </li>
@@ -255,7 +257,7 @@ function Dashboard({ alCerrarSesion, usuario }) {
               }}
               className={vistaActual === 'clientes' ? 'active' : ''}
             >
-              <span className="menu-icon-badge">👥</span>
+              <span className="menu-icon-badge"><Users size={20} /></span>
               <span className="menu-text">Clientes</span>
             </button>
           </li>
@@ -267,7 +269,7 @@ function Dashboard({ alCerrarSesion, usuario }) {
               }}
               className={vistaActual === 'pedidos' ? 'active' : ''}
             >
-              <span className="menu-icon-badge">📋</span>
+              <span className="menu-icon-badge"><FileText size={20} /></span>
               <span className="menu-text">Pedidos</span>
             </button>
           </li>
@@ -279,7 +281,7 @@ function Dashboard({ alCerrarSesion, usuario }) {
               }}
               className={vistaActual === 'reportes' ? 'active' : ''}
             >
-              <span className="menu-icon-badge">📊</span>
+              <span className="menu-icon-badge"><TrendingUp size={20} /></span>
               <span className="menu-text">Reportes</span>
             </button>
           </li>
@@ -291,59 +293,59 @@ function Dashboard({ alCerrarSesion, usuario }) {
               }}
               className={vistaActual === 'busquedaPedidos' ? 'active' : ''}
             >
-              <span className="menu-icon-badge">🔍</span>
+              <span className="menu-icon-badge"><Search size={20} /></span>
               <span className="menu-text">Historial Pedidos</span>
             </button>
           </li>
           <li className="logout-li">
-            <button 
+            <button
               onClick={() => {
                 handleLogout();
                 setSidebarVisible(false);
-              }} 
+              }}
               className="logout-button"
             >
-              <span className="menu-icon-badge">🚪</span>
+              <span className="menu-icon-badge"><LogOut size={20} /></span>
               <span className="menu-text">Cerrar Sesión</span>
             </button>
           </li>
         </ul>
-            {/* Footer del sidebar - Opcional, reservado para versión o info extra */}
-            <div className="sidebar-footer">
-              <p className="version-info">v1.2.0</p>
-            </div>
-          </div>
-
-          {/* Contenido Principal con animación de entrada */}
-          <div className="main-content">
-            <div className="content-fade-in" key={vistaActual}>
-              {renderizarVista()}
-            </div>
-          </div>
-
-          {/* Modales */}
-          {mostrandoModalApertura && (
-            <ModalApertura
-              onClose={() => setMostrandoModalApertura(false)}
-              onConfirmarApertura={handleConfirmarApertura}
-            />
-          )}
-          {mostrandoModalCierreZ && cajaActual && (
-            <ModalCierreZ
-              cajaActual={cajaActual}
-              onClose={() => setMostrandoModalCierreZ(false)}
-              onConfirmarCierreZ={handleConfirmarCierreZ}
-            />
-          )}
-          {mensajeModal && (
-            <ModalMensaje
-              mensaje={mensajeModal.texto}
-              tipo={mensajeModal.tipo}
-              onClose={() => setMensajeModal(null)}
-            />
-          )}
+        {/* Footer del sidebar - Opcional, reservado para versión o info extra */}
+        <div className="sidebar-footer">
+          <p className="version-info">v1.2.0</p>
+        </div>
       </div>
-      );
+
+      {/* Contenido Principal con animación de entrada */}
+      <div className="main-content">
+        <div className="content-fade-in" key={vistaActual}>
+          {renderizarVista()}
+        </div>
+      </div>
+
+      {/* Modales */}
+      {mostrandoModalApertura && (
+        <ModalApertura
+          onClose={() => setMostrandoModalApertura(false)}
+          onConfirmarApertura={handleConfirmarApertura}
+        />
+      )}
+      {mostrandoModalCierreZ && cajaActual && (
+        <ModalCierreZ
+          cajaActual={cajaActual}
+          onClose={() => setMostrandoModalCierreZ(false)}
+          onConfirmarCierreZ={handleConfirmarCierreZ}
+        />
+      )}
+      {mensajeModal && (
+        <ModalMensaje
+          mensaje={mensajeModal.texto}
+          tipo={mensajeModal.tipo}
+          onClose={() => setMensajeModal(null)}
+        />
+      )}
+    </div>
+  );
 }
 
-      export default Dashboard;
+export default Dashboard;

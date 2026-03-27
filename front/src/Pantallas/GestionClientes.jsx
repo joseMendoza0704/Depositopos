@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { useNotification } from '../context/NotificationContext';
 import '../styles/GestionClientes.css';
+import { Search, Plus, Edit, Trash2, X, User, Loader } from 'lucide-react';
 
 function GestionClientes({ usuario }) {
   const { showAlert } = useNotification();
@@ -112,15 +113,15 @@ function GestionClientes({ usuario }) {
       if (clienteIdSeleccionado) {
         const clienteRef = doc(db, 'clientes', clienteIdSeleccionado);
         await updateDoc(clienteRef, datosCliente);
-        showAlert('✅ Cliente actualizado con éxito!', 'exito');
+        showAlert('Cliente actualizado con éxito!', 'exito');
       } else {
         await addDoc(collection(db, 'clientes'), datosCliente);
-        showAlert('✅ Cliente agregado con éxito!', 'exito');
+        showAlert('Cliente agregado con éxito!', 'exito');
       }
       limpiarFormulario();
     } catch (err) {
       console.error('Error al guardar cliente:', err);
-      showAlert('❌ Error al guardar cliente', 'error');
+      showAlert('Error al guardar cliente', 'error');
     } finally {
       setCargando(false);
     }
@@ -135,11 +136,11 @@ function GestionClientes({ usuario }) {
     try {
       const clienteRef = doc(db, 'clientes', clienteIdSeleccionado);
       await updateDoc(clienteRef, { activo: false });
-      showAlert('✅ Cliente eliminado con éxito!', 'exito');
+      showAlert('Cliente eliminado con éxito!', 'exito');
       limpiarFormulario();
     } catch (err) {
       console.error('Error al eliminar cliente:', err);
-      showAlert('❌ Error al eliminar cliente', 'error');
+      showAlert('Error al eliminar cliente', 'error');
     } finally {
       setCargando(false);
     }
@@ -198,7 +199,7 @@ function GestionClientes({ usuario }) {
       <h2>Gestión de Clientes</h2>
 
       <form onSubmit={handleSubmit} className="producto-form">
-        <h3>{clienteIdSeleccionado ? '✏️ Editar Cliente' : '➕ Añadir Nuevo Cliente'}</h3>
+        <h3>{clienteIdSeleccionado ? <><Edit size={18} /> Editar Cliente</> : <><Plus size={18} /> Añadir Nuevo Cliente</>}</h3>
 
         <div className="form-grid">
           <div className="form-group">
@@ -253,18 +254,18 @@ function GestionClientes({ usuario }) {
 
         <div className="form-botones">
           <button type="submit" disabled={cargando} className="btn-submit">
-            {cargando ? '⏳ Guardando...' : clienteIdSeleccionado ? '💾 Actualizar Cliente' : '➕ Añadir Cliente'}
+            {cargando ? <><Loader size={18} className="animate-spin" /> Guardando...</> : clienteIdSeleccionado ? 'Actualizar Cliente' : 'Añadir Cliente'}
           </button>
 
           {clienteIdSeleccionado && (
             <>
               {usuario?.rol === 'admin' && (
                 <button type="button" onClick={handleDelete} disabled={cargando} className="btn-eliminar">
-                  🗑️ Eliminar
+                  <Trash2 size={18} /> Eliminar
                 </button>
               )}
               <button type="button" onClick={limpiarFormulario} disabled={cargando} className="btn-cancelar">
-                ❌ Cancelar
+                <X size={18} /> Cancelar
               </button>
             </>
           )}
@@ -307,7 +308,7 @@ function GestionClientes({ usuario }) {
 
         <input
           type="text"
-          placeholder={`🔍 Buscar por ${criterioBusqueda}...`}
+          placeholder={`Buscar por ${criterioBusqueda}...`}
           className="input-filtro"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}

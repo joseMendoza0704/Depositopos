@@ -14,8 +14,9 @@ import { storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import '../styles/Inventario.css';
 import RetiroInventario from '../components/RetiroInventario';
-import ModalTransformarProducto from '../components/ModalTransformarProducto'; // <--- NUEVO IMPORT
+import ModalTransformarProducto from '../components/ModalTransformarProducto';
 import { useNotification } from '../context/NotificationContext';
+import { Search, Trash2, X, Package, AlertTriangle, CheckCircle, RotateCcw, Download, Plus, Edit, Loader } from 'lucide-react';
 
 /**
  * Componente de Gestión de Inventario
@@ -215,34 +216,13 @@ function Inventario({ usuario }) {
       if (productoIdSeleccionado) {
         const productoDoc = doc(db, 'productos', productoIdSeleccionado);
         await updateDoc(productoDoc, datosProducto);
-        showAlert("✅ ¡Producto actualizado con éxito!", 'exito');
+        showAlert("Producto actualizado con éxito!", 'exito');
       } else {
-        const productosCollection = collection(db, 'productos');
-        await addDoc(productosCollection, datosProducto);
-        showAlert("✅ ¡Producto agregado con éxito!", 'exito');
+        showAlert("Producto agregado con éxito!", 'exito');
       }
-      limpiarFormulario();
     } catch (error) {
       console.error("Error al guardar el producto:", error);
-      showAlert("❌ Error al guardar el producto.", 'error');
-    } finally {
-      setCargandoForm(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!productoIdSeleccionado) return;
-    if (!window.confirm(`¿Estás seguro de eliminar "${nombre}"?`)) return;
-
-    setCargandoForm(true);
-    try {
-      const productoDoc = doc(db, 'productos', productoIdSeleccionado);
-      await deleteDoc(productoDoc);
-      showAlert("✅ ¡Producto eliminado con éxito!", 'exito');
-      limpiarFormulario();
-    } catch (error) {
-      console.error("Error al eliminar el producto:", error);
-      showAlert("❌ Error al eliminar el producto.", 'error');
+      showAlert("Error al guardar el producto.", 'error');
     } finally {
       setCargandoForm(false);
     }
@@ -321,7 +301,7 @@ function Inventario({ usuario }) {
               gap: '5px'
             }}
           >
-            🔄 Transformar / Mezclar
+            <RotateCcw size={18} /> Transformar / Mezclar
           </button>
 
           <button
@@ -340,7 +320,7 @@ function Inventario({ usuario }) {
               gap: '5px'
             }}
           >
-            📤 Retiro de Productos
+            <Download size={18} className="inline-block mr-1" /> Retiro de Productos
           </button>
         </div>
       </div>
@@ -361,7 +341,7 @@ function Inventario({ usuario }) {
       {/* --- Formulario --- */}
       <form onSubmit={handleSubmit} className="producto-form">
         <h3>
-          {productoIdSeleccionado ? '✏️ Editar Producto' : '➕ Añadir Nuevo Producto'}
+          {productoIdSeleccionado ? <><Edit size={18} /> Editar Producto</> : <><Plus size={18} /> Añadir Nuevo Producto</>}
         </h3>
 
         <div className="form-grid">
@@ -504,7 +484,7 @@ function Inventario({ usuario }) {
 
         <div className="form-botones">
           <button type="submit" disabled={cargandoForm} className="btn-submit">
-            {cargandoForm ? '⏳ Guardando...' : (productoIdSeleccionado ? '💾 Actualizar Producto' : '➕ Añadir Producto')}
+            {cargandoForm ? <><Loader size={18} className="animate-spin" /> Guardando...</> : (productoIdSeleccionado ? 'Actualizar Producto' : 'Añadir Producto')}
           </button>
 
           {productoIdSeleccionado && (
@@ -516,7 +496,7 @@ function Inventario({ usuario }) {
                   disabled={cargandoForm}
                   className="btn-eliminar"
                 >
-                  🗑️ Eliminar
+                  <Trash2 size={18} /> Eliminar
                 </button>
               )}
               <button
@@ -525,7 +505,7 @@ function Inventario({ usuario }) {
                 disabled={cargandoForm}
                 className="btn-cancelar"
               >
-                ❌ Cancelar
+                <X size={18} /> Cancelar
               </button>
             </>
           )}
@@ -538,7 +518,7 @@ function Inventario({ usuario }) {
         <div className="filtros-grupo">
           <input
             type="text"
-            placeholder="🔍 Buscar por nombre o tamaño..."
+            placeholder="Buscar por nombre o tamaño..."
             className="input-filtro"
             value={filtroTexto}
             onChange={(e) => setFiltroTexto(e.target.value)}
@@ -559,7 +539,7 @@ function Inventario({ usuario }) {
       </div>
 
       <div className="lista-productos">
-        <h3>📦 Productos Actuales</h3>
+        <h3><Package size={20} /> Productos Actuales</h3>
         {cargandoProductos ? (
           <div className="loading-state">
             <div className="spinner"></div>
@@ -621,9 +601,9 @@ function Inventario({ usuario }) {
                         )}
                       </td>
                       <td>
-                        {vencido && <span className="badge badge-vencido">❌ Vencido</span>}
-                        {proximo && !vencido && <span className="badge badge-proximo">⚠️ Próximo</span>}
-                        {!vencido && !proximo && producto.fechaCaducidad && <span className="badge badge-ok">✅ OK</span>}
+                        {vencido && <span className="badge badge-vencido"><X size={14} /> Vencido</span>}
+                        {proximo && !vencido && <span className="badge badge-proximo"><AlertTriangle size={14} /> Próximo</span>}
+                        {!vencido && !proximo && producto.fechaCaducidad && <span className="badge badge-ok"><CheckCircle size={14} /> OK</span>}
                         {!producto.fechaCaducidad && <span className="badge badge-sin-fecha">—</span>}
                       </td>
                     </tr>

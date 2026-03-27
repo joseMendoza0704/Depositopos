@@ -7,7 +7,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
   /* Configuración del fondo */
-  background-image: url('/public/fondo.jpg');
+  background-image: url('/fondo.jpg');
   /* Llama a la imagen desde la carpeta 'public' */
   background-size: cover;
   /* Cubre toda la pantalla */
@@ -1749,4 +1749,75 @@ body {
   font-size: 20px;
   color: #2ecc71;
   margin-top: 20px;
+}
+
+/* --- Nuevos estilos para Login con credenciales y PIN --- */
+.saved-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.saved-user-info svg {
+  color: #007bff;
+  margin-bottom: 10px;
+}
+
+.saved-user-info p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.saved-email {
+  color: #6c757d;
+  font-size: 14px !important;
+}
+
+.pin-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pin-section svg {
+  color: #007bff;
+  margin-bottom: 10px;
+}
+
+.pin-section p {
+  margin: 5px 0 15px 0;
+  color: #555;
+}
+
+.login-button.secondary {
+  background-color: #6c757d;
+  margin-top: 10px;
+}
+
+.login-button.secondary:hover {
+  background-color: #5a6268;
+}
+
+.recordarme-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+}
+
+.recordarme-checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.recordarme-checkbox svg {
+  color: #007bff;
 }

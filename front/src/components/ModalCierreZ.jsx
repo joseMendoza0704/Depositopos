@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
 import { useNotification } from '../context/NotificationContext';
+import { Printer, AlertTriangle, CheckCircle } from 'lucide-react';
 import '../styles/factura.css';
 
 function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
@@ -303,12 +304,12 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
         <div className="factura-footer">
           {!isConfirmado ? (
             <>
-              <p className="factura-agradecimiento" style={{ color: '#e74c3c' }}>⚠️ Cierre Final del Día</p>
+              <p className="factura-agradecimiento" style={{ color: '#e74c3c' }}><AlertTriangle size={18} /> Cierre Final del Día</p>
               <p className="factura-mensaje">Al confirmar, se archivará toda la información y se cerrará la caja.</p>
             </>
           ) : (
             <>
-              <p className="factura-agradecimiento" style={{ color: '#27ae60' }}>✓ Cierre Z Completado</p>
+              <p className="factura-agradecimiento" style={{ color: '#27ae60' }}><CheckCircle size={18} /> Cierre Z Completado</p>
               <p className="factura-mensaje">La caja ha sido cerrada exitosamente.</p>
             </>
           )}
@@ -319,7 +320,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
           {isConfirmado ? (
             <>
               <button onClick={handlePrint} className="boton-modal-agregar">
-                🖨️ Imprimir Reporte
+                <Printer size={18} /> Imprimir Reporte
               </button>
               <button onClick={onClose} className="boton-modal-cancelar">
                 Cerrar

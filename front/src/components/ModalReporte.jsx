@@ -1,4 +1,5 @@
 import React from 'react';
+import { Printer } from 'lucide-react';
 import '../styles/ModalReporte.css';
 
 const ModalReporte = ({ titulo, columnas, datos, onClose, filtros, onImprimir }) => {
@@ -54,7 +55,7 @@ const ModalReporte = ({ titulo, columnas, datos, onClose, filtros, onImprimir })
 
                 <div className="modal-footer">
                     <button className="btn-imprimir" onClick={onImprimir || (() => window.print())}>
-                        🖨️ Imprimir
+                        <Printer size={18} /> Imprimir
                     </button>
                     <button className="btn-cerrar" onClick={onClose}>
                         Cerrar

@@ -4,6 +4,7 @@ import { collection, query, orderBy, getDocs, where } from 'firebase/firestore';
 import { useNotification } from '../context/NotificationContext';
 import FacturaPedido from '../components/FacturaPedido';
 import '../styles/busquedaPedidos.css';
+import { Printer } from 'lucide-react';
 
 function BusquedaPedidos() {
     const { showAlert } = useNotification();
@@ -164,13 +165,13 @@ function BusquedaPedidos() {
                                     </td>
                                     <td>{pedido.items?.length || 0}</td>
                                     <td>
-                                        <button
-                                            className="btn-ver-detalle"
-                                            onClick={() => setPedidoSeleccionado(pedido)}
-                                            title="Ver Factura para Imprimir"
-                                        >
-                                            🖨️ Ver Factura
-                                        </button>
+                                            <button
+                                                className="btn-ver-detalle"
+                                                onClick={() => setPedidoSeleccionado(pedido)}
+                                                title="Ver Factura para Imprimir"
+                                            >
+                                                <Printer size={16} /> Ver Factura
+                                            </button>
                                     </td>
                                 </tr>
                             ))

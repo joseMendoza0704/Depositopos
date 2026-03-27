@@ -1,24 +1,22 @@
 import React, { useEffect } from 'react';
-import '../styles/styles.css'; // Aseguramos que los estilos estén disponibles
+import { XCircle, Info, CheckCircle, X } from 'lucide-react';
+import '../styles/styles.css';
 
-// Recibe: mensaje, tipo ('exito', 'error', 'info'), y función onClose
 function ModalMensaje({ mensaje, tipo = 'exito', onClose }) {
 
-  // Cierra el modal automáticamente después de unos segundos
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 3000); // 3 segundos
+    }, 3000);
 
-    // Limpia el temporizador si el componente se desmonta antes
     return () => clearTimeout(timer);
   }, [onClose]);
 
   const getIcon = () => {
     switch (tipo) {
-      case 'error': return '❌';
-      case 'info': return 'ℹ️';
-      default: return '✅';
+      case 'error': return <XCircle size={48} className="text-red-500" />;
+      case 'info': return <Info size={48} className="text-blue-500" />;
+      default: return <CheckCircle size={48} className="text-green-500" />;
     }
   };
 
@@ -33,7 +31,7 @@ function ModalMensaje({ mensaje, tipo = 'exito', onClose }) {
   return (
     <div className="modal-backdrop" style={{ zIndex: 2000 }}>
       <div className={`modal-content ${tipo === 'error' ? 'error-modal' : 'exito-modal'}`} style={{ maxWidth: '400px', textAlign: 'center', padding: '30px' }}>
-        <div style={{ fontSize: '3em', marginBottom: '15px' }}>
+        <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'center' }}>
           {getIcon()}
         </div>
         <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>{getTitle()}</h3>

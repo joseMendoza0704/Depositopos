@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { Printer } from 'lucide-react';
 import '../styles/factura.css';
 
 function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
@@ -185,7 +186,7 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
         {/* Botones */}
         <div className="factura-botones no-print">
           <button onClick={handlePrint} className="boton-modal-agregar">
-            🖨️ Imprimir
+            <Printer size={18} /> Imprimir
           </button>
           <button onClick={onClose} className="boton-modal-cancelar">
             Cerrar

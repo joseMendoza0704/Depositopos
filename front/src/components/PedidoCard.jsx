@@ -3,7 +3,8 @@ import { collection, doc, updateDoc, deleteDoc, addDoc, getDoc } from 'firebase/
 import { db } from '../firebaseConfig';
 import FacturaPedido from './FacturaPedido';
 import { useNotification } from '../context/NotificationContext';
-import '../styles/PedidoCard.css'; // Asegúrate de que el CSS esté importado
+import { User, Phone, MapPin, Package, Printer, Trash2, Edit, Truck, ArrowLeft, CheckCircle } from 'lucide-react';
+import '../styles/PedidoCard.css';
 
 function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
   const { showAlert } = useNotification();
@@ -104,16 +105,16 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
       <div className="pedido-card-header">
         <div className="cliente-info">
           <div className="cliente-nombre">
-            <span className="icon-cliente">👤</span>
+            <User size={18} className="icon-cliente" />
             <h4>{cliente.nombre}</h4>
           </div>
           <div className="cliente-contacto">
-            <span className="icon-telefono">📱</span>
+            <Phone size={16} className="icon-telefono" />
             <span>{cliente.telefono}</span>
           </div>
           {cliente.direccion && (
             <div className="cliente-direccion">
-              <span className="icon-direccion">📍</span>
+              <MapPin size={16} className="icon-direccion" />
               <span>{cliente.direccion}</span>
             </div>
           )}
@@ -123,7 +124,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
       {/* Items */}
       <div className="pedido-card-body">
         <div className="items-header">
-          <span className="icon-lista">📦</span>
+          <Package size={18} className="icon-lista" />
           <span className="items-title">Productos</span>
         </div>
         <div className="pedido-items-list">
@@ -156,7 +157,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
             className="btn-modern btn-imprimir-modern"
             title="Imprimir factura"
           >
-            <span className="btn-icon">🖨️</span>
+            <Printer size={18} className="btn-icon" />
             <span className="btn-text">Imprimir</span>
           </button>
 
@@ -166,7 +167,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
             className="btn-modern btn-eliminar-modern"
             title="Eliminar pedido"
           >
-            <span className="btn-icon">🗑️</span>
+            <Trash2 size={18} className="btn-icon" />
             <span className="btn-text">Eliminar</span>
           </button>
 
@@ -177,7 +178,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
               className="btn-modern btn-editar-modern"
               title="Editar pedido"
             >
-              <span className="btn-icon">✏️</span>
+              <Edit size={18} className="btn-icon" />
               <span className="btn-text">Editar</span>
             </button>
           )}
@@ -189,7 +190,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
               className="btn-modern btn-mover-modern"
               title="Marcar como enviado"
             >
-              <span className="btn-icon">🚚</span>
+              <Truck size={18} className="btn-icon" />
               <span className="btn-text">Enviar</span>
             </button>
           )}
@@ -201,7 +202,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
                 className="btn-modern btn-regresar-modern"
                 title="Regresar a Recibido"
               >
-                <span className="btn-icon">↩️</span>
+                <ArrowLeft size={18} className="btn-icon" />
                 <span className="btn-text">Regresar</span>
               </button>
 
@@ -210,7 +211,7 @@ function PedidoCard({ pedido, onEdit, onRecargarPedidos }) {
                 className="btn-modern btn-pagar-modern"
                 title="Marcar como pagado"
               >
-                <span className="btn-icon">✅</span>
+                <CheckCircle size={18} className="btn-icon" />
                 <span className="btn-text">Pagar</span>
               </button>
             </>

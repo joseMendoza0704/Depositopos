@@ -1,4 +1,5 @@
 import React from 'react';
+import { Printer } from 'lucide-react';
 import '../styles/factura.css'; // Reutilizamos los estilos de factura para consistencia
 
 function ComprobanteRetiro({ retiro, onClose }) {
@@ -78,7 +79,7 @@ function ComprobanteRetiro({ retiro, onClose }) {
                 {/* Botones (no se imprimen) */}
                 <div className="factura-botones no-print">
                     <button onClick={handlePrint} className="boton-modal-agregar">
-                        🖨️ Imprimir
+                        <Printer size={18} /> Imprimir
                     </button>
                     <button onClick={onClose} className="boton-modal-cancelar">
                         Cerrar
