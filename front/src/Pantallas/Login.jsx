@@ -56,7 +56,7 @@ function Login({ alIniciarSesion }) {
         rol = docSnap.data().rol;
       }
 
-      alIniciarSesion({ ...user, rol });
+      alIniciarSesion({ uid: user.uid, email: user.email, displayName: user.displayName, rol });
     } catch (err) {
       console.error("Error al iniciar sesión:", err.message);
       setError("Error al iniciar sesión. Verifica tu email y contraseña.");
