@@ -3,10 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
 import { useNotification } from '../context/NotificationContext';
+import { Printer, AlertTriangle, CheckCircle } from 'lucide-react';
+import { formatearMoneda } from '../utils/formatoMoneda';
 import '../styles/factura.css';
 
-function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
+function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ, usuario }) {
   const { showAlert } = useNotification();
+  const NUMERO_WHATSAPP = '96823813';
+  const nombreUsuario = usuario?.displayName || usuario?.email || 'Usuario';
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [ventasNormales, setVentasNormales] = useState(0);
@@ -162,13 +166,37 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
     }
   };
 
-  const handlePrint = () => {
-    document.title = `Cierre_Z_${new Date().toLocaleDateString()}`;
-    window.print();
-  };
-
   const fechaReporte = new Date().toLocaleDateString('es-HN');
   const horaReporte = new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+
+  const handlePrint = () => {
+    const mensaje = `
+*CIERRE Z - Deposito Mendoza*
+
+*Fecha:* ${fechaReporte}
+*Hora:* ${horaReporte}
+*Usuario:* ${nombreUsuario}
+
+*RESUMEN DE VENTAS*
+Ventas POS: L. ${formatearMoneda(ventasNormales)}
+Ventas Pedidos: L. ${formatearMoneda(ventasPedidos)}
+*Total Ventas: L. ${formatearMoneda(totalVentas)}*
+
+*DETALLE DE CAJA*
+Monto Inicial: L. ${formatearMoneda(montoInicialCongelado)}
+Efectivo Final Esperado: L. ${formatearMoneda(efectivoFinalEsperado)}
+
+*RESUMEN FINANCIERO*
+Costos: L. ${formatearMoneda(totalCostos)}
+*Ganancia Bruta: L. ${formatearMoneda(gananciaBruta)}*
+Donacion (1%): L. ${formatearMoneda(donacion)}
+`;
+    
+    const urlWhatsApp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+    document.title = `Cierre_Z_${new Date().toLocaleDateString()}`;
+    window.print();
+    window.open(urlWhatsApp, '_blank');
+  };
 
   return (
     <div className="modal-backdrop">
@@ -303,12 +331,12 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
         <div className="factura-footer">
           {!isConfirmado ? (
             <>
-              <p className="factura-agradecimiento" style={{ color: '#e74c3c' }}>⚠️ Cierre Final del Día</p>
+              <p className="factura-agradecimiento" style={{ color: '#e74c3c' }}><AlertTriangle size={18} /> Cierre Final del Día</p>
               <p className="factura-mensaje">Al confirmar, se archivará toda la información y se cerrará la caja.</p>
             </>
           ) : (
             <>
-              <p className="factura-agradecimiento" style={{ color: '#27ae60' }}>✓ Cierre Z Completado</p>
+              <p className="factura-agradecimiento" style={{ color: '#27ae60' }}><CheckCircle size={18} /> Cierre Z Completado</p>
               <p className="factura-mensaje">La caja ha sido cerrada exitosamente.</p>
             </>
           )}
@@ -319,7 +347,7 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ }) {
           {isConfirmado ? (
             <>
               <button onClick={handlePrint} className="boton-modal-agregar">
-                🖨️ Imprimir Reporte
+                <Printer size={18} /> Imprimir Reporte
               </button>
               <button onClick={onClose} className="boton-modal-cancelar">
                 Cerrar

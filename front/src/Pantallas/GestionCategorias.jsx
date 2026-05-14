@@ -3,6 +3,7 @@ import { db } from '../firebaseConfig';
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import '../styles/GestionCategorias.css';
 import { useNotification } from '../context/NotificationContext';
+import { Plus, Trash2, Edit, Package, CheckCircle, XCircle, Search } from 'lucide-react';
 
 const GestionCategorias = () => {
     const { showAlert } = useNotification();
@@ -96,7 +97,7 @@ const GestionCategorias = () => {
                     nombre: nombreCategoria.trim(),
                     descripcion: descripcionCategoria.trim()
                 });
-                showAlert('✅ Categoría actualizada correctamente', 'exito');
+                showAlert('Categoría actualizada correctamente', 'exito');
             } else {
                 // Crear nueva categoría
                 const nuevaCategoriaRef = await addDoc(collection(db, 'categorias'), {
@@ -105,7 +106,7 @@ const GestionCategorias = () => {
                     activo: true,
                     createdAt: new Date()
                 });
-                showAlert('✅ Categoría creada correctamente', 'exito');
+                showAlert('Categoría creada correctamente', 'exito');
                 // Seleccionar la nueva categoría automáticamente
                 setCategoriaSeleccionada({
                     id: nuevaCategoriaRef.id,
@@ -115,7 +116,7 @@ const GestionCategorias = () => {
             }
         } catch (error) {
             console.error('Error al guardar categoría:', error);
-            showAlert('❌ Error al guardar categoría', 'error');
+                showAlert('Error al guardar categoría', 'error');
         } finally {
             setCargando(false);
         }
@@ -140,11 +141,11 @@ const GestionCategorias = () => {
             const categoriaDoc = doc(db, 'categorias', categoriaSeleccionada.id);
             await deleteDoc(categoriaDoc);
             
-            showAlert('✅ Categoría eliminada correctamente', 'exito');
+                showAlert('Categoría eliminada correctamente', 'exito');
             handleNuevaCategoria();
         } catch (error) {
             console.error('Error al eliminar categoría:', error);
-            showAlert('❌ Error al eliminar categoría', 'error');
+                showAlert('Error al eliminar categoría', 'error');
         }
     };
 
@@ -157,10 +158,10 @@ const GestionCategorias = () => {
                 categoriaId: categoriaSeleccionada.id,
                 categoriaNombre: categoriaSeleccionada.nombre
             });
-            showAlert(`✅ ${producto.nombre} agregado a ${categoriaSeleccionada.nombre}`, 'exito');
+                showAlert(`${producto.nombre} agregado a ${categoriaSeleccionada.nombre}`, 'exito');
         } catch (error) {
             console.error('Error al agregar producto:', error);
-            showAlert('❌ Error al agregar producto', 'error');
+                showAlert('Error al agregar producto', 'error');
         }
     };
 
@@ -173,7 +174,7 @@ const GestionCategorias = () => {
                 categoriaId: null,
                 categoriaNombre: null
             });
-            showAlert(`✅ ${producto.nombre} removido de ${categoriaSeleccionada.nombre}`, 'exito');
+                showAlert(`${producto.nombre} removido de ${categoriaSeleccionada.nombre}`, 'exito');
         } catch (error) {
             console.error('Error al remover producto:', error);
             showAlert('❌ Error al remover producto', 'error');
@@ -186,7 +187,7 @@ const GestionCategorias = () => {
                 <div className="sidebar-header">
                     <h3>Categorías</h3>
                     <button className="btn-nueva" onClick={handleNuevaCategoria}>
-                        ➕ Nueva
+                        <Plus size={16} /> Nueva
                     </button>
                 </div>
                 
@@ -226,7 +227,7 @@ const GestionCategorias = () => {
 
                 {/* Formulario de edición/creación */}
                 <div className="main-form">
-                    <h4>{categoriaSeleccionada ? '✏️ Editar Categoría' : '➕ Nueva Categoría'}</h4>
+                    <h4>{categoriaSeleccionada ? <><Edit size={18} /> Editar Categoría</> : <><Plus size={18} /> Nueva Categoría</>}</h4>
                     <form onSubmit={handleGuardarCategoria}>
                         <div className="form-group">
                             <label>Nombre *</label>
@@ -256,7 +257,7 @@ const GestionCategorias = () => {
                 {/* Gestión de productos (solo si hay categoría seleccionada) */}
                 {categoriaSeleccionada && (
                     <div className="main-products">
-                        <h4>📦 Productos en esta Categoría ({productosDeCategoria.length})</h4>
+                        <h4><Package size={18} /> Productos en esta Categoría ({productosDeCategoria.length})</h4>
                         
                         {/* Buscador */}
                         <div className="search-box">

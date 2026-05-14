@@ -1,4 +1,5 @@
 import React from 'react';
+import { Printer } from 'lucide-react';
 import '../styles/factura.css';
 
 function ModalVerCierreZ({ datosCierre, onClose }) {
@@ -158,7 +159,7 @@ function ModalVerCierreZ({ datosCierre, onClose }) {
                 )}
 
                 <div className="factura-botones no-print">
-                    <button className="btn-imprimir" onClick={handlePrint}>🖨️ Imprimir Ticket</button>
+                    <button className="btn-imprimir" onClick={handlePrint}><Printer size={18} /> Imprimir Ticket</button>
                     <button className="btn-cerrar" onClick={onClose}>Cerrar</button>
                 </div>
 

@@ -2,9 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { Printer } from 'lucide-react';
+import { formatearMoneda } from '../utils/formatoMoneda';
 import '../styles/factura.css';
 
-function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
+function ModalCierreX({ cajaActualId, montoInicial, onClose, usuario }) {
+  const NUMERO_WHATSAPP = '50489534082';
+  const nombreUsuario = usuario?.displayName || usuario?.email || 'Usuario';
   const [totalVentas, setTotalVentas] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,6 +16,7 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
   const [diferencia, setDiferencia] = useState(0);
   const [ventasNormales, setVentasNormales] = useState(0);
   const [ventasPedidos, setVentasPedidos] = useState(0);
+  const [totalCostos, setTotalCostos] = useState(0);
 
   useEffect(() => {
     if (!cajaActualId) return;
@@ -24,10 +29,14 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
         const qVentas = query(ventasRef, where('cajaId', '==', cajaActualId));
         const ventasSnapshot = await getDocs(qVentas);
         let sumaVentasNormales = 0;
+        let sumaCostos = 0;
         ventasSnapshot.forEach((doc) => {
-          sumaVentasNormales += doc.data().totalVenta;
+          const venta = doc.data();
+          sumaVentasNormales += venta.totalVenta || 0;
+          sumaCostos += (venta.items || []).reduce((acc, item) => acc + (item.costoTotalItem || 0), 0);
         });
         setVentasNormales(sumaVentasNormales);
+        setTotalCostos(sumaCostos);
 
         const cajaTransaccionesRef = collection(db, 'cajaTransacciones');
         const startOfDay = new Date(new Date().setHours(0, 0, 0, 0));
@@ -38,14 +47,17 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
         );
         const pedidosSnapshot = await getDocs(qPedidos);
         let sumaVentasPedidos = 0;
+        let sumaCostosPedidos = 0;
         pedidosSnapshot.forEach((doc) => {
           const pedido = doc.data();
           const pedidoFecha = pedido.fecha.toDate();
           if (pedidoFecha <= new Date(new Date().setHours(23, 59, 59, 999))) {
             sumaVentasPedidos += pedido.total || 0;
+            sumaCostosPedidos += (pedido.items || []).reduce((acc, item) => acc + ((item.costo || 0) * item.cantidad), 0);
           }
         });
         setVentasPedidos(sumaVentasPedidos);
+        setTotalCostos(prev => prev + sumaCostosPedidos);
 
         setTotalVentas(sumaVentasNormales + sumaVentasPedidos);
         setError(null);
@@ -67,14 +79,42 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
     setDiferencia(contadoNum - totalEsperado);
   }, [dineroContado, totalEsperado]);
 
+  const fechaReporte = new Date().toLocaleDateString('es-HN');
+  const horaReporte = new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+
   const handlePrint = () => {
+    const gananciaBruta = totalVentas - totalCostos;
+    const mensaje = `
+*CIERRE X - Deposito Mendoza*
+
+*Fecha:* ${fechaReporte}
+*Hora:* ${horaReporte}
+*Usuario:* ${nombreUsuario}
+
+*RESUMEN DE VENTAS*
+Ventas POS: L. ${formatearMoneda(ventasNormales)}
+Ventas Pedidos: L. ${formatearMoneda(ventasPedidos)}
+*Total Ventas: L. ${formatearMoneda(totalVentas)}*
+
+*DETALLE DE CAJA*
+Monto Inicial: L. ${formatearMoneda(montoInicial)}
+Total Esperado: L. ${formatearMoneda(totalEsperado)}
+
+*RESUMEN FINANCIERO*
+Costos: L. ${formatearMoneda(totalCostos)}
+*Ganancia Bruta: L. ${formatearMoneda(gananciaBruta)}*
+
+*Cierre Parcial* - Caja permanece abierta`;
+    
+    // WhatsApp mensaje removido por solicitud del usuario para Cierre X
+    // const urlWhatsApp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+    // window.open(urlWhatsApp, '_blank');
+
+    
     document.title = `Cierre_X_${new Date().toLocaleDateString()}`;
     window.print();
     setTimeout(() => { document.title = 'Deposito POS'; }, 500);
   };
-
-  const fechaReporte = new Date().toLocaleDateString('es-HN');
-  const horaReporte = new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="modal-backdrop">
@@ -185,7 +225,7 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose }) {
         {/* Botones */}
         <div className="factura-botones no-print">
           <button onClick={handlePrint} className="boton-modal-agregar">
-            🖨️ Imprimir
+            <Printer size={18} /> Imprimir
           </button>
           <button onClick={onClose} className="boton-modal-cancelar">
             Cerrar
