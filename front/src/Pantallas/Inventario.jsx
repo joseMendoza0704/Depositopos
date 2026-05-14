@@ -15,12 +15,10 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import '../styles/Inventario.css';
 import RetiroInventario from '../components/RetiroInventario';
 import ModalTransformarProducto from '../components/ModalTransformarProducto';
+import HistorialRetiros from '../components/HistorialRetiros';
 import { useNotification } from '../context/NotificationContext';
-import { Search, Trash2, X, Package, AlertTriangle, CheckCircle, RotateCcw, Download, Plus, Edit, Loader } from 'lucide-react';
+import { Search, Trash2, X, Package, AlertTriangle, CheckCircle, RotateCcw, Download, Plus, Edit, Loader, Eye, XCircle } from 'lucide-react';
 
-/**
- * Componente de Gestión de Inventario
- */
 function Inventario({ usuario }) {
   const { showAlert } = useNotification();
 
@@ -43,79 +41,43 @@ function Inventario({ usuario }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
 
-
   // --- Estados de Categorías ---
   const [categorias, setCategorias] = useState([]);
   const [categoriaId, setCategoriaId] = useState('');
 
+  // --- Estados de Modales ---
   const [mostrarRetiro, setMostrarRetiro] = useState(false);
-  const [mostrarTransformar, setMostrarTransformar] = useState(false); // <--- NUEVO ESTADO
+  const [mostrarTransformar, setMostrarTransformar] = useState(false);
+  const [mostrarHistorialRetiros, setMostrarHistorialRetiros] = useState(false);
 
   // --- Estados de Filtros ---
   const [filtroTexto, setFiltroTexto] = useState('');
   const [filtroVencidos, setFiltroVencidos] = useState(false);
 
-  // --- Suscripción a productos en tiempo real ---
+  // --- Paginación ---
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [itemsPorPagina] = useState(20);
+
+  // --- Suscripciones Firebase ---
   useEffect(() => {
-    const productosCollection = collection(db, 'productos');
+    const unsubscribeProd = onSnapshot(collection(db, 'productos'), (snapshot) => {
+      setProductos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setCargandoProductos(false);
+    }, (err) => { console.error(err); setCargandoProductos(false); });
 
-    const unsubscribe = onSnapshot(
-      productosCollection,
-      (snapshot) => {
-        const listaDeProductos = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setProductos(listaDeProductos);
-        setCargandoProductos(false);
-      },
-      (error) => {
-        console.error("Error al cargar productos:", error);
-        setCargandoProductos(false);
-      }
-    );
+    const unsubscribeCat = onSnapshot(collection(db, 'categorias'), (snapshot) => {
+      setCategorias(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (err) => console.error(err));
 
-    return () => unsubscribe();
+    return () => { unsubscribeProd(); unsubscribeCat(); };
   }, []);
 
-  // --- Suscripción a categorías en tiempo real ---
-  useEffect(() => {
-    const categoriasCollection = collection(db, 'categorias');
-
-    const unsubscribe = onSnapshot(
-      categoriasCollection,
-      (snapshot) => {
-        const listaDeCategorias = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setCategorias(listaDeCategorias);
-      },
-      (error) => {
-        console.error("Error al cargar categorías:", error);
-      }
-    );
-
-    return () => unsubscribe();
-  }, []);
-
-  // --- Limpia el formulario ---
   const limpiarFormulario = useCallback(() => {
-    setNombre('');
-    setTamaño('');
-    setStock('');
-    setCosto('');
-    setPrecioUnidad('');
-    setFechaCaducidad('');
-    setCategoriaId('');
-    setProductoIdSeleccionado(null);
-    setImageFile(null);
-    setImagePreview(null);
-    setCurrentImageUrl(null);
-
+    setNombre(''); setTamaño(''); setStock(''); setCosto(''); setPrecioUnidad('');
+    setFechaCaducidad(''); setCategoriaId(''); setProductoIdSeleccionado(null);
+    setImageFile(null); setImagePreview(null); setCurrentImageUrl(null);
   }, []);
 
-  // --- Selecciona un producto para editar ---
   const handleSelectProducto = useCallback((producto) => {
     setProductoIdSeleccionado(producto.id);
     setNombre(producto.nombre ?? '');
@@ -124,487 +86,215 @@ function Inventario({ usuario }) {
     setCosto(producto.precioCostoUnidad ?? '');
     setPrecioUnidad(producto.formatosVenta?.[0]?.precio ?? '');
     setCategoriaId(producto.categoriaId ?? '');
-
     if (producto.fechaCaducidad) {
-      const fecha = producto.fechaCaducidad.toDate();
-      const fechaFormateada = fecha.toISOString().split('T')[0];
-      setFechaCaducidad(fechaFormateada);
+      setFechaCaducidad(producto.fechaCaducidad.toDate().toISOString().split('T')[0]);
     } else {
       setFechaCaducidad('');
     }
     setCurrentImageUrl(producto.imagen || null);
     setImagePreview(producto.imagen || null);
-
     setImageFile(null);
   }, []);
 
-  // --- Valida el formulario ---
-  const validarFormulario = () => {
-    if (!nombre.trim()) {
-      showAlert('El nombre del producto es requerido', 'error');
-      return false;
-    }
-    if (!tamaño.trim()) {
-      showAlert('El tamaño del producto es requerido', 'error');
-      return false;
-    }
-    if (!stock || Number(stock) < 0) {
-      showAlert('El stock debe ser un número válido mayor o igual a 0', 'error');
-      return false;
-    }
-    if (!costo || Number(costo) < 0) {
-      showAlert('El costo debe ser un número válido mayor o igual a 0', 'error');
-      return false;
-    }
-    if (!precioUnidad || Number(precioUnidad) < 0) {
-      showAlert('El precio de venta debe ser un número válido mayor o igual a 0', 'error');
-      return false;
-    }
-    return true;
-  };
-
-  // --- Maneja el envío del formulario ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (cargandoForm) return;
-    if (!validarFormulario()) return;
+    if (!nombre.trim()) { showAlert('Nombre requerido', 'error'); return; }
 
     setCargandoForm(true);
-
-    // Obtener el nombre de la categoría seleccionada
-    const categoriaSeleccionada = categorias.find(c => c.id === categoriaId);
-    const categoriaNombre = categoriaSeleccionada ? categoriaSeleccionada.nombre : null;
-
-    const datosProducto = {
-      nombre: nombre.trim(),
-      tamaño: tamaño.trim(),
-      stockUnidades: Number(stock),
-      precioCostoUnidad: Number(costo),
-      formatosVenta: [
-        {
-          nombre: "Unidad",
-          precio: Number(precioUnidad),
-          unidades: 1
-        }
-      ],
-      activo: true,
-      imagen: currentImageUrl || null,
-      categoriaId: categoriaId || null,
-      categoriaNombre: categoriaNombre
-    };
-
-    if (fechaCaducidad) {
-      const fecha = new Date(fechaCaducidad);
-      fecha.setHours(0, 0, 0, 0);
-      datosProducto.fechaCaducidad = Timestamp.fromDate(fecha);
-    } else {
-      datosProducto.fechaCaducidad = null;
-    }
-
     try {
       let finalImageUrl = currentImageUrl;
-
-      // Subir imagen si hay una nueva seleccionada
       if (imageFile) {
         const imageRef = ref(storage, `productos/${Date.now()}_${imageFile.name}`);
         const snapshot = await uploadBytes(imageRef, imageFile);
         finalImageUrl = await getDownloadURL(snapshot.ref);
-        datosProducto.imagen = finalImageUrl;
       }
 
+      const categoria = categorias.find(c => c.id === categoriaId);
+      const datos = {
+        nombre: nombre.trim(),
+        tamaño: tamaño.trim(),
+        stockUnidades: Number(stock),
+        precioCostoUnidad: Number(costo),
+        formatosVenta: [{ nombre: "Unidad", precio: Number(precioUnidad), unidades: 1 }],
+        activo: true,
+        imagen: finalImageUrl,
+        categoriaId: categoriaId || null,
+        categoriaNombre: categoria ? categoria.nombre : null,
+        fechaCaducidad: fechaCaducidad ? Timestamp.fromDate(new Date(fechaCaducidad)) : null
+      };
+
       if (productoIdSeleccionado) {
-        const productoDoc = doc(db, 'productos', productoIdSeleccionado);
-        await updateDoc(productoDoc, datosProducto);
-        showAlert("Producto actualizado con éxito!", 'exito');
+        await updateDoc(doc(db, 'productos', productoIdSeleccionado), datos);
+        showAlert("Actualizado!", 'exito');
       } else {
-        showAlert("Producto agregado con éxito!", 'exito');
+        await addDoc(collection(db, 'productos'), datos);
+        showAlert("Agregado!", 'exito');
       }
+      limpiarFormulario();
     } catch (error) {
-      console.error("Error al guardar el producto:", error);
-      showAlert("Error al guardar el producto.", 'error');
+      console.error(error);
+      showAlert("Error al guardar", 'error');
     } finally {
       setCargandoForm(false);
     }
   };
 
-  // --- Estados de Paginación ---
-  const [paginaActual, setPaginaActual] = useState(1);
-  const [itemsPorPagina] = useState(20);
+  const handleDelete = async () => {
+    if (!productoIdSeleccionado || !window.confirm('¿Eliminar producto?')) return;
+    try {
+      await deleteDoc(doc(db, 'productos', productoIdSeleccionado));
+      showAlert("Eliminado", 'exito');
+      limpiarFormulario();
+    } catch (error) { console.error(error); showAlert("Error al eliminar", 'error'); }
+  };
 
   const productosFiltrados = useMemo(() => {
-    return productos.filter(producto => {
-      if (filtroTexto) {
-        const textoLower = filtroTexto.toLowerCase();
-        const nombreMatch = producto.nombre?.toLowerCase().includes(textoLower);
-        const tamañoMatch = producto.tamaño?.toLowerCase().includes(textoLower);
-        if (!nombreMatch && !tamañoMatch) return false;
-      }
-
-      if (filtroVencidos && producto.fechaCaducidad) {
-        const ahora = new Date();
-        const fechaCad = producto.fechaCaducidad.toDate();
-        if (fechaCad >= ahora) return false;
-      }
-
-      return true;
+    return productos.filter(p => {
+      const matchTexto = !filtroTexto || p.nombre?.toLowerCase().includes(filtroTexto.toLowerCase()) || p.tamaño?.toLowerCase().includes(filtroTexto.toLowerCase());
+      const matchVencido = !filtroVencidos || (p.fechaCaducidad && p.fechaCaducidad.toDate() < new Date());
+      return matchTexto && matchVencido;
     });
   }, [productos, filtroTexto, filtroVencidos]);
 
-  // Resetear a página 1 cuando cambian los filtros
-  useEffect(() => {
-    setPaginaActual(1);
-  }, [filtroTexto, filtroVencidos]);
-
-  // Lógica de Paginación
-  const indiceUltimoItem = paginaActual * itemsPorPagina;
-  const indicePrimerItem = indiceUltimoItem - itemsPorPagina;
-  const productosPaginados = productosFiltrados.slice(indicePrimerItem, indiceUltimoItem);
   const totalPaginas = Math.ceil(productosFiltrados.length / itemsPorPagina);
+  const productosPaginados = productosFiltrados.slice((paginaActual - 1) * itemsPorPagina, paginaActual * itemsPorPagina);
+  const cambiarPagina = (n) => setPaginaActual(n);
 
-  const cambiarPagina = (numeroPagina) => setPaginaActual(numeroPagina);
-
-  const estaVencido = (fechaCaducidad) => {
-    if (!fechaCaducidad) return false;
-    const ahora = new Date();
-    const fechaCad = fechaCaducidad.toDate();
-    return fechaCad < ahora;
-  };
-
-  const proximoAVencer = (fechaCaducidad) => {
-    if (!fechaCaducidad) return false;
-    const ahora = new Date();
-    const fechaCad = fechaCaducidad.toDate();
-    const diasDiferencia = Math.ceil((fechaCad - ahora) / (1000 * 60 * 60 * 24));
-    return diasDiferencia > 0 && diasDiferencia <= 7;
+  const estaVencido = (f) => f && f.toDate() < new Date();
+  const proximoAVencer = (f) => {
+    if (!f) return false;
+    const dias = Math.ceil((f.toDate() - new Date()) / (1000 * 60 * 60 * 24));
+    return dias > 0 && dias <= 7;
   };
 
   return (
     <div className="inventario-container">
       <div className="inventario-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <h2>Gestión de Inventario</h2>
-
         <div style={{ display: 'flex', gap: '10px' }}>
-          {/* BOTÓN NUEVO: Transformar */}
-          <button
-            onClick={() => setMostrarTransformar(true)}
-            style={{
-              backgroundColor: '#3498db', // Azul
-              color: 'white',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}
-          >
-            <RotateCcw size={18} /> Transformar / Mezclar
+          <button onClick={() => setMostrarTransformar(true)} style={{ backgroundColor: '#3498db', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <RotateCcw size={18} /> Transformar
           </button>
-
-          <button
-            className="btn-retiro"
-            onClick={() => setMostrarRetiro(true)}
-            style={{
-              backgroundColor: '#ffc107', // Amarillo
-              color: '#333',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}
-          >
-            <Download size={18} className="inline-block mr-1" /> Retiro de Productos
+          <button onClick={() => setMostrarRetiro(true)} style={{ backgroundColor: '#ffc107', color: '#333', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Download size={18} /> Retiro
+          </button>
+          <button onClick={() => setMostrarHistorialRetiros(true)} style={{ backgroundColor: '#34495e', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Eye size={18} /> Historial
           </button>
         </div>
       </div>
 
-      {/* --- Modales --- */}
-      {mostrarRetiro && (
-        <RetiroInventario onClose={() => setMostrarRetiro(false)} />
-      )}
+      {mostrarRetiro && <RetiroInventario onClose={() => setMostrarRetiro(false)} />}
+      {mostrarTransformar && <ModalTransformarProducto onClose={() => setMostrarTransformar(false)} productos={productos} />}
+      {mostrarHistorialRetiros && <HistorialRetiros onClose={() => setMostrarHistorialRetiros(false)} />}
 
-      {/* --- Nuevo Modal --- */}
-      {mostrarTransformar && (
-        <ModalTransformarProducto
-          onClose={() => setMostrarTransformar(false)}
-          productos={productos}
-        />
-      )}
-
-      {/* --- Formulario --- */}
       <form onSubmit={handleSubmit} className="producto-form">
-        <h3>
-          {productoIdSeleccionado ? <><Edit size={18} /> Editar Producto</> : <><Plus size={18} /> Añadir Nuevo Producto</>}
-        </h3>
-
+        <h3>{productoIdSeleccionado ? <><Edit size={18} /> Editar Producto</> : <><Plus size={18} /> Nuevo Producto</>}</h3>
         <div className="form-grid">
+          <div className="form-group"><label>Nombre*</label><input type="text" value={nombre} onChange={e => setNombre(e.target.value)} required /></div>
+          <div className="form-group"><label>Tamaño*</label><input type="text" value={tamaño} onChange={e => setTamaño(e.target.value)} required /></div>
+          <div className="form-group"><label>Stock</label><input type="number" value={stock} onChange={e => setStock(e.target.value)} required /></div>
+          <div className="form-group"><label>Costo</label><input type="number" step="0.01" value={costo} onChange={e => setCosto(e.target.value)} required /></div>
+          <div className="form-group"><label>Precio Venta</label><input type="number" step="0.01" value={precioUnidad} onChange={e => setPrecioUnidad(e.target.value)} required /></div>
+          <div className="form-group"><label>Vencimiento</label><input type="date" value={fechaCaducidad} onChange={e => setFechaCaducidad(e.target.value)} /></div>
           <div className="form-group">
-            <label htmlFor="nombre">Nombre del Producto*</label>
-            <input
-              id="nombre"
-              type="text"
-              placeholder="Ej: Coca-Cola"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="tamaño">Tamaño*</label>
-            <input
-              id="tamaño"
-              type="text"
-              placeholder="Ej: ml o Lts"
-              value={tamaño}
-              onChange={(e) => setTamaño(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="stock">Stock </label>
-            <input
-              id="stock"
-              type="number"
-              placeholder="Cantidad en inventario"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              min="0"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="costo">Precio Costo </label>
-            <input
-              id="costo"
-              type="number"
-              placeholder="Costo unitario"
-              value={costo}
-              onChange={(e) => setCosto(e.target.value)}
-              min="0"
-              step="0.01"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="precioVenta">Precio Venta </label>
-            <input
-              id="precioVenta"
-              type="number"
-              placeholder="Precio de venta"
-              value={precioUnidad}
-              onChange={(e) => setPrecioUnidad(e.target.value)}
-              min="0"
-              step="0.01"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="fechaCaducidad">Fecha de Vencimiento</label>
-            <input
-              id="fechaCaducidad"
-              type="date"
-              value={fechaCaducidad}
-              onChange={(e) => setFechaCaducidad(e.target.value)}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="categoria">Categoría</label>
-            <select
-              id="categoria"
-              value={categoriaId}
-              onChange={(e) => setCategoriaId(e.target.value)}
-              className="select-categoria"
-            >
+            <label>Categoría</label>
+            <select value={categoriaId} onChange={e => setCategoriaId(e.target.value)}>
               <option value="">Sin categoría</option>
-              {categorias.map(categoria => (
-                <option key={categoria.id} value={categoria.id}>
-                  {categoria.nombre}
-                </option>
-              ))}
+              {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
           </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           <div className="form-group">
-            <label>Imagen del Producto</label>
-            <div className="image-upload-container">
+            <label>Imagen</label>
+            <div className="image-upload-container" onClick={() => !imagePreview && document.getElementById('fileInput').click()} style={{ cursor: 'pointer', border: '1px dashed #ccc', minHeight: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {imagePreview ? (
                 <div className="image-preview">
-                  <img src={imagePreview} alt="Vista previa" />
-                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); setCurrentImageUrl(null); }} className="btn-remove-image">
-                    Remover
-                  </button>
+                  <img src={imagePreview} alt="Preview" style={{ maxWidth: '100px' }} />
+                  <button type="button" onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(null); setCurrentImageUrl(null); }}>X</button>
                 </div>
-              ) : (
-                <div className="image-placeholder" onClick={() => document.getElementById('imageInput').click()}>
-                  <span>Seleccionar Imagen</span>
-                </div>
-              )}
-              <input
-                id="imageInput"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setImageFile(file);
-                    setImagePreview(URL.createObjectURL(file));
-                  }
-                }}
-                style={{ display: 'none' }}
-              />
+              ) : <span>Subir Imagen</span>}
+              <input id="fileInput" type="file" hidden onChange={e => { const f = e.target.files[0]; if(f){setImageFile(f); setImagePreview(URL.createObjectURL(f));} }} />
             </div>
           </div>
         </div>
-
         <div className="form-botones">
-          <button type="submit" disabled={cargandoForm} className="btn-submit">
-            {cargandoForm ? <><Loader size={18} className="animate-spin" /> Guardando...</> : (productoIdSeleccionado ? 'Actualizar Producto' : 'Añadir Producto')}
-          </button>
-
+          <button type="submit" disabled={cargandoForm} className="btn-submit">{cargandoForm ? 'Guardando...' : (productoIdSeleccionado ? 'Actualizar' : 'Añadir')}</button>
           {productoIdSeleccionado && (
             <>
-              {usuario?.rol === 'admin' && (
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={cargandoForm}
-                  className="btn-eliminar"
-                >
-                  <Trash2 size={18} /> Eliminar
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={limpiarFormulario}
-                disabled={cargandoForm}
-                className="btn-cancelar"
-              >
-                <X size={18} /> Cancelar
-              </button>
+              {usuario?.rol === 'admin' && <button type="button" onClick={handleDelete} className="btn-eliminar">Eliminar</button>}
+              <button type="button" onClick={limpiarFormulario} className="btn-cancelar">Cancelar</button>
             </>
           )}
         </div>
       </form>
 
-      {/* --- Filtros y Tabla --- */}
       <div className="filtros-inventario">
-        <h3>Filtrar Productos</h3>
-        <div className="filtros-grupo">
-          <input
-            type="text"
-            placeholder="Buscar por nombre o tamaño..."
-            className="input-filtro"
-            value={filtroTexto}
-            onChange={(e) => setFiltroTexto(e.target.value)}
-          />
-          <div className="filtro-checkbox">
-            <input
-              id="filtro-vencidos"
-              type="checkbox"
-              checked={filtroVencidos}
-              onChange={(e) => setFiltroVencidos(e.target.checked)}
-            />
-            <label htmlFor="filtro-vencidos">Solo productos vencidos</label>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+          <Search size={20} color="#2c3e50" />
+          <h3 style={{ margin: 0 }}>Filtrar Inventario</h3>
         </div>
-        <p className="filtros-info">
-          Mostrando <strong>{productosFiltrados.length}</strong> de <strong>{productos.length}</strong> productos
-        </p>
+        <div className="filtros-grupo">
+          <div style={{ position: 'relative', flex: 1 }}>
+            <input 
+              type="text" 
+              className="input-filtro" 
+              placeholder="Buscar por nombre, tamaño o categoría..." 
+              value={filtroTexto} 
+              onChange={e => setFiltroTexto(e.target.value)} 
+            />
+          </div>
+          <label className="filtro-checkbox">
+            <input 
+              type="checkbox" 
+              checked={filtroVencidos} 
+              onChange={e => setFiltroVencidos(e.target.checked)} 
+            /> 
+            Ver solo Vencidos
+          </label>
+        </div>
       </div>
 
       <div className="lista-productos">
-        <h3><Package size={20} /> Productos Actuales</h3>
-        {cargandoProductos ? (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Cargando productos...</p>
-          </div>
-        ) : productosFiltrados.length === 0 ? (
-          <p className="mensaje-vacio">No hay productos que coincidan con los filtros.</p>
-        ) : (
+        {cargandoProductos ? <p>Cargando...</p> : (
           <div className="tabla-responsive">
             <table className="productos-tabla">
-              <thead>
-                <tr>
-                  <th>Descripción</th>
-                  <th>Tamaño</th>
-                  <th>Categoría</th>
-                  <th>Stock (Uds.)</th>
-                  <th>Costo (U.)</th>
-                  <th>Precio Venta (U.)</th>
-                  <th>Fecha Vencimiento</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Descripción</th><th>Tamaño</th><th>Categoría</th><th>Stock</th><th>Costo</th><th>Venta</th><th>Vencimiento</th><th>Estado</th></tr></thead>
               <tbody>
-                {productosPaginados.map(producto => {
-                  const vencido = estaVencido(producto.fechaCaducidad);
-                  const proximo = proximoAVencer(producto.fechaCaducidad);
+                {productosPaginados.map(p => {
+                  const vencido = estaVencido(p.fechaCaducidad);
+                  const proximo = proximoAVencer(p.fechaCaducidad);
+                  
+                  let rowClass = '';
+                  if (productoIdSeleccionado === p.id) rowClass = 'fila-seleccionada';
+                  else if (vencido) rowClass = 'fila-vencido';
+                  else if (proximo) rowClass = 'fila-proximo-vencer';
 
                   return (
-                    <tr
-                      key={producto.id}
-                      onClick={() => handleSelectProducto(producto)}
-                      className={`
-                        ${productoIdSeleccionado === producto.id ? 'fila-seleccionada' : ''}
-                        ${vencido ? 'fila-vencido' : ''}
-                        ${proximo ? 'fila-proximo-vencer' : ''}
-                      `}
-                    >
-                      <td>{producto.nombre}</td>
-                      <td>{producto.tamaño}</td>
+                    <tr key={p.id} onClick={() => handleSelectProducto(p)} className={rowClass}>
+                      <td style={{ color: '#2c3e50' }}>{p.nombre}</td>
+                      <td style={{ color: '#555' }}>{p.tamaño}</td>
+                      <td style={{ color: '#555' }}>{p.categoriaNombre || '—'}</td>
                       <td>
-                        <span className="categoria-badge">
-                          {producto.categoriaNombre || '—'}
+                        <span className={p.stockUnidades <= 5 ? 'stock-bajo' : ''}>
+                          {p.stockUnidades}
+                        </span>
+                      </td>
+                      <td style={{ color: '#555' }}>L. {p.precioCostoUnidad?.toFixed(2)}</td>
+                      <td style={{ color: '#555' }}>L. {p.formatosVenta?.[0]?.precio?.toFixed(2)}</td>
+                      <td>
+                        <span className={vencido ? 'fecha-vencida' : proximo ? 'fecha-proxima' : ''} style={{ color: !vencido && !proximo ? '#555' : undefined }}>
+                          {p.fechaCaducidad?.toDate().toLocaleDateString('es-HN') || '—'}
                         </span>
                       </td>
                       <td>
-                        <span className={producto.stockUnidades < 10 ? 'stock-bajo' : ''}>
-                          {producto.stockUnidades}
-                        </span>
-                      </td>
-                      <td>L. {producto.precioCostoUnidad?.toFixed(2) ?? 'N/A'}</td>
-                      <td>L. {producto.formatosVenta?.[0]?.precio?.toFixed(2) ?? 'N/A'}</td>
-                      <td>
-                        {producto.fechaCaducidad ? (
-                          <span className={vencido ? 'fecha-vencida' : proximo ? 'fecha-proxima' : ''}>
-                            {producto.fechaCaducidad.toDate().toLocaleDateString()}
-                          </span>
+                        {vencido ? (
+                          <span className="badge badge-vencido"><XCircle size={14} /> Vencido</span>
+                        ) : proximo ? (
+                          <span className="badge badge-proximo"><AlertTriangle size={14} /> Próximo</span>
                         ) : (
-                          <span className="sin-fecha">Sin fecha</span>
+                          <span className="badge badge-ok"><CheckCircle size={14} /> OK</span>
                         )}
-                      </td>
-                      <td>
-                        {vencido && <span className="badge badge-vencido"><X size={14} /> Vencido</span>}
-                        {proximo && !vencido && <span className="badge badge-proximo"><AlertTriangle size={14} /> Próximo</span>}
-                        {!vencido && !proximo && producto.fechaCaducidad && <span className="badge badge-ok"><CheckCircle size={14} /> OK</span>}
-                        {!producto.fechaCaducidad && <span className="badge badge-sin-fecha">—</span>}
                       </td>
                     </tr>
                   );
@@ -613,27 +303,11 @@ function Inventario({ usuario }) {
             </table>
           </div>
         )}
-
-        {/* Controles de Paginación */}
-        {!cargandoProductos && productosFiltrados.length > 0 && totalPaginas > 1 && (
+        {totalPaginas > 1 && (
           <div className="pagination-container">
-            <button
-              className="pagination-btn"
-              onClick={() => cambiarPagina(paginaActual - 1)}
-              disabled={paginaActual === 1}
-            >
-              Anterior
-            </button>
-            <span className="pagination-info">
-              Página {paginaActual} de {totalPaginas}
-            </span>
-            <button
-              className="pagination-btn"
-              onClick={() => cambiarPagina(paginaActual + 1)}
-              disabled={paginaActual === totalPaginas}
-            >
-              Siguiente
-            </button>
+            <button className="pagination-btn" onClick={() => cambiarPagina(paginaActual - 1)} disabled={paginaActual === 1}>Anterior</button>
+            <span className="pagination-info">{paginaActual} de {totalPaginas}</span>
+            <button className="pagination-btn" onClick={() => cambiarPagina(paginaActual + 1)} disabled={paginaActual === totalPaginas}>Siguiente</button>
           </div>
         )}
       </div>

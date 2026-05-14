@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db } from '../firebaseConfig';
-import { doc, updateDoc, increment, Timestamp } from 'firebase/firestore';
+import { doc, updateDoc, increment, Timestamp, collection, addDoc } from 'firebase/firestore';
 import ModalBuscarProducto from './ModalBuscarProducto';
 import ComprobanteRetiro from './ComprobanteRetiro';
 import { useNotification } from '../context/NotificationContext';
@@ -77,16 +77,29 @@ function RetiroInventario({ onClose }) {
 
             await Promise.all(batchPromises);
 
-            // 2. Preparar datos para el comprobante
+            // 2. Guardar el registro del retiro en una nueva colección
             const datosRetiro = {
-                fecha: new Date(),
+                fecha: Timestamp.now(),
                 responsable: responsable,
-                destino: destino,
-                items: itemsRetiro
+                destino: destino || 'Otro Negocio',
+                items: itemsRetiro.map(item => ({
+                    id: item.id,
+                    nombre: item.nombre,
+                    formato: item.formato || item.tamaño || '',
+                    cantidad: item.cantidad
+                }))
             };
 
-            setDatosRetiroFinal(datosRetiro);
+            const docRef = await addDoc(collection(db, 'retirosInventario'), datosRetiro);
+
+            // 3. Preparar datos para el comprobante (usando Date para el componente)
+            setDatosRetiroFinal({
+                ...datosRetiro,
+                id: docRef.id,
+                fecha: new Date()
+            });
             setMostrarComprobante(true);
+
 
         } catch (error) {
             console.error("Error al procesar retiro:", error);

@@ -297,10 +297,11 @@ button:disabled {
   accent-color: #4a90e2;
 }
 
-.filtro-checkbox label {
+.filtro-checkbox span,
+.filtro-checkbox {
   font-size: 14px;
-  font-weight: 500;
-  color: #555;
+  font-weight: 600;
+  color: #2c3e50;
   cursor: pointer;
   user-select: none;
 }
@@ -350,19 +351,20 @@ button:disabled {
 }
 
 .productos-tabla thead {
-  background: linear-gradient(135deg, #2e3b4e 0%, #3f4f67 100%);
+  background: #2c3e50;
   color: #fff;
 }
 
 .productos-tabla thead th {
   padding: 15px 12px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   white-space: nowrap;
-  color: #2e3b4e;
+  color: #ffffff;
+  border: none;
 }
 
 .productos-tabla tbody tr {

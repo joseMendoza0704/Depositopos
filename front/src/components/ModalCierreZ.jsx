@@ -9,7 +9,7 @@ import '../styles/factura.css';
 
 function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ, usuario }) {
   const { showAlert } = useNotification();
-  const NUMERO_WHATSAPP = '50489534082';
+  const NUMERO_WHATSAPP = '96823813';
   const nombreUsuario = usuario?.displayName || usuario?.email || 'Usuario';
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -170,7 +170,8 @@ function ModalCierreZ({ cajaActual, onClose, onConfirmarCierreZ, usuario }) {
   const horaReporte = new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
 
   const handlePrint = () => {
-    const mensaje = `*CIERRE Z - Deposito Mendoza*
+    const mensaje = `
+*CIERRE Z - Deposito Mendoza*
 
 *Fecha:* ${fechaReporte}
 *Hora:* ${horaReporte}
@@ -189,14 +190,12 @@ Efectivo Final Esperado: L. ${formatearMoneda(efectivoFinalEsperado)}
 Costos: L. ${formatearMoneda(totalCostos)}
 *Ganancia Bruta: L. ${formatearMoneda(gananciaBruta)}*
 Donacion (1%): L. ${formatearMoneda(donacion)}
-
-Pedidos: ${totalPedidosPagados} pagados`;
+`;
     
     const urlWhatsApp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
-    window.open(urlWhatsApp, '_blank');
-    
     document.title = `Cierre_Z_${new Date().toLocaleDateString()}`;
     window.print();
+    window.open(urlWhatsApp, '_blank');
   };
 
   return (

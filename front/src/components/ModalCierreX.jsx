@@ -84,7 +84,8 @@ function ModalCierreX({ cajaActualId, montoInicial, onClose, usuario }) {
 
   const handlePrint = () => {
     const gananciaBruta = totalVentas - totalCostos;
-    const mensaje = `*CIERRE X - Deposito Mendoza*
+    const mensaje = `
+*CIERRE X - Deposito Mendoza*
 
 *Fecha:* ${fechaReporte}
 *Hora:* ${horaReporte}
@@ -105,8 +106,10 @@ Costos: L. ${formatearMoneda(totalCostos)}
 
 *Cierre Parcial* - Caja permanece abierta`;
     
-    const urlWhatsApp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
-    window.open(urlWhatsApp, '_blank');
+    // WhatsApp mensaje removido por solicitud del usuario para Cierre X
+    // const urlWhatsApp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+    // window.open(urlWhatsApp, '_blank');
+
     
     document.title = `Cierre_X_${new Date().toLocaleDateString()}`;
     window.print();
