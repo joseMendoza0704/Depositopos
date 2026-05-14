@@ -17,6 +17,9 @@
     "electron:build:dir": "vite build && electron-builder --win --dir"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/geolocation": "^8.1.0",
     "firebase": "^12.4.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.6.0",

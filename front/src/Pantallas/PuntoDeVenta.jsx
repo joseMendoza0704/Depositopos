@@ -1,5 +1,5 @@
 // En: src/pantallas/PuntoDeVenta.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { db } from '../firebaseConfig';
 import {
   collection,
@@ -17,13 +17,51 @@ import ModalCierreX from '../components/ModalCierreX';
 import { useNotification } from '../context/NotificationContext';
 import '../styles/PuntoDeVenta.css';
 
+// --- Componente de fila del carrito memoizado ---
+const CartRow = memo(({ item, index, onRemove, disabled }) => (
+  <tr>
+    <td>{item.nombre} ({item.tamaño}) - <strong>{item.formato.nombre}</strong></td>
+    <td>{item.cantidad}</td>
+    <td>L. {item.precio.toFixed(2)}</td>
+    <td>L. {item.subtotal.toFixed(2)}</td>
+    <td>
+      <button
+        onClick={() => onRemove(index)}
+        className="boton-quitar"
+        disabled={disabled}
+      >
+        X
+      </button>
+    </td>
+  </tr>
+));
+CartRow.displayName = 'CartRow';
+
+// --- Componente de resultados de búsqueda memoizado ---
+const SearchResults = memo(({ results, onSelect }) => {
+  if (results.length === 0) return null;
+  return (
+    <div className="search-results">
+      {results.map(producto => (
+        <div
+          key={producto.id}
+          className="search-result-item"
+          onClick={() => onSelect(producto)}
+        >
+          {producto.nombre} - {producto.tamaño}
+        </div>
+      ))}
+    </div>
+  );
+});
+SearchResults.displayName = 'SearchResults';
+
 // Recibe cajaActual, onAbrirCaja y onCierreZ del Dashboard
 function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
   const { showAlert } = useNotification();
   // --- Estados Principales ---
   const [productosDB, setProductosDB] = useState([]);
   const [carrito, setCarrito] = useState([]);
-  const [total, setTotal] = useState(0);
 
   // --- Estados de Búsqueda y Modal ---
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
@@ -50,63 +88,64 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
     return () => unsubscribe();
   }, []);
 
-  // --- Calcula el total ---
-  useEffect(() => {
-    const nuevoTotal = carrito.reduce((acc, item) => acc + item.subtotal, 0);
-    setTotal(nuevoTotal);
+  // --- Calcula el total con useMemo ---
+  const total = useMemo(() => {
+    return carrito.reduce((acc, item) => acc + item.subtotal, 0);
   }, [carrito]);
 
-  // --- Lógica de Búsqueda ---
-  const handleSearchChange = (e) => {
+  // --- Lógica de Búsqueda con useCallback y debounce ---
+  const handleSearchChange = useCallback((e) => {
     const query = e.target.value;
     setTerminoBusqueda(query);
     if (query.length > 1) {
+      const queryLower = query.toLowerCase();
       const filtrados = productosDB.filter(p =>
-        p.nombre.toLowerCase().includes(query.toLowerCase())
+        p.nombre.toLowerCase().includes(queryLower)
       );
       setResultadosBusqueda(filtrados);
     } else {
       setResultadosBusqueda([]);
     }
-  };
+  }, [productosDB]);
 
-  const handleSelectProductoBusqueda = (producto) => {
+  const handleSelectProductoBusqueda = useCallback((producto) => {
     setProductoModal(producto);
     setTerminoBusqueda('');
     setResultadosBusqueda([]);
-  };
+  }, []);
 
-  // --- Lógica del Carrito ---
-  const handleAgregarAlCarrito = (producto, formato, cantidad) => {
+  // --- Lógica del Carrito con useCallback ---
+  const handleAgregarAlCarrito = useCallback((producto, formato, cantidad) => {
     const nuevoItem = {
       id: producto.id,
       nombre: producto.nombre,
       tamaño: producto.tamaño,
-      formato: formato, // Guarda el objeto formato completo
+      formato: formato,
       cantidad: cantidad,
       precio: formato.precio,
       subtotal: formato.precio * cantidad
     };
-    setCarrito([...carrito, nuevoItem]);
-  };
+    setCarrito(prev => [...prev, nuevoItem]);
+  }, []);
 
-  const handleQuitarDelCarrito = (index) => {
-    const nuevoCarrito = [...carrito];
-    nuevoCarrito.splice(index, 1);
-    setCarrito(nuevoCarrito);
-  };
+  const handleQuitarDelCarrito = useCallback((index) => {
+    setCarrito(prev => {
+      const nuevoCarrito = [...prev];
+      nuevoCarrito.splice(index, 1);
+      return nuevoCarrito;
+    });
+  }, []);
 
   // --- Lógica de Venta ---
-  const handleRealizarVenta = () => {
+  const handleRealizarVenta = useCallback(() => {
     if (carrito.length === 0) {
       showAlert("El carrito está vacío.", 'info');
       return;
     }
-    setMostrandoModalCobro(true); // Abre el modal de cobro
-  };
+    setMostrandoModalCobro(true);
+  }, [carrito.length, showAlert]);
 
-  const handleConfirmarVenta = async (dineroRecibido, vuelto) => {
-    // Verifica si cajaActual existe antes de intentar acceder a cajaActual.id
+  const handleConfirmarVenta = useCallback(async (dineroRecibido, vuelto) => {
     if (!cajaActual?.id) {
       showAlert("Error: No se pudo identificar la caja actual. Por favor, intente recargar.", 'error');
       setCargandoVenta(false);
@@ -117,15 +156,12 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
     setMostrandoModalCobro(false);
 
     try {
-      // 1. Restar Stock usando transacción CORRECTAMENTE
+      // 1. Restar Stock usando transacción
       await runTransaction(db, async (transaction) => {
-        // PASO 1: Primero hacemos TODAS las lecturas
-        const productosRefs = [];
         const productosData = [];
 
         for (const item of carrito) {
           const productoRef = doc(db, 'productos', item.id);
-          productosRefs.push(productoRef);
           const productoDoc = await transaction.get(productoRef);
 
           if (!productoDoc.exists()) {
@@ -139,7 +175,6 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
           });
         }
 
-        // PASO 2: Ahora hacemos TODAS las escrituras
         for (const producto of productosData) {
           const cantidadARestar = producto.item.formato.unidades * producto.item.cantidad;
           const stockActual = producto.data.stockUnidades;
@@ -172,7 +207,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
         cliente: nombreCliente.trim() === '' ? "Consumidor Final" : nombreCliente,
         dineroRecibido: Number(dineroRecibido),
         vuelto: Number(vuelto),
-        cajaId: cajaActual.id // Asocia la venta a la caja abierta
+        cajaId: cajaActual.id
       };
 
       // 3. Guardar la Venta
@@ -189,11 +224,24 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
     } finally {
       setCargandoVenta(false);
     }
-  };
+  }, [cajaActual, carrito, productosDB, total, nombreCliente, showAlert]);
 
-  const handleCerrarFactura = () => {
+  const handleCerrarFactura = useCallback(() => {
     setVentaCompleta(null);
-  };
+  }, []);
+
+  const handleCloseModal = useCallback(() => setProductoModal(null), []);
+  const handleCloseHistorial = useCallback(() => setMostrandoHistorial(false), []);
+  const handleCloseCobro = useCallback(() => setMostrandoModalCobro(false), []);
+  const handleCloseCierreX = useCallback(() => setMostrandoCierreX(false), []);
+  const handleOpenHistorial = useCallback(() => setMostrandoHistorial(true), []);
+  const handleOpenCierreX = useCallback(() => setMostrandoCierreX(true), []);
+  const handleNombreClienteChange = useCallback((e) => setNombreCliente(e.target.value), []);
+
+  // --- Texto del botón de caja memoizado ---
+  const cajaButtonText = useMemo(() => {
+    return cajaActual ? `Caja Abierta (L. ${cajaActual.montoInicial.toFixed(2)})` : 'Apertura';
+  }, [cajaActual]);
 
   return (
     <div className="pos-container">
@@ -217,29 +265,20 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
               className="pos-search-bar"
               value={terminoBusqueda}
               onChange={handleSearchChange}
-              disabled={!cajaActual} // Deshabilita si la caja está cerrada
+              disabled={!cajaActual}
             />
-            {resultadosBusqueda.length > 0 && (
-              <div className="search-results">
-                {resultadosBusqueda.map(producto => (
-                  <div
-                    key={producto.id}
-                    className="search-result-item"
-                    onClick={() => handleSelectProductoBusqueda(producto)}
-                  >
-                    {producto.nombre} - {producto.tamaño}
-                  </div>
-                ))}
-              </div>
-            )}
+            <SearchResults
+              results={resultadosBusqueda}
+              onSelect={handleSelectProductoBusqueda}
+            />
           </div>
           <input
             type="text"
             placeholder="Nombre del Cliente (Opcional)"
             className="pos-cliente-input"
             value={nombreCliente}
-            onChange={(e) => setNombreCliente(e.target.value)}
-            disabled={!cajaActual} // Deshabilita si la caja está cerrada
+            onChange={handleNombreClienteChange}
+            disabled={!cajaActual}
           />
           <div className="pos-total">
             <h2>TOTAL</h2>
@@ -264,21 +303,13 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
                 <tr><td colSpan="5" style={{ textAlign: 'center' }}>El carrito está vacío</td></tr>
               )}
               {carrito.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.nombre} ({item.tamaño}) - <strong>{item.formato.nombre}</strong></td>
-                  <td>{item.cantidad}</td>
-                  <td>L. {item.precio.toFixed(2)}</td>
-                  <td>L. {item.subtotal.toFixed(2)}</td>
-                  <td>
-                    <button
-                      onClick={() => handleQuitarDelCarrito(index)}
-                      className="boton-quitar"
-                      disabled={!cajaActual} // Deshabilita si la caja está cerrada
-                    >
-                      X
-                    </button>
-                  </td>
-                </tr>
+                <CartRow
+                  key={`${item.id}-${index}`}
+                  item={item}
+                  index={index}
+                  onRemove={handleQuitarDelCarrito}
+                  disabled={!cajaActual}
+                />
               ))}
             </tbody>
           </table>
@@ -292,12 +323,12 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
           onClick={onAbrirCaja}
           disabled={!!cajaActual}
         >
-          {cajaActual ? `Caja Abierta (L. ${cajaActual.montoInicial.toFixed(2)})` : 'Apertura'}
+          {cajaButtonText}
         </button>
         <button
           className="pos-button"
           disabled={!cajaActual}
-          onClick={() => setMostrandoCierreX(true)}
+          onClick={handleOpenCierreX}
         >
           Cierre X
         </button>
@@ -310,7 +341,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
         </button>
         <button
           className="pos-button"
-          onClick={() => setMostrandoHistorial(true)}
+          onClick={handleOpenHistorial}
           disabled={!cajaActual}
         >
           Imprimir
@@ -324,11 +355,11 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
         </button>
       </div>
 
-      {/* --- Modales --- */}
+      {/* --- Modales (renderizado condicional evita montaje innecesario) --- */}
       {productoModal && (
         <ModalAgregarProducto
           producto={productoModal}
-          onClose={() => setProductoModal(null)}
+          onClose={handleCloseModal}
           onAdd={handleAgregarAlCarrito}
         />
       )}
@@ -340,13 +371,13 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
       )}
       {mostrandoHistorial && (
         <HistorialVentas
-          onClose={() => setMostrandoHistorial(false)}
+          onClose={handleCloseHistorial}
         />
       )}
       {mostrandoModalCobro && (
         <ModalCobro
           totalAPagar={total}
-          onClose={() => setMostrandoModalCobro(false)}
+          onClose={handleCloseCobro}
           onConfirmarVenta={handleConfirmarVenta}
         />
       )}
@@ -354,7 +385,7 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
         <ModalCierreX
           cajaActualId={cajaActual.id}
           montoInicial={cajaActual.montoInicial}
-          onClose={() => setMostrandoCierreX(false)}
+          onClose={handleCloseCierreX}
           usuario={usuario}
         />
       )}
@@ -362,4 +393,4 @@ function PuntoDeVenta({ cajaActual, onAbrirCaja, onCierreZ, usuario }) {
   );
 }
 
-export default PuntoDeVenta;
+export default memo(PuntoDeVenta);

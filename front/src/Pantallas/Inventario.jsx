@@ -42,7 +42,7 @@ function Inventario({ usuario }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
-  const [imageUrlManual, setImageUrlManual] = useState('');
+
 
   // --- Estados de Categorías ---
   const [categorias, setCategorias] = useState([]);
@@ -112,7 +112,7 @@ function Inventario({ usuario }) {
     setImageFile(null);
     setImagePreview(null);
     setCurrentImageUrl(null);
-    setImageUrlManual('');
+
   }, []);
 
   // --- Selecciona un producto para editar ---
@@ -134,7 +134,7 @@ function Inventario({ usuario }) {
     }
     setCurrentImageUrl(producto.imagen || null);
     setImagePreview(producto.imagen || null);
-    setImageUrlManual(producto.imagen || '');
+
     setImageFile(null);
   }, []);
 
@@ -189,7 +189,7 @@ function Inventario({ usuario }) {
         }
       ],
       activo: true,
-      imagen: imageUrlManual || currentImageUrl || null,
+      imagen: currentImageUrl || null,
       categoriaId: categoriaId || null,
       categoriaNombre: categoriaNombre
     };
@@ -437,21 +437,21 @@ function Inventario({ usuario }) {
             </select>
           </div>
 
-          <div className="form-group">
-            <label>Link de Imagen (PostImages, etc.)</label>
-            <input
-              type="text"
-              placeholder="Pegar Link Directo aquí..."
-              value={imageUrlManual}
-              onChange={(e) => {
-                setImageUrlManual(e.target.value);
-                setImagePreview(e.target.value || currentImageUrl);
-              }}
-            />
-          </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
           <div className="form-group">
-            <label>O Subir Archivo</label>
+            <label>Imagen del Producto</label>
             <div className="image-upload-container">
               {imagePreview ? (
                 <div className="image-preview">

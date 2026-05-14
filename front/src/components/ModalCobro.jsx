@@ -49,7 +49,7 @@ function ModalCobro({ totalAPagar, onClose, onConfirmarVenta }) {
             <strong>L. {totalAPagar.toFixed(2)}</strong>
           </div>
           <div className="cobro-vuelto">
-            <span>Vuelto:</span>
+            <span>Cambio:</span>
             <strong>L. {vuelto.toFixed(2)}</strong>
           </div>
         </div>

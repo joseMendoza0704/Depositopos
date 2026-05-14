@@ -95,13 +95,17 @@
 /* Menú del sidebar */
 .sidebar-menu {
   list-style: none;
-  padding: 15px 10px;
+  padding: 10px 10px;
   margin: 0;
   flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
 }
 
 .sidebar-menu li {
-  margin-bottom: 5px;
+  margin-bottom: 0;
 }
 
 /* Botones del menú con hover y active - DISEÑO MODERNO */
@@ -109,12 +113,12 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 14px 16px;
+  padding: 10px 14px;
   background: transparent;
   border: none;
   border-radius: var(--radius-md);
   color: var(--text-light);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -157,16 +161,16 @@
 
 /* ===== ICONOS EMOJI CON BADGES ===== */
 .menu-icon-badge {
-  font-size: 22px;
-  width: 40px;
-  height: 40px;
+  font-size: 20px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.15);
-  margin-right: 14px;
+  margin-right: 12px;
   transition: var(--transition);
 }
 
@@ -200,7 +204,8 @@
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(0, 0, 0, 0.1);
   text-align: center;
-  margin-top: auto; /* Empuja el footer al fondo */
+  margin-top: auto;
+  /* Empuja el footer al fondo */
 }
 
 .version-info {
@@ -212,8 +217,8 @@
 }
 
 .logout-li {
-  margin-top: 25px !important;
-  padding: 0 10px;
+  margin-top: 20px !important;
+  padding: 0 10px 5px;
 }
 
 /* Forzar el color rojo del botón de logout */
@@ -224,7 +229,8 @@
 }
 
 .sidebar-menu li .logout-button:hover {
-  background: linear-gradient(135deg, #ff4d4d 0%, #ff0000 100%) !important; /* Rojo más intenso on hover */
+  background: linear-gradient(135deg, #ff4d4d 0%, #ff0000 100%) !important;
+  /* Rojo más intenso on hover */
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(255, 0, 0, 0.4) !important;
 }
@@ -234,12 +240,12 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 14px 16px;
+  padding: 10px 14px;
   background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
   border: none;
   border-radius: var(--radius-md);
   color: white;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
@@ -371,7 +377,8 @@
 .hamburger-btn {
   display: none;
   position: fixed;
-  top: 40px; /* Bajado aún más a petición del usuario (antes 23px) */
+  top: 40px;
+  /* Bajado aún más a petición del usuario (antes 23px) */
   left: 15px;
   z-index: 1001;
   width: 48px;
@@ -422,7 +429,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 15px 20px;
   background: rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }

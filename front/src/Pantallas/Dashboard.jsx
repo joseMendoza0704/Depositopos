@@ -15,7 +15,7 @@ import {
   updateDoc
 } from 'firebase/firestore';
 
-import { ShoppingCart, Package, Tag, Users, FileText, TrendingUp, Search, LogOut, Menu, X, Store } from 'lucide-react';
+import { ShoppingCart, Package, Tag, Users, FileText, TrendingUp, Search, LogOut, Menu, X, Store, MapPin } from 'lucide-react';
 
 import Inventario from './Inventario.jsx';
 import PuntoDeVenta from './PuntoDeVenta.jsx';
@@ -23,6 +23,7 @@ import GestionClientes from './GestionClientes.jsx';
 import GestionPedidos from './GestionPedidos.jsx';
 import Reportes from './Reportes.jsx';
 import GestionCategorias from './GestionCategorias.jsx';
+import Ubicaciones from './Ubicaciones.jsx';
 
 import ModalApertura from '../components/ModalApertura.jsx';
 import ModalCierreZ from '../components/ModalCierreZ.jsx';
@@ -172,6 +173,8 @@ function Dashboard({ alCerrarSesion, usuario }) {
         return <Reportes />;
       case 'busquedaPedidos':
         return <BusquedaPedidos />;
+      case 'ubicaciones':
+        return <Ubicaciones usuario={usuario} />;
       default:
         return <VistaPrincipal />;
     }
@@ -284,6 +287,18 @@ function Dashboard({ alCerrarSesion, usuario }) {
             >
               <span className="menu-icon-badge"><TrendingUp size={20} /></span>
               <span className="menu-text">Reportes</span>
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => {
+                setVistaActual('ubicaciones');
+                setSidebarVisible(false);
+              }}
+              className={vistaActual === 'ubicaciones' ? 'active' : ''}
+            >
+              <span className="menu-icon-badge"><MapPin size={20} /></span>
+              <span className="menu-text">Ubicaciones</span>
             </button>
           </li>
           <li>
