@@ -47,7 +47,9 @@ function VistaPrincipal() {
 }
 
 function Dashboard({ alCerrarSesion, usuario }) {
-  const [vistaActual, setVistaActual] = useState('principal');
+  // Definimos la vista inicial según el rol del usuario
+  const vistaInicial = usuario?.rol === 'ubicaciones' ? 'ubicaciones' : 'principal';
+  const [vistaActual, setVistaActual] = useState(vistaInicial);
   const [cajaActual, setCajaActual] = useState(null);
   const [cargandoCaja, setCargandoCaja] = useState(true);
   const [mostrandoModalApertura, setMostrandoModalApertura] = useState(false);
@@ -55,6 +57,24 @@ function Dashboard({ alCerrarSesion, usuario }) {
   const [mensajeModal, setMensajeModal] = useState(null);
   const [sidebarColapsada, setSidebarColapsada] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  // --- Definición de ítems del menú con permisos por rol ---
+  const todosLosMenuItems = [
+    { id: 'pos', label: 'Punto de Venta', icon: <ShoppingCart size={20} />, roles: ['admin', 'cajero'] },
+    { id: 'inventario', label: 'Inventario', icon: <Package size={20} />, roles: ['admin', 'cajero'] },
+    { id: 'categorias', label: 'Categorías', icon: <Tag size={20} />, roles: ['admin', 'cajero'] },
+    { id: 'clientes', label: 'Clientes', icon: <Users size={20} />, roles: ['admin', 'cajero'] },
+    { id: 'pedidos', label: 'Pedidos', icon: <FileText size={20} />, roles: ['admin', 'cajero'] },
+    { id: 'reportes', label: 'Reportes', icon: <TrendingUp size={20} />, roles: ['admin', 'cajero'] },
+    { id: 'ubicaciones', label: 'Ubicaciones', icon: <MapPin size={20} />, roles: ['admin', 'cajero', 'ubicaciones'] },
+    { id: 'busquedaPedidos', label: 'Historial Pedidos', icon: <Search size={20} />, roles: ['admin', 'cajero'] },
+  ];
+
+  // Filtrar menú según el rol del usuario
+  const rolUsuario = usuario?.rol || 'cajero';
+  const menuItemsFiltrados = todosLosMenuItems.filter(item =>
+    item.roles.includes(rolUsuario)
+  );
 
   // --- useEffect para cerrar sidebar con Escape ---
   useEffect(() => {
@@ -217,102 +237,20 @@ function Dashboard({ alCerrarSesion, usuario }) {
           </button>
         </div>
         <ul className="sidebar-menu">
-          <li>
-            <button
-              onClick={() => {
-                setVistaActual('pos');
-                setSidebarVisible(false);
-              }}
-              className={vistaActual === 'pos' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge"><ShoppingCart size={20} /></span>
-              <span className="menu-text">Punto de Venta</span>
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => {
-                setVistaActual('inventario');
-                setSidebarVisible(false);
-              }}
-              className={vistaActual === 'inventario' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge"><Package size={20} /></span>
-              <span className="menu-text">Inventario</span>
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => {
-                setVistaActual('categorias');
-                setSidebarVisible(false);
-              }}
-              className={vistaActual === 'categorias' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge"><Tag size={20} /></span>
-              <span className="menu-text">Categorías</span>
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => {
-                setVistaActual('clientes');
-                setSidebarVisible(false);
-              }}
-              className={vistaActual === 'clientes' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge"><Users size={20} /></span>
-              <span className="menu-text">Clientes</span>
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => {
-                setVistaActual('pedidos');
-                setSidebarVisible(false);
-              }}
-              className={vistaActual === 'pedidos' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge"><FileText size={20} /></span>
-              <span className="menu-text">Pedidos</span>
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => {
-                setVistaActual('reportes');
-                setSidebarVisible(false);
-              }}
-              className={vistaActual === 'reportes' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge"><TrendingUp size={20} /></span>
-              <span className="menu-text">Reportes</span>
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => {
-                setVistaActual('ubicaciones');
-                setSidebarVisible(false);
-              }}
-              className={vistaActual === 'ubicaciones' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge"><MapPin size={20} /></span>
-              <span className="menu-text">Ubicaciones</span>
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => {
-                setVistaActual('busquedaPedidos');
-                setSidebarVisible(false);
-              }}
-              className={vistaActual === 'busquedaPedidos' ? 'active' : ''}
-            >
-              <span className="menu-icon-badge"><Search size={20} /></span>
-              <span className="menu-text">Historial Pedidos</span>
-            </button>
-          </li>
+          {menuItemsFiltrados.map(item => (
+            <li key={item.id}>
+              <button
+                onClick={() => {
+                  setVistaActual(item.id);
+                  setSidebarVisible(false);
+                }}
+                className={vistaActual === item.id ? 'active' : ''}
+              >
+                <span className="menu-icon-badge">{item.icon}</span>
+                <span className="menu-text">{item.label}</span>
+              </button>
+            </li>
+          ))}
           <li className="logout-li">
             <button
               onClick={() => {
