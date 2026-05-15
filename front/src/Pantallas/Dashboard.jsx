@@ -15,7 +15,7 @@ import {
   updateDoc
 } from 'firebase/firestore';
 
-import { ShoppingCart, Package, Tag, Users, FileText, TrendingUp, Search, LogOut, Menu, X, Store, MapPin } from 'lucide-react';
+import { ShoppingCart, Package, Tag, Users, FileText, TrendingUp, Search, LogOut, Menu, X, Store, MapPin, Navigation, Truck } from 'lucide-react';
 
 import Inventario from './Inventario.jsx';
 import PuntoDeVenta from './PuntoDeVenta.jsx';
@@ -24,6 +24,7 @@ import GestionPedidos from './GestionPedidos.jsx';
 import Reportes from './Reportes.jsx';
 import GestionCategorias from './GestionCategorias.jsx';
 import Ubicaciones from './Ubicaciones.jsx';
+import Tracking from './Tracking.jsx';
 
 import ModalApertura from '../components/ModalApertura.jsx';
 import ModalCierreZ from '../components/ModalCierreZ.jsx';
@@ -66,7 +67,8 @@ function Dashboard({ alCerrarSesion, usuario }) {
     { id: 'clientes', label: 'Clientes', icon: <Users size={20} />, roles: ['admin', 'cajero'] },
     { id: 'pedidos', label: 'Pedidos', icon: <FileText size={20} />, roles: ['admin', 'cajero'] },
     { id: 'reportes', label: 'Reportes', icon: <TrendingUp size={20} />, roles: ['admin', 'cajero'] },
-    { id: 'ubicaciones', label: 'Ubicaciones', icon: <MapPin size={20} />, roles: ['admin', 'cajero', 'ubicaciones'] },
+    { id: 'ubicaciones', label: 'Entregas', icon: <Truck size={20} />, roles: ['admin', 'cajero', 'ubicaciones'] },
+    { id: 'tracking', label: 'Tracking', icon: <Navigation size={20} />, roles: ['admin', 'cajero'] },
     { id: 'busquedaPedidos', label: 'Historial Pedidos', icon: <Search size={20} />, roles: ['admin', 'cajero'] },
   ];
 
@@ -195,6 +197,8 @@ function Dashboard({ alCerrarSesion, usuario }) {
         return <BusquedaPedidos />;
       case 'ubicaciones':
         return <Ubicaciones usuario={usuario} />;
+      case 'tracking':
+        return <Tracking />;
       default:
         return <VistaPrincipal />;
     }
