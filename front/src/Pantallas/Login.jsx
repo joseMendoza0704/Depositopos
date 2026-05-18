@@ -16,7 +16,6 @@ function Login({ alIniciarSesion }) {
   const [recordarme, setRecordarme] = useState(false);
 
   useEffect(() => {
-    if (!esElectron) return;
 
     const savedEmail = localStorage.getItem('depositpos_email');
     const savedPassword = localStorage.getItem('depositpos_password');
@@ -35,11 +34,11 @@ function Login({ alIniciarSesion }) {
     setLoading(true);
 
     try {
-      if (esElectron && recordarme) {
+      if (recordarme) {
         localStorage.setItem('depositpos_email', email);
         localStorage.setItem('depositpos_password', contraseña);
         localStorage.setItem('depositpos_recordarme', 'true');
-      } else if (esElectron) {
+      } else {
         localStorage.removeItem('depositpos_email');
         localStorage.removeItem('depositpos_password');
         localStorage.removeItem('depositpos_recordarme');
@@ -97,17 +96,15 @@ function Login({ alIniciarSesion }) {
           </span>
         </div>
 
-        {esElectron && (
-          <label className="recordarme-checkbox">
-            <input
-              type="checkbox"
-              checked={recordarme}
-              onChange={(e) => setRecordarme(e.target.checked)}
-            />
-            <Save size={16} />
-            <span>Recordar credenciales</span>
-          </label>
-        )}
+        <label className="recordarme-checkbox">
+          <input
+            type="checkbox"
+            checked={recordarme}
+            onChange={(e) => setRecordarme(e.target.checked)}
+          />
+          <Save size={16} />
+          <span>Recordar credenciales</span>
+        </label>
 
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit" className="login-button">Ingresar</button>

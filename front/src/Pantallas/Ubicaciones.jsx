@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebaseConfig.js';
 import { Geolocation } from '@capacitor/geolocation';
+import { startBackgroundTracking, stopBackgroundTracking } from '../plugins/BackgroundLocation';
 import {
   collection,
   addDoc,
@@ -169,6 +170,8 @@ function Ubicaciones({ usuario }) {
     return () => unsubscribe();
   }, []);
 
+  const isNative = window.Capacitor?.isNativePlatform?.();
+
   // 2. Cargar la entrega activa de este repartidor
   useEffect(() => {
     if (!usuario?.uid) return;
@@ -179,13 +182,16 @@ function Ubicaciones({ usuario }) {
       where('estado', '==', 'en_camino')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       if (!snapshot.empty) {
         const docSnap = snapshot.docs[0];
         setEntregaData({ id: docSnap.id, ...docSnap.data() });
       } else {
         setEntregaData(null);
-        if (watchIdRef.current !== null) {
+        // Stop tracking when no active delivery
+        if (isNative) {
+          try { await stopBackgroundTracking(); } catch(e) { console.error(e); }
+        } else if (watchIdRef.current !== null) {
           navigator.geolocation.clearWatch(watchIdRef.current);
           watchIdRef.current = null;
         }
@@ -204,6 +210,10 @@ function Ubicaciones({ usuario }) {
         const estadoPedido = docSnap.data().estado;
         if (estadoPedido === 'pagado') {
           showAlert('El pedido ha sido cobrado. Puedes realizar otra entrega.', 'success');
+          // Stop background tracking
+          if (isNative) {
+            try { await stopBackgroundTracking(); } catch(e) { console.error(e); }
+          }
           try {
             await updateDoc(doc(db, 'entregas', entregaData.id), {
               estado: 'completado',
@@ -220,7 +230,10 @@ function Ubicaciones({ usuario }) {
   }, [entregaData?.pedidoId, entregaData?.id]);
 
   // 4. Iniciar watch de GPS en tiempo real
+  // On native: background service handles everything
+  // On web: fallback to navigator.geolocation.watchPosition
   const iniciarWatchLocal = () => {
+    if (isNative) return; // Native uses the foreground service, no web watch needed
     if (!navigator.geolocation) return;
     
     watchIdRef.current = navigator.geolocation.watchPosition(
@@ -249,7 +262,7 @@ function Ubicaciones({ usuario }) {
   };
 
   useEffect(() => {
-    if (entregaData && watchIdRef.current === null) {
+    if (entregaData && !isNative && watchIdRef.current === null) {
       iniciarWatchLocal();
     }
   }, [entregaData]);
@@ -270,7 +283,7 @@ function Ubicaciones({ usuario }) {
       return;
     }
 
-    if (!navigator.geolocation) {
+    if (!isNative && !navigator.geolocation) {
       showAlert('Tu navegador no soporta geolocalización', 'error');
       return;
     }
@@ -282,7 +295,7 @@ function Ubicaciones({ usuario }) {
       });
 
       // 2. Crear documento de entrega en Firestore
-      await addDoc(collection(db, 'entregas'), {
+      const entregaRef = await addDoc(collection(db, 'entregas'), {
         pedidoId: pedido.id,
         clienteNombre: pedido.cliente.nombre,
         clienteDireccion: pedido.cliente.direccion,
@@ -295,7 +308,24 @@ function Ubicaciones({ usuario }) {
         ubicaciones: [],
       });
 
-      showAlert(`Entrega iniciada para ${pedido.cliente.nombre}. Rastreo GPS activo.`, 'success');
+      // 3. On native: start the background location service
+      if (isNative) {
+        try {
+          await startBackgroundTracking(entregaRef.id, pedido.cliente.nombre);
+          showAlert(
+            `Entrega iniciada para ${pedido.cliente.nombre}. Rastreo GPS en segundo plano activo — funciona con pantalla apagada.`,
+            'success'
+          );
+        } catch (bgError) {
+          console.error('Error starting background tracking:', bgError);
+          showAlert(
+            `Entrega iniciada pero el rastreo en segundo plano falló. Mantén la app abierta.`,
+            'warning'
+          );
+        }
+      } else {
+        showAlert(`Entrega iniciada para ${pedido.cliente.nombre}. Rastreo GPS activo.`, 'success');
+      }
     } catch (error) {
       console.error('Error iniciando entrega:', error);
       showAlert('Error al iniciar la entrega', 'error');
@@ -312,6 +342,11 @@ function Ubicaciones({ usuario }) {
       onConfirm: async () => {
         setModalConfirm({ visible: false, mensaje: '', onConfirm: null });
         try {
+          // Stop background tracking on native
+          if (isNative) {
+            try { await stopBackgroundTracking(); } catch(e) { console.error(e); }
+          }
+
           // 1. Regresar pedido a "recibido"
           await updateDoc(doc(db, 'pedidos', entregaData.pedidoId), {
             estado: 'recibido'
