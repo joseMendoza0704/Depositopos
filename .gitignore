@@ -22,3 +22,4 @@ pnpm-debug.log*
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+front/.firebase/hosting.ZGlzdA.cache

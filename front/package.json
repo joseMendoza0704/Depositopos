@@ -17,8 +17,10 @@
     "electron:build:dir": "vite build && electron-builder --win --dir"
   },
   "dependencies": {
+    "@capacitor-community/background-geolocation": "^1.2.26",
     "@capacitor/android": "^8.3.0",
     "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.4",
     "@capacitor/geolocation": "^8.1.0",
     "firebase": "^12.4.0",
     "leaflet": "^1.9.4",
@@ -41,7 +43,7 @@
     "vite": "^7.1.7"
   },
   "build": {
-    "appId": "com.depositpos.app",
+    "appId": "com.depositopos.app",
     "productName": "DepositPOS",
     "directories": {
       "output": "release"
