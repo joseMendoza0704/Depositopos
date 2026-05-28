@@ -55,6 +55,13 @@ function Tracking() {
   const [cargando, setCargando] = useState(true);
   const [entregaSeleccionada, setEntregaSeleccionada] = useState(null);
 
+  // Ref to always have the current value of entregaSeleccionada inside the
+  // onSnapshot callback without needing to re-subscribe on every change.
+  const entregaSeleccionadaRef = useRef(null);
+  useEffect(() => {
+    entregaSeleccionadaRef.current = entregaSeleccionada;
+  }, [entregaSeleccionada]);
+
   // Listen to active deliveries (estado === 'en_camino')
   useEffect(() => {
     const q = query(
@@ -70,19 +77,25 @@ function Tracking() {
       setEntregas(lista);
       setCargando(false);
 
-      // Auto-select if only one delivery active
-      if (lista.length === 1 && !entregaSeleccionada) {
+      const currentSelected = entregaSeleccionadaRef.current;
+
+      // Auto-select if only one delivery active and nothing selected
+      if (lista.length === 1 && !currentSelected) {
         setEntregaSeleccionada(lista[0]);
       }
       // Update selected delivery data in real-time
-      if (entregaSeleccionada) {
-        const updated = lista.find((e) => e.id === entregaSeleccionada.id);
+      else if (currentSelected) {
+        const updated = lista.find((e) => e.id === currentSelected.id);
         if (updated) {
           setEntregaSeleccionada(updated);
         } else {
-          // Delivery finished, deselect
+          // Delivery finished or cancelled — select next available or clear
           setEntregaSeleccionada(lista.length > 0 ? lista[0] : null);
         }
+      }
+      // Auto-select first delivery if nothing selected and there are active deliveries
+      else if (lista.length > 0 && !currentSelected) {
+        setEntregaSeleccionada(lista[0]);
       }
     });
 
@@ -102,13 +115,19 @@ function Tracking() {
     }
   };
 
+  // Default center: Paraíso, El Paraíso
+  const DEFAULT_CENTER = [13.863397, -86.554473];
+
   const selectedPosition =
     entregaSeleccionada?.ultimaUbicacion
       ? [
-          entregaSeleccionada.ultimaUbicacion.lat,
-          entregaSeleccionada.ultimaUbicacion.lng,
-        ]
+        entregaSeleccionada.ultimaUbicacion.lat,
+        entregaSeleccionada.ultimaUbicacion.lng,
+      ]
       : null;
+
+  // Always show the map when a delivery is selected, even if GPS hasn't reported yet
+  const mapCenter = selectedPosition || DEFAULT_CENTER;
 
   return (
     <div className="tracking-container">
@@ -147,9 +166,8 @@ function Tracking() {
               {entregas.map((entrega) => (
                 <div
                   key={entrega.id}
-                  className={`tracking-card ${
-                    entregaSeleccionada?.id === entrega.id ? 'selected' : ''
-                  }`}
+                  className={`tracking-card ${entregaSeleccionada?.id === entrega.id ? 'selected' : ''
+                    }`}
                   onClick={() => setEntregaSeleccionada(entrega)}
                 >
                   <div className="tracking-card-top">
@@ -214,34 +232,47 @@ function Tracking() {
 
         {/* Map area */}
         <div className="tracking-map-area">
-          {selectedPosition ? (
-            <MapContainer
-              center={selectedPosition}
-              zoom={16}
-              style={{ height: '100%', width: '100%', borderRadius: '12px' }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <MapUpdater position={selectedPosition} />
-              <Marker position={selectedPosition} icon={deliveryIcon}>
-                <Popup>
-                  <div style={{ textAlign: 'center' }}>
-                    <strong>{entregaSeleccionada?.clienteNombre}</strong>
-                    <br />
-                    <span style={{ fontSize: '12px', color: '#666' }}>
-                      Repartidor: {entregaSeleccionada?.repartidorNombre}
-                    </span>
-                    <br />
-                    <span style={{ fontSize: '11px', color: '#999' }}>
-                      Última actualización:{' '}
-                      {entregaSeleccionada?.ultimaUbicacion?.timestamp || '---'}
-                    </span>
-                  </div>
-                </Popup>
-              </Marker>
-            </MapContainer>
+          {entregaSeleccionada ? (
+            <>
+              <MapContainer
+                key={entregaSeleccionada.id}
+                center={mapCenter}
+                zoom={selectedPosition ? 16 : 14}
+                style={{ height: '100%', width: '100%', borderRadius: '12px' }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapUpdater position={selectedPosition || mapCenter} />
+                {selectedPosition && (
+                  <Marker position={selectedPosition} icon={deliveryIcon}>
+                    <Popup>
+                      <div style={{ textAlign: 'center' }}>
+                        <strong>{entregaSeleccionada?.clienteNombre}</strong>
+                        <br />
+                        <span style={{ fontSize: '12px', color: '#666' }}>
+                          Repartidor: {entregaSeleccionada?.repartidorNombre}
+                        </span>
+                        <br />
+                        <span style={{ fontSize: '11px', color: '#999' }}>
+                          Última actualización:{' '}
+                          {entregaSeleccionada?.ultimaUbicacion?.timestamp || '---'}
+                        </span>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )}
+              </MapContainer>
+              {/* Overlay: waiting for GPS signal */}
+              {!selectedPosition && (
+                <div className="tracking-gps-waiting">
+                  <Loader className="spinner" size={24} />
+                  <span>Esperando señal GPS del repartidor...</span>
+                  <p>El mapa se actualizará automáticamente cuando se reciba la primera ubicación</p>
+                </div>
+              )}
+            </>
           ) : (
             <div className="tracking-map-placeholder">
               <Navigation size={56} />

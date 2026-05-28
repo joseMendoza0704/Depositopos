@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebaseConfig.js';
 import { Geolocation } from '@capacitor/geolocation';
-import { startBackgroundTracking, stopBackgroundTracking } from '../plugins/BackgroundLocation';
+import { registerPlugin } from '@capacitor/core';
+const BackgroundGeolocation = registerPlugin('BackgroundGeolocation');
 import {
   collection,
   addDoc,
@@ -79,6 +80,7 @@ function Ubicaciones({ usuario }) {
   const [cargandoPedidos, setCargandoPedidos] = useState(true);
   const [entregaData, setEntregaData] = useState(null); // Documento de la entrega activa
   const watchIdRef = useRef(null);
+  const bgWatcherRef = useRef(null);
 
   // Cargar clientes activos
   useEffect(() => {
@@ -172,6 +174,12 @@ function Ubicaciones({ usuario }) {
 
   const isNative = window.Capacitor?.isNativePlatform?.();
 
+  // Ref to always have the current entregaData inside watchPosition callback
+  const entregaDataRef = useRef(null);
+  useEffect(() => {
+    entregaDataRef.current = entregaData;
+  }, [entregaData]);
+
   // 2. Cargar la entrega activa de este repartidor
   useEffect(() => {
     if (!usuario?.uid) return;
@@ -188,13 +196,6 @@ function Ubicaciones({ usuario }) {
         setEntregaData({ id: docSnap.id, ...docSnap.data() });
       } else {
         setEntregaData(null);
-        // Stop tracking when no active delivery
-        if (isNative) {
-          try { await stopBackgroundTracking(); } catch(e) { console.error(e); }
-        } else if (watchIdRef.current !== null) {
-          navigator.geolocation.clearWatch(watchIdRef.current);
-          watchIdRef.current = null;
-        }
       }
     });
 
@@ -210,10 +211,6 @@ function Ubicaciones({ usuario }) {
         const estadoPedido = docSnap.data().estado;
         if (estadoPedido === 'pagado') {
           showAlert('El pedido ha sido cobrado. Puedes realizar otra entrega.', 'success');
-          // Stop background tracking
-          if (isNative) {
-            try { await stopBackgroundTracking(); } catch(e) { console.error(e); }
-          }
           try {
             await updateDoc(doc(db, 'entregas', entregaData.id), {
               estado: 'completado',
@@ -229,15 +226,32 @@ function Ubicaciones({ usuario }) {
     return () => unsubscribe();
   }, [entregaData?.pedidoId, entregaData?.id]);
 
-  // 4. Iniciar watch de GPS en tiempo real
-  // On native: background service handles everything
-  // On web: fallback to navigator.geolocation.watchPosition
-  const iniciarWatchLocal = () => {
-    if (isNative) return; // Native uses the foreground service, no web watch needed
-    if (!navigator.geolocation) return;
-    
+  const detenerTracking = async () => {
+    if (bgWatcherRef.current !== null) {
+      try {
+        await BackgroundGeolocation.removeWatcher({ id: bgWatcherRef.current });
+      } catch (err) {
+        console.error('Error deteniendo BackgroundGeolocation:', err);
+      }
+      bgWatcherRef.current = null;
+    }
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+  };
+
+  const iniciarWebTracking = () => {
+    if (!navigator.geolocation) {
+      console.warn('navigator.geolocation not available');
+      return;
+    }
+    console.log('Iniciando web GPS watch');
     watchIdRef.current = navigator.geolocation.watchPosition(
       async (position) => {
+        const currentEntrega = entregaDataRef.current;
+        if (!currentEntrega?.id) return;
+
         const punto = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
@@ -245,34 +259,87 @@ function Ubicaciones({ usuario }) {
           accuracy: position.coords.accuracy,
         };
 
-        if (entregaData?.id) {
-          try {
-            await updateDoc(doc(db, 'entregas', entregaData.id), {
-              ultimaUbicacion: punto,
-              ultimaActualizacion: serverTimestamp(),
-            });
-          } catch (err) {
-            console.error('Error actualizando ubicación:', err);
-          }
+        try {
+          await updateDoc(doc(db, 'entregas', currentEntrega.id), {
+            ultimaUbicacion: punto,
+            ultimaActualizacion: serverTimestamp(),
+          });
+          console.log('GPS web update sent:', punto.lat, punto.lng);
+        } catch (err) {
+          console.error('Error actualizando ubicación web:', err);
         }
       },
-      (error) => console.error('Error GPS:', error),
+      (error) => console.error('Error GPS web:', error),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
     );
   };
 
-  useEffect(() => {
-    if (entregaData && !isNative && watchIdRef.current === null) {
-      iniciarWatchLocal();
-    }
-  }, [entregaData]);
+  const iniciarTracking = async (entregaId) => {
+    if (isNative) {
+      try {
+        const watcherId = await BackgroundGeolocation.addWatcher(
+          {
+            backgroundMessage: 'Rastreando tu ubicación para la entrega en curso.',
+            backgroundTitle: 'Entrega en curso',
+            requestPermissions: true,
+            stale: false,
+            distanceFilter: 10
+          },
+          async function callback(location, error) {
+            if (error) {
+              if (error.code === 'NOT_AUTHORIZED') {
+                if (window.confirm('La app necesita permisos de ubicación. ¿Abrir configuración?')) {
+                  BackgroundGeolocation.openSettings();
+                }
+              }
+              console.error('Error BackgroundGeolocation:', error);
+              return;
+            }
 
-  // Cleanup en desmontaje
+            const currentEntrega = entregaDataRef.current;
+            if (!currentEntrega?.id) return;
+
+            const punto = {
+              lat: location.latitude,
+              lng: location.longitude,
+              timestamp: new Date().toISOString(),
+              accuracy: location.accuracy,
+            };
+
+            try {
+              await updateDoc(doc(db, 'entregas', currentEntrega.id), {
+                ultimaUbicacion: punto,
+                ultimaActualizacion: serverTimestamp(),
+              });
+              console.log('Background GPS update sent:', punto.lat, punto.lng);
+            } catch (err) {
+              console.error('Error actualizando ubicación bg:', err);
+            }
+          }
+        );
+        bgWatcherRef.current = watcherId;
+      } catch (err) {
+        console.error('Error iniciando BackgroundGeolocation, usando web fallback:', err);
+        iniciarWebTracking();
+      }
+    } else {
+      iniciarWebTracking();
+    }
+  };
+
+  useEffect(() => {
+    if (entregaData?.id) {
+      if (bgWatcherRef.current === null && watchIdRef.current === null) {
+        iniciarTracking(entregaData.id);
+      }
+    } else {
+      detenerTracking();
+    }
+  }, [entregaData?.id]);
+
   useEffect(() => {
     return () => {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-      }
+      detenerTracking();
     };
   }, []);
 
@@ -308,24 +375,7 @@ function Ubicaciones({ usuario }) {
         ubicaciones: [],
       });
 
-      // 3. On native: start the background location service
-      if (isNative) {
-        try {
-          await startBackgroundTracking(entregaRef.id, pedido.cliente.nombre);
-          showAlert(
-            `Entrega iniciada para ${pedido.cliente.nombre}. Rastreo GPS en segundo plano activo — funciona con pantalla apagada.`,
-            'success'
-          );
-        } catch (bgError) {
-          console.error('Error starting background tracking:', bgError);
-          showAlert(
-            `Entrega iniciada pero el rastreo en segundo plano falló. Mantén la app abierta.`,
-            'warning'
-          );
-        }
-      } else {
-        showAlert(`Entrega iniciada para ${pedido.cliente.nombre}. Rastreo GPS activo.`, 'success');
-      }
+      showAlert(`Entrega iniciada para ${pedido.cliente.nombre}. Rastreo GPS activo.`, 'success');
     } catch (error) {
       console.error('Error iniciando entrega:', error);
       showAlert('Error al iniciar la entrega', 'error');
@@ -342,15 +392,16 @@ function Ubicaciones({ usuario }) {
       onConfirm: async () => {
         setModalConfirm({ visible: false, mensaje: '', onConfirm: null });
         try {
-          // Stop background tracking on native
-          if (isNative) {
-            try { await stopBackgroundTracking(); } catch(e) { console.error(e); }
-          }
+          await detenerTracking();
 
-          // 1. Regresar pedido a "recibido"
-          await updateDoc(doc(db, 'pedidos', entregaData.pedidoId), {
-            estado: 'recibido'
-          });
+          // 1. Regresar pedido a "recibido" (con try/catch por si el pedido fue eliminado)
+          try {
+            await updateDoc(doc(db, 'pedidos', entregaData.pedidoId), {
+              estado: 'recibido'
+            });
+          } catch (e) {
+            console.warn('El pedido no se pudo actualizar o ya no existe:', e);
+          }
 
           // 2. Cancelar la entrega
           await updateDoc(doc(db, 'entregas', entregaData.id), {
@@ -358,7 +409,7 @@ function Ubicaciones({ usuario }) {
             fechaFin: serverTimestamp()
           });
 
-          showAlert('Tracking cancelado correctamente', 'info');
+          showAlert('Tracking cancelado/reseteado correctamente', 'info');
         } catch(e) {
           console.error(e);
           showAlert('Error al cancelar', 'error');
