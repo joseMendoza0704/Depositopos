@@ -39,6 +39,17 @@ const deliveryIcon = new L.Icon({
   popupAnchor: [0, -36],
 });
 
+// Custom store (pulperia) icon - Standard Blue Marker
+const storeIcon = new L.Icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
 // Component to auto-pan the map when position updates
 function MapUpdater({ position }) {
   const map = useMap();
@@ -54,6 +65,7 @@ function Tracking() {
   const [entregas, setEntregas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [entregaSeleccionada, setEntregaSeleccionada] = useState(null);
+  const [ubicaciones, setUbicaciones] = useState([]);
 
   // Ref to always have the current value of entregaSeleccionada inside the
   // onSnapshot callback without needing to re-subscribe on every change.
@@ -102,6 +114,18 @@ function Tracking() {
     return () => unsubscribe();
   }, []);
 
+  // Listen to ubicaciones
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'ubicaciones'), (snapshot) => {
+      const lista = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+      setUbicaciones(lista);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const formatTime = (timestamp) => {
     if (!timestamp) return '--:--';
     try {
@@ -126,8 +150,23 @@ function Tracking() {
       ]
       : null;
 
+  const destinationUbicacion = entregaSeleccionada
+    ? ubicaciones.find(u => {
+        // Primero intenta por clienteId (más confiable)
+        if (entregaSeleccionada.clienteId && u.clienteId) {
+          return u.clienteId === entregaSeleccionada.clienteId;
+        }
+        // Fallback por nombre normalizado
+        return u.nombre?.trim().toLowerCase() === entregaSeleccionada.clienteNombre?.trim().toLowerCase();
+      })
+    : null;
+
+  const destinationPosition = destinationUbicacion && destinationUbicacion.lat && destinationUbicacion.lng
+    ? [parseFloat(destinationUbicacion.lat), parseFloat(destinationUbicacion.lng)]
+    : null;
+
   // Always show the map when a delivery is selected, even if GPS hasn't reported yet
-  const mapCenter = selectedPosition || DEFAULT_CENTER;
+  const mapCenter = selectedPosition || destinationPosition || DEFAULT_CENTER;
 
   return (
     <div className="tracking-container">
@@ -258,6 +297,19 @@ function Tracking() {
                         <span style={{ fontSize: '11px', color: '#999' }}>
                           Última actualización:{' '}
                           {entregaSeleccionada?.ultimaUbicacion?.timestamp || '---'}
+                        </span>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )}
+                {destinationPosition && (
+                  <Marker position={destinationPosition} icon={storeIcon}>
+                    <Popup>
+                      <div style={{ textAlign: 'center' }}>
+                        <strong>{destinationUbicacion.nombre}</strong>
+                        <br />
+                        <span style={{ fontSize: '12px', color: '#666' }}>
+                          Destino de la entrega
                         </span>
                       </div>
                     </Popup>

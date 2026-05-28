@@ -150,6 +150,7 @@ function Ubicaciones({ usuario }) {
         const data = d.data();
         return {
           id: d.id,
+          clienteId: data.clienteId || data.cliente?.id || null,
           cliente: {
             nombre: data.cliente?.nombre || data.nombre || 'Sin nombre',
             direccion: data.cliente?.direccion || data.direccion || '',
@@ -364,6 +365,7 @@ function Ubicaciones({ usuario }) {
       // 2. Crear documento de entrega en Firestore
       const entregaRef = await addDoc(collection(db, 'entregas'), {
         pedidoId: pedido.id,
+        clienteId: pedido.clienteId || null,
         clienteNombre: pedido.cliente.nombre,
         clienteDireccion: pedido.cliente.direccion,
         clienteTelefono: pedido.cliente.telefono,
