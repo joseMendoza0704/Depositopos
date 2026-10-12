@@ -5,38 +5,65 @@ import '../styles/ModalBuscarProducto.css';
 
 function ModalBuscarProducto({ onClose, onSelectProducto }) {
   const [productos, setProductos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
-  const [productosFiltrados, setProductosFiltrados] = useState([]);
   const [cargando, setCargando] = useState(true);
 
+  // Cargar categorías desde la base de datos
+  useEffect(() => {
+    const cargarCategorias = async () => {
+      try {
+        const catRef = collection(db, 'categorias');
+        const snapshot = await getDocs(catRef);
+        const catsData = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            nombre: doc.data().nombre,
+            ...doc.data()
+          }))
+          .filter((c) => c.nombre);
+        setCategorias(catsData);
+      } catch (error) {
+        console.error('Error al cargar categorias:', error);
+      }
+    };
+
+    cargarCategorias();
+  }, []);
+
+  // Cargar productos desde la base de datos
   useEffect(() => {
     const cargarProductos = async () => {
       try {
         const productosRef = collection(db, 'productos');
         const snapshot = await getDocs(productosRef);
-        
-        const productosData = snapshot.docs.map(doc => {
-          const data = doc.data();
-          
-          const stock = data.stockUnidades || data.stock || 0;
-          const formato = data.tamaño || data.formato || 'Sin formato';
-          const precio = (data.formatosVenta && data.formatosVenta.length > 0)
-            ? data.formatosVenta[0].precio
-            : (data.precio || 0);
 
-          return {
-            ...data, 
-            id: doc.id,
-            nombre: data.nombre || 'Sin nombre',
-            formato: formato, 
-            stock: stock,     
-            precio: precio    
-          };
+        const productosData = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
 
-        }).filter(producto => producto.nombre); 
+            const stock = data.stockUnidades || data.stock || 0;
+            const formato = data.tamaño || data.formato || 'Unidad';
+            const precio =
+              data.formatosVenta && data.formatosVenta.length > 0
+                ? Number(data.formatosVenta[0].precio) || 0
+                : Number(data.precio) || 0;
+
+            return {
+              ...data,
+              id: doc.id,
+              nombre: data.nombre || 'Sin nombre',
+              formato: formato,
+              stock: Number(stock) || 0,
+              precio: precio,
+              categoriaId: data.categoriaId || '',
+              categoriaNombre: data.categoriaNombre || data.categoria || ''
+            };
+          })
+          .filter((producto) => producto.nombre);
 
         setProductos(productosData);
-        setProductosFiltrados(productosData);
         setCargando(false);
       } catch (error) {
         console.error('Error al cargar productos:', error);
@@ -47,115 +74,203 @@ function ModalBuscarProducto({ onClose, onSelectProducto }) {
     cargarProductos();
   }, []);
 
-  useEffect(() => {
-    // Filtrar productos basado en la búsqueda
-    const resultados = productos.filter(producto => {
-      if (!producto) return false;
-      
-      const nombreMatch = producto.nombre 
-        ? producto.nombre.toString().toLowerCase().includes(busqueda.toLowerCase())
-        : false;
-        
-      const formatoMatch = producto.formato
-        ? producto.formato.toString().toLowerCase().includes(busqueda.toLowerCase())
-        : false;
-        
-      return nombreMatch || formatoMatch;
-    });
-    setProductosFiltrados(resultados);
-  }, [busqueda, productos]);
+  // Filtrado de productos por búsqueda y categoría seleccionada
+  const productosFiltrados = productos.filter((producto) => {
+    // Filtro de búsqueda
+    const query = busqueda.trim().toLowerCase();
+    const coincideBusqueda =
+      !query ||
+      producto.nombre?.toLowerCase().includes(query) ||
+      producto.formato?.toLowerCase().includes(query) ||
+      (producto.formatosVenta &&
+        producto.formatosVenta.some((f) =>
+          f.nombre?.toLowerCase().includes(query)
+        ));
 
-  // --- FUNCIÓN CORREGIDA ---
+    // Filtro de categoría
+    let coincideCategoria = true;
+    if (categoriaSeleccionada !== 'todos') {
+      const catObj = categorias.find((c) => c.id === categoriaSeleccionada);
+      const catNombre = catObj?.nombre?.toLowerCase() || '';
+
+      coincideCategoria =
+        producto.categoriaId === categoriaSeleccionada ||
+        producto.categoriaNombre?.toLowerCase() === catNombre ||
+        producto.categoria?.toLowerCase() === catNombre ||
+        producto.categoria === categoriaSeleccionada;
+    }
+
+    return coincideBusqueda && coincideCategoria;
+  });
+
   const handleProductoClick = (producto) => {
-    // 1. Validar que el producto sea un objeto válido
-    if (!producto || !producto.id || typeof producto.stock === 'undefined') {
-      console.error('Producto inválido o datos de stock faltantes:', producto);
-      return;
-    }
+    if (!producto || !producto.id) return;
+    if (producto.stock <= 0) return;
 
-    // 2. No permitir seleccionar productos sin stock
-    //    (La variable 'producto.stock' fue corregida en cargarProductos)
-    if (producto.stock <= 0) {
-      console.warn('Intento de seleccionar producto sin stock:', producto);
-      return; // No hacer nada, la clase 'sin-stock' ya lo indica visualmente
-    }
-    
-    // 3. Enviar el objeto 'producto' COMPLETO al componente padre.
-    //    Este objeto ya contiene 'stock', 'stockUnidades', 'formatosVenta', 'tamaño', etc.
-    onSelectProducto(producto); 
+    onSelectProducto(producto);
     onClose();
-  };
-  // --- FIN DE LA CORRECCIÓN ---
-
-  const formatearPrecio = (precio) => {
-    return typeof precio === 'number' ? `L. ${precio.toFixed(2)}` : 'Precio no disponible';
   };
 
   return (
     <div className="modal-backdrop">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h3>Buscar Producto</h3>
+      <div className="modal-content modal-buscar-producto-content">
+        {/* Handle superior */}
+        <div className="modal-top-handle"></div>
+
+        {/* Encabezado */}
+        <div className="buscar-producto-header">
+          <div className="buscar-producto-titulo-col">
+            <h3>Buscar Producto</h3>
+            <p className="buscar-producto-subtitulo">
+              Seleccione productos para agregarlos al pedido
+            </p>
+          </div>
+          <button
+            className="btn-cerrar-circulo"
+            onClick={onClose}
+            title="Cerrar"
+          >
+            ✕
+          </button>
         </div>
 
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Buscar por nombre o formato..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          autoFocus
-        />
+        {/* Barra de búsqueda con icono */}
+        <div className="buscar-input-container">
+          <span className="buscar-icono">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input
+            type="text"
+            placeholder="Buscar por nombre o formato..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            autoFocus
+          />
+          {busqueda && (
+            <button
+              className="btn-limpiar-busqueda"
+              onClick={() => setBusqueda('')}
+              title="Borrar búsqueda"
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
-        <div className="productos-lista">
+        {/* Pills de categorías cargadas desde la BD */}
+        <div className="categorias-pills-row">
+          <button
+            className={`categoria-pill ${
+              categoriaSeleccionada === 'todos' ? 'activa' : ''
+            }`}
+            onClick={() => setCategoriaSeleccionada('todos')}
+          >
+            Todos
+          </button>
+          {categorias.map((cat) => (
+            <button
+              key={cat.id}
+              className={`categoria-pill ${
+                categoriaSeleccionada === cat.id ? 'activa' : ''
+              }`}
+              onClick={() => setCategoriaSeleccionada(cat.id)}
+            >
+              {cat.nombre}
+            </button>
+          ))}
+        </div>
+
+        {/* Lista de productos */}
+        <div className="productos-lista-moderna">
           {cargando ? (
-            <div className="cargando">Cargando productos...</div>
+            <div className="productos-estado-mensaje">Cargando productos...</div>
           ) : productosFiltrados.length > 0 ? (
-            productosFiltrados.map((producto) => (
-              <div
-                key={producto.id}
-                className={`producto-item ${producto.stock <= 0 ? 'sin-stock' : ''}`}
-                onClick={() => handleProductoClick(producto)}
-              >
-                <div className="producto-info">
-                  <div className="producto-nombre">
-                    {producto.nombre}
-                    {producto.stock <= 0 && (
-                      <span className="sin-stock-badge">Sin Stock</span>
+            productosFiltrados.map((producto) => {
+              const tieneStock = producto.stock > 0;
+              const formatoTexto =
+                producto.formatosVenta && producto.formatosVenta.length > 0
+                  ? `Formato: ${producto.formatosVenta[0].nombre} (${producto.formatosVenta[0].unidades || 1} uds)`
+                  : `Formato: ${producto.formato || 'Unidad'} (1 uds)`;
+
+              return (
+                <div
+                  key={producto.id}
+                  className={`producto-card-item ${
+                    !tieneStock ? 'card-sin-stock' : ''
+                  }`}
+                >
+                  <div className="producto-card-header">
+                    <div className="producto-card-nombre-box">
+                      <span className="producto-card-nombre">
+                        {producto.nombre}
+                      </span>
+                      {!tieneStock && (
+                        <span className="badge-sin-stock">Sin Stock</span>
+                      )}
+                    </div>
+                    {tieneStock ? (
+                      <span className="badge-stock-disponible">
+                        Stock: {producto.stock}
+                      </span>
+                    ) : (
+                      <span className="badge-stock-cero">Stock: 0</span>
                     )}
                   </div>
-                  <div className="producto-detalles">
-                    {producto.formatosVenta && producto.formatosVenta.length > 0 ? (
-                      producto.formatosVenta.map((formato, index) => (
-                        <div key={index} className="formato-detalle">
-                          <span>Formato: {formato.nombre} ({formato.unidades} uds)</span>
-                          <span>Precio: L. {formato.precio.toFixed(2)}</span>
-                        </div>
-                      ))
+
+                  <div className="producto-card-formato">
+                    {formatoTexto}
+                  </div>
+
+                  <div className="producto-card-footer">
+                    <div className="producto-card-precio">
+                      Precio:{' '}
+                      <strong className="producto-card-precio-valor">
+                        L. {producto.precio.toFixed(2)}
+                      </strong>
+                    </div>
+
+                    {tieneStock ? (
+                      <button
+                        className="btn-agregar-producto-card"
+                        onClick={() => handleProductoClick(producto)}
+                      >
+                        + Agregar
+                      </button>
                     ) : (
-                      <>
-                        <span>Formato: {producto.formato}</span>
-                        <span>Precio: {formatearPrecio(producto.precio)}</span>
-                      </>
+                      <span className="badge-no-disponible">
+                        No disponible
+                      </span>
                     )}
-                    <span>Stock: {producto.stock || 0}</span>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
-            <div className="sin-resultados">
-              No se encontraron productos que coincidan con la búsqueda
+            <div className="productos-estado-mensaje">
+              No se encontraron productos que coincidan
             </div>
           )}
         </div>
 
-        <div className="modal-botones">
-          <button 
-            className="boton-modal boton-cancelar"
-            onClick={onClose}
-          >
+        {/* Footer con botones */}
+        <div className="modal-buscar-producto-footer">
+          <button className="btn-buscar-cancelar" onClick={onClose}>
             Cancelar
+          </button>
+          <button className="btn-buscar-listo" onClick={onClose}>
+            Listo
           </button>
         </div>
       </div>

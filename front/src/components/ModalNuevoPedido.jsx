@@ -6,6 +6,7 @@ import { collection, addDoc, Timestamp, doc, updateDoc } from 'firebase/firestor
 import { db } from '../firebaseConfig';
 import FacturaPedido from './FacturaPedido';
 import { useNotification } from '../context/NotificationContext';
+import '../styles/ModalNuevoPedido.css';
 
 function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
   const { showAlert } = useNotification();
@@ -121,7 +122,7 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
 
   return (
     <div className="modal-backdrop">
-      <div className="modal-content">
+      <div className="modal-content modal-nuevo-pedido-content">
         {showBuscarCliente && (
           <ModalBuscarCliente
             onClose={onClose}
@@ -131,62 +132,115 @@ function ModalNuevoPedido({ onClose, onCrear, pedidoParaEditar }) {
 
         {!showBuscarCliente && !showBuscarProducto && !showAgregarProducto && !showFactura && (
           <>
-            <h3>Nuevo Pedido</h3>
-
-            <div className="cliente-seleccionado">
-              <div className="cliente-header">
-                <h4>Cliente:</h4>
-                <button
-                  onClick={() => setShowBuscarCliente(true)}
-                  className="boton-cambiar-cliente"
-                >
-                  Cambiar Cliente
-                </button>
-              </div>
-              <p>{cliente.nombre} - {cliente.telefono}</p>
-              <p>{cliente.direccion}</p>
+            <div className="nuevo-pedido-header">
+              <h3>{pedidoParaEditar ? 'Editar Pedido' : 'Nuevo Pedido'}</h3>
+              <button className="btn-cerrar-modal" onClick={onClose} title="Cerrar modal">
+                ✕
+              </button>
             </div>
 
-            <div className="items-list">
-              {items.map((item, index) => (
-                <div key={index} className="item-row">
-                  <div className="item-info">
-                    <span>{item.cantidad}x {item.nombre} ({item.formato})</span>
-                    <span>L. {item.subtotal.toFixed(2)}</span>
+            {cliente && (
+              <div className="cliente-card">
+                <div className="cliente-card-header">
+                  <div className="cliente-badge-label">
+                    CLIENTE <span className="cliente-dot"></span>
                   </div>
                   <button
-                    onClick={() => {
-                      const nuevosItems = items.filter((_, i) => i !== index);
-                      setItems(nuevosItems);
-                      setTotal(nuevosItems.reduce((acc, item) => acc + item.subtotal, 0));
-                    }}
-                    className="boton-quitar-item"
+                    onClick={() => setShowBuscarCliente(true)}
+                    className="btn-cambiar-cliente"
                   >
-                    ✕
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Cambiar Cliente
                   </button>
                 </div>
-              ))}
-
-              <div className="total-row">
-                <strong>Total: L. {total.toFixed(2)}</strong>
+                <div className="cliente-card-body">
+                  <span className="cliente-nombre-tel">
+                    <strong>{cliente.nombre}</strong> {cliente.telefono && <span className="cliente-tel">• {cliente.telefono}</span>}
+                  </span>
+                  {cliente.direccion && (
+                    <span className="cliente-direccion">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                      </svg>
+                      {cliente.direccion}
+                    </span>
+                  )}
+                </div>
               </div>
+            )}
+
+            <div className="pedidos-articulos-card">
+              <div className="articulos-card-header">
+                <span className="articulos-titulo">Artículos en el pedido</span>
+                <span className="articulos-badge-count">{items.length} {items.length === 1 ? 'item' : 'items'}</span>
+              </div>
+
+              <div className="items-list">
+                {items.length === 0 ? (
+                  <div className="items-vacio">No hay artículos en el pedido</div>
+                ) : (
+                  items.map((item, index) => (
+                    <div key={index} className="item-row">
+                      <div className="item-cantidad-badge">
+                        {item.cantidad}x
+                      </div>
+                      <div className="item-details">
+                        <div className="item-nombre-texto">
+                          {item.nombre}
+                        </div>
+                      </div>
+                      <div className="item-precio-texto">
+                        L. {item.subtotal.toFixed(2)}
+                      </div>
+                      <button
+                        onClick={() => {
+                          const nuevosItems = items.filter((_, i) => i !== index);
+                          setItems(nuevosItems);
+                          setTotal(nuevosItems.reduce((acc, item) => acc + item.subtotal, 0));
+                        }}
+                        className="boton-quitar-item"
+                        title="Quitar artículo"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="resumen-card">
+              <span className="resumen-label">RESUMEN</span>
+              <span className="resumen-total">Total: L. {total.toFixed(2)}</span>
             </div>
 
             <div className="modal-botones">
               <button
                 onClick={() => setShowBuscarProducto(true)}
-                className="boton-modal-agregar"
+                className="btn-modal-accion-verde"
               >
-                + Agregar Producto
+                <span className="btn-modal-icon-badge">+</span>
+                <span className="btn-modal-text-stack">
+                  <span>Agregar</span>
+                  <span>Producto</span>
+                </span>
               </button>
               <button
                 onClick={handleCrearPedido}
-                className="boton-modal-agregar"
+                className="btn-modal-accion-verde"
                 disabled={items.length === 0}
               >
-                Crear Pedido
+                <span className="btn-modal-icon-badge">✓</span>
+                <span className="btn-modal-text-stack">
+                  <span>{pedidoParaEditar ? 'Guardar' : 'Crear'}</span>
+                  <span>Pedido</span>
+                </span>
               </button>
-              <button onClick={onClose} className="boton-modal-cancelar">
+              <button onClick={onClose} className="btn-modal-cancelar-outline">
                 Cancelar
               </button>
             </div>

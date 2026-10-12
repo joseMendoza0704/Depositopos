@@ -546,6 +546,8 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
 /* Estilos para la sección del cliente */
@@ -554,6 +556,7 @@ body {
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .cliente-header {
@@ -583,8 +586,13 @@ body {
   background-color: white;
   border: 1px solid #dee2e6;
   border-radius: 8px;
-  margin-bottom: 20px;
-  overflow: hidden;
+  margin-bottom: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-right: 6px;
+  box-sizing: border-box;
 }
 
 .item-row {
@@ -619,6 +627,7 @@ body {
   cursor: pointer;
   font-size: 12px;
   transition: background-color 0.2s;
+  flex-shrink: 0;
 }
 
 .boton-quitar-item:hover {
@@ -627,9 +636,13 @@ body {
 
 .total-row {
   background-color: #f8f9fa;
-  padding: 15px;
+  padding: 14px 15px;
   text-align: right;
   font-size: 18px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 /* Estilos para productos sin stock */
@@ -683,12 +696,17 @@ body {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 450px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .modal-content h3 {
   margin-top: 0;
   border-bottom: 1px solid #eee;
   padding-bottom: 15px;
+  flex-shrink: 0;
 }
 
 .form-group {
@@ -715,7 +733,8 @@ body {
   display: flex;
   justify-content: space-between;
   gap: 15px;
-  margin-top: 30px;
+  margin-top: 20px;
+  flex-shrink: 0;
 }
 
 .boton-modal-agregar,
