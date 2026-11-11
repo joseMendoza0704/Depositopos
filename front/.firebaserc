@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "deposito-mendoza-98e71"
-  }
+  },
+  "targets": {
+    "deposito-mendoza-98e71": {
+      "hosting": {
+        "pos": [
+          "deposito-mendoza-98e71"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
